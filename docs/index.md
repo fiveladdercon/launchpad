@@ -6,3 +6,6 @@ layout: default
 ---
 
 Hello World!
+
+{{site.title}} &middot;
+{{relative_url}}
