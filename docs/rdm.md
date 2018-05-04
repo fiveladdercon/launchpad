@@ -1,13 +1,16 @@
 ---
 layout: default
-title: Resident Object Model
-permalink: /model/
+title: Resident Data Model
+permalink: /rdm/
 ---
 
+[Engine API]: /api/
+[Dimensions]: #dimensions
+[Properties]: #properties
 
 
-Spacecraft Resident Object Model
-================================
+Spacecraft Resident Data Model (RDM)
+====================================
 
 If you're going to use spacecraft to work with your hardware memory map, then you need to know how 
 it's represented in memory.
@@ -18,8 +21,8 @@ Bit Spaces
 ----------
 
 Generally register tools map byte, halfword and/or word spaces.  Doing so mixes the _functional 
-intent_ of the mapping with the _access mechanism_.  Spacecraft, conversly, maps **bit spaces**.  
-In a **bit space** every bit is numbered, beginning with zero on the right and numbers increasing 
+intent_ of the mapping with the _access mechanism_.  Spacecraft, conversly, maps **bit spaces**. 
+In a **bit space** every bit is numbered, beginning with zero on the right and increasing 
 to the left<sup>a</sup>:
 
 ##### FIGURE 1: An infinite bit space #####
@@ -39,7 +42,7 @@ number is needed and the units are always bits.
 
 - - - 
 
-(a) Bit 0, the least significant bit, is shown on the right to align with the English language
+(a) Bit 0, the least significant bit, is shown on the right to align with the natural language
     convention that the most significant digit is read first and hence on the left, while the least
     significant digit is read last and hence are on the right.  This ensures that octal and 
     hexademical notations, which also follow this ordering convention, map directly into the bit 
@@ -69,7 +72,8 @@ A field has a **value**, which specifies the initial default value of the bits.
 A field has a **name** so that people can associate the function of the field with a memorable 
 identifier.
 
-A field has a **type** which specifies a general class of functionality (i.e. configuration or status). 
+A field has a **type** which specifies a general class of functionality (i.e. configuration or 
+status). 
 
 A field has an optional **description** of the specific function of the bits.
 
@@ -378,6 +382,3 @@ contain the name of the engine.
 
 M/O = Mandatory/Optional 
 
-[Engine API]: /api/
-[Dimensions]: #dimensions
-[Properties]: #properties
