@@ -12,10 +12,8 @@ permalink: /rdm/
 Spacecraft Resident Data Model (RDM)
 ====================================
 
-If you're going to use spacecraft to work with your hardware memory map, then you need to know how 
+If you're going to use spacecraft to work with your hardware address map, then you need to know how 
 it's represented in memory.
-
-
 
 Bit Spaces
 ----------

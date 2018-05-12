@@ -14,17 +14,17 @@ layout: default
 /ˈspāsˌkraft/
 ===================
 
-Spacecraft is a hardware memory mapping tool.  
+Spacecraft is an address mapping tool.  
 
-It is built on the premise that hardware memory maps are vital to so many audiences that they are 
+It is built on the premise that hardware address maps are vital to so many audiences that they are 
 never quite in the right format for everyone. So rather than dictate output format, Spacecraft 
 instead constructs a light weight, flexible and _fast_ memory resident model of the hardware 
-memory map and provides an extensive and powerful API that allows *you* to alter and output 
-the memory map in whatever format *you* need.
+address map and provides an extensive and powerful API that allows *you* to alter and output 
+the address map in whatever format *you* need.
 
 Spacecraft has 5 components:
 
-| [Resident Data Model (RDM)](rdm/) | A light weight, flexible, memory resident model of a hardware memory map.                                                                     |
+| [Resident Data Model (RDM)](rdm/) | A light weight, flexible, memory resident model of a hardware address map.                                                                    |
 | [Spacecraft CLI](cli/)            | A wickedly fast command line tool with an embedded [Perl][] interpretter for accessing the **[RDM][]** using **engines** written in [Perl][]. |
 | [Engine API](api/)                | An extensive and powerful extension to spacecraft's embedded [Perl][] interpretter for building & traversing the **[RDM][]**.                 |
 | [Rocket Fuel RDL](rdl/)           | A minimalist, yet expressive file format for persisting the **[RDM][]**.                                                                      |
