@@ -1,0 +1,8 @@
+VERSION=0.0.0
+ARCH=`uname -m`
+
+echo ln -s bin/spacecraft-${VERSION}-${ARCH} bin/spacecraft
+
+export SC_LAUNCHPAD=$PWD
+
+PATH=$PATH:$SC_LAUNCHPAD/bin
