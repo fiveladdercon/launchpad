@@ -49,7 +49,7 @@ Note that dimensions are numbered from 1 to N, left to right in the
 field name or region glob.
 
 To change multiple dimension details at once, set the field name with 
-[sc_set_name]() or set the region glob with [sc_set_glob]().
+[sc_set_name](sc_set_name) or set the region glob with [sc_set_glob](sc_set_glob).
 
 
 Example

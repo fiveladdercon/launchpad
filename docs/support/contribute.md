@@ -22,10 +22,14 @@
 
 https://help.github.com/articles/setting-up-your-github-pages-site-locally-with-jekyll/
 
-5.1 Install ruby 2.2
+5.1 Install ruby
 
 >sudo apt-add-repository ppa:brightbox/ruby-ng
->sudo apt-get install ruby2.2 ruby2.2-dev
+>sudo apt-get install ruby ruby-dev
+
+5.1.b Install bundler dependencies:
+
+>sudo apt-get install g++ zlib1g-dev
 
 5.2 Install bundler
 
