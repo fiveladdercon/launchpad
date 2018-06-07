@@ -42,7 +42,7 @@ A field must have a type, but a region may be typeless.
 
 If the node is a field, the set can fail if:
 
-- the type is undef or ""
+- the type is undef or "".
 
 Recall that field type has no meaning to spacecraft; it's meaning is
 determined by the hardware engine used.
@@ -59,9 +59,9 @@ $space = &sc_get_space();
 
 $field = $space->sc_add_field(-offset => 0, -size => 32, -type => 'RW', ...);
 
-$field->sc_set_type() or &sc_error("Can\'t set type");
+$field->sc_set_type() or &sc_error("Can't set type");
 
-$field->sc_set_type('RO') or &sc_error("Can\'t set type");
+$field->sc_set_type('RO') or &sc_error("Can't set type");
 ```
 
 The first set fails because a field requires a type.

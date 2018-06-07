@@ -40,7 +40,7 @@ Description
 
 The set can fail if:
 
-- The offset specified is not a valid number;
+- The offset specified is not a valid number; or
 - The new offset causes the span of the node to overlap with siblings or 
   extend past the size of the parent region.
 

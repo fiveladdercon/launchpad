@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$string = &sc_number(format,num)
+$string = &sc_number(format,number)
 ```
 
 
@@ -22,7 +22,7 @@ Parameters
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
 | `format` | `string` |  M  |                                              |
-| `num` | `string` |  M  |                                              |
+| `number` | `string` |  M  |                                              |
 
 M/O = Mandatory/Optional
 
@@ -43,5 +43,5 @@ Example
 -------
 
 ```perl
-$string = &sc_number(format,num);
+$string = &sc_number(format,number);
 ```

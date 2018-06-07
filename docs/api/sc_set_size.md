@@ -21,7 +21,7 @@ Parameters
 
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
-| `size`    | `string` |  M  | The new size of the node.                      |
+| `size`    | `number` |  M  | The new size of the node.                      |
 
 M/O = Mandatory/Optional
 
@@ -42,7 +42,7 @@ The set can fail if:
 
 - The size specified is not a valid number;
 - The new size causes the span of the node to overlap with siblings or extend 
-  past the size of the parent region.
+  past the size of the parent region; or
 - The node is a region and new size causes children to no longer fit within
   the region.
 

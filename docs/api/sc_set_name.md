@@ -47,7 +47,7 @@ Hence the name affects the span of a field but not a region.
 If the node is a field, the set can fail if:
 
 - the name is undef or "";
-- the name, if dimensioned, does not have valid dimensions;
+- the name, if dimensioned, does not have valid dimensions; or
 - the name, if dimensioned, changes the span of the field so that it overlaps
   with siblings or extends past the size of the parent.
 
