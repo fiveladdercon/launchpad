@@ -40,8 +40,8 @@ The `sc_error` utility function unifies logging between engines and spacecraft,
 creating a single log file that spans all engines.
 
 Errors are printed to `stderr` in red, logged and counted, but processing 
-continues.  Errors are typically a result of faulty input, and thus are easily
-fixed by the end user.
+continues.  Errors are typically a result of faulty input, and thus are fixed 
+by the end user.
 
 
 Example
