@@ -1,10 +1,10 @@
 ---
 layout: default
-title: sc_rehook API
+title: sc_detach API
 ---
 
 
-sc_rehook
+sc_detach
 =========
 
 
@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$node->sc_rehook()
+$node->sc_detach()
 ```
 
 
@@ -30,12 +30,12 @@ _None_
 Description
 -----------
 
-**sc_rehook** ...
+**sc_detach** ...
 
 
 Example
 -------
 
 ```perl
-$node->sc_rehook();
+$node->sc_detach();
 ```

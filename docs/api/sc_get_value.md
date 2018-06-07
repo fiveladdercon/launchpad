@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$number = $field->sc_get_value()
+$string = $field->sc_get_value()
 ```
 
 
@@ -24,7 +24,7 @@ _None_
 Return Type
 -----------
 
-`SC_NUMBER`
+`string`
 
 
 Description
@@ -37,5 +37,5 @@ Example
 -------
 
 ```perl
-$number = $field->sc_get_value();
+$string = $field->sc_get_value();
 ```

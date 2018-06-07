@@ -1,18 +1,18 @@
 ---
 layout: default
-title: sc_load API
+title: sc_drop_property API
 ---
 
 
-sc_load
-=======
+sc_drop_property
+================
 
 
 Prototype
 ---------
 
 ```
-$space->sc_load(filename,flags)
+$node->sc_drop_property(key)
 ```
 
 
@@ -21,8 +21,7 @@ Parameters
 
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
-| `filename` | `string` |  M  |                                              |
-| `flags` | `integer` |  M  |                                              |
+| `key` | `string` |  M  |                                              |
 
 M/O = Mandatory/Optional
 
@@ -36,12 +35,12 @@ _None_
 Description
 -----------
 
-**sc_load** ...
+**sc_drop_property** ...
 
 
 Example
 -------
 
 ```perl
-$space->sc_load(filename,flags);
+$node->sc_drop_property(key);
 ```

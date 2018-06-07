@@ -22,7 +22,7 @@ Parameters
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
 | `key` | `string` |  M  |                                              |
-| `value` | `integer` |  M  |                                              |
+| `value` | `string` |  M  |                                              |
 
 M/O = Mandatory/Optional
 

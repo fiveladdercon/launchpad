@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$number = $node->sc_get_property(key)
+$string = $node->sc_get_property(key)
 ```
 
 
@@ -29,7 +29,7 @@ M/O = Mandatory/Optional
 Return Type
 -----------
 
-`SC_NUMBER`
+`string`
 
 
 Description
@@ -42,5 +42,5 @@ Example
 -------
 
 ```perl
-$number = $node->sc_get_property(key);
+$string = $node->sc_get_property(key);
 ```

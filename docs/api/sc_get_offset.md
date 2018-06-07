@@ -12,19 +12,24 @@ Prototype
 ---------
 
 ```
-$number = $node->sc_get_offset()
+$string = $node->sc_get_offset(numformat)
 ```
 
 
 Parameters
 ----------
 
-_None_
+| Parameter | Type     | M/O | Description                                    |
+|:----------|:---------|:---:|:-----------------------------------------------|
+| `numformat` | `string` |  M  |                                              |
+
+M/O = Mandatory/Optional
+
 
 Return Type
 -----------
 
-`SC_NUMBER`
+`string`
 
 
 Description
@@ -37,5 +42,5 @@ Example
 -------
 
 ```perl
-$number = $node->sc_get_offset();
+$string = $node->sc_get_offset(numformat);
 ```

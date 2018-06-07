@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$number = $node->sc_get_dimension_size(dimension)
+$string = $node->sc_get_dimension_size(dimension,numformat)
 ```
 
 
@@ -22,6 +22,7 @@ Parameters
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
 | `dimension` | `integer` |  M  |                                              |
+| `numformat` | `string` |  M  |                                              |
 
 M/O = Mandatory/Optional
 
@@ -29,7 +30,7 @@ M/O = Mandatory/Optional
 Return Type
 -----------
 
-`SC_NUMBER`
+`string`
 
 
 Description
@@ -42,5 +43,5 @@ Example
 -------
 
 ```perl
-$number = $node->sc_get_dimension_size(dimension);
+$string = $node->sc_get_dimension_size(dimension,numformat);
 ```

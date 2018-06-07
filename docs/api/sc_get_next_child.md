@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$node = $space->sc_get_next_child()
+$node = $region->sc_get_next_child()
 ```
 
 
@@ -37,5 +37,5 @@ Example
 -------
 
 ```perl
-$node = $space->sc_get_next_child();
+$node = $region->sc_get_next_child();
 ```

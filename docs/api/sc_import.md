@@ -1,18 +1,18 @@
 ---
 layout: default
-title: sc_glob API
+title: sc_import API
 ---
 
 
-sc_glob
-=======
+sc_import
+=========
 
 
 Prototype
 ---------
 
 ```
-$string = $node->sc_glob(string,dimformat)
+$string = $node->sc_import(string,dimformat)
 ```
 
 
@@ -36,12 +36,12 @@ Return Type
 Description
 -----------
 
-**sc_glob** ...
+**sc_import** ...
 
 
 Example
 -------
 
 ```perl
-$string = $node->sc_glob(string,dimformat);
+$string = $node->sc_import(string,dimformat);
 ```

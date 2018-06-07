@@ -1,18 +1,18 @@
 ---
 layout: default
-title: sc_get_address API
+title: sc_fuel API
 ---
 
 
-sc_get_address
-==============
+sc_fuel
+=======
 
 
 Prototype
 ---------
 
 ```
-$string = $node->sc_get_address(numformat)
+$space->sc_fuel(filename,flags)
 ```
 
 
@@ -21,7 +21,8 @@ Parameters
 
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
-| `numformat` | `string` |  M  |                                              |
+| `filename` | `string` |  M  |                                              |
+| `flags` | `integer` |  M  |                                              |
 
 M/O = Mandatory/Optional
 
@@ -29,18 +30,18 @@ M/O = Mandatory/Optional
 Return Type
 -----------
 
-`string`
+_None_
 
 
 Description
 -----------
 
-**sc_get_address** ...
+**sc_fuel** ...
 
 
 Example
 -------
 
 ```perl
-$string = $node->sc_get_address(numformat);
+$space->sc_fuel(filename,flags);
 ```

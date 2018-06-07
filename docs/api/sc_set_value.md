@@ -21,7 +21,7 @@ Parameters
 
 | Parameter | Type     | M/O | Description                                    |
 |:----------|:---------|:---:|:-----------------------------------------------|
-| `value` | `SC_NUMBER` |  M  |                                              |
+| `value` | `string` |  M  |                                              |
 
 M/O = Mandatory/Optional
 

@@ -1,18 +1,18 @@
 ---
 layout: default
-title: sc_unhook API
+title: sc_drop API
 ---
 
 
-sc_unhook
-=========
+sc_drop
+=======
 
 
 Prototype
 ---------
 
 ```
-$node->sc_unhook()
+$node->sc_drop()
 ```
 
 
@@ -30,12 +30,12 @@ _None_
 Description
 -----------
 
-**sc_unhook** ...
+**sc_drop** ...
 
 
 Example
 -------
 
 ```perl
-$node->sc_unhook();
+$node->sc_drop();
 ```

@@ -1,18 +1,18 @@
 ---
 layout: default
-title: sc_free API
+title: sc_reattach API
 ---
 
 
-sc_free
-=======
+sc_reattach
+===========
 
 
 Prototype
 ---------
 
 ```
-$node->sc_free()
+$node->sc_reattach()
 ```
 
 
@@ -30,12 +30,12 @@ _None_
 Description
 -----------
 
-**sc_free** ...
+**sc_reattach** ...
 
 
 Example
 -------
 
 ```perl
-$node->sc_free();
+$node->sc_reattach();
 ```
