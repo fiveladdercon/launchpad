@@ -56,9 +56,6 @@
 - sc_reattach
 - sc_unroll
 - sc_reroll
-- sc_search_path
-- sc_search_ext
-- sc_fuel
 - sc_note
 - sc_warn
 - sc_error

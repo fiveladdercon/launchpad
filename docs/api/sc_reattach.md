@@ -30,12 +30,8 @@ _None_
 Description
 -----------
 
-**sc_reattach** ...
+**sc_reattach** reinsertes a detached node back into it's parent.
 
+See [sc_detach] for details on detaching a node.
 
-Example
--------
-
-```perl
-$node->sc_reattach();
-```
+Reattaching a node that is not in the detached state has no effect.
