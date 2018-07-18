@@ -55,7 +55,7 @@ format string.
 | `%hD`  | Hexadecimal Doublewords   |
 | `%hU`  | Hexadecimal scaled Bytes  |
 
-The same number is formatted mulitple times if the format string has
+The same number is formatted multiple times if the format string has
 multiple specifiers, which allows quick and easy comparison.
 
 Unrecognized specifiers are passed through unmodified.

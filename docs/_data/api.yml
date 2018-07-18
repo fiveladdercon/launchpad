@@ -36,6 +36,7 @@
 - sc_set_dimension_from
 - sc_set_dimension_to
 - sc_set_dimension_size
+- sc_set_children
 - sc_is_space
 - sc_is_region
 - sc_is_field
@@ -56,6 +57,8 @@
 - sc_reattach
 - sc_unroll
 - sc_reroll
+- sc_fuel_supply
+- sc_fuel
 - sc_note
 - sc_warn
 - sc_error
