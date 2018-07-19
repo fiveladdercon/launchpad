@@ -39,7 +39,8 @@ Description
 -----------
 
 **sc_fuel** loads field and region definitions from a **supply** and returns them 
-in a space.
+in a space.  If called as a region method and the region has no children, the 
+region is populated with the children of the space.
 
 A **supply** is either specified as a *type* or a *file*.  If it specified as a 
 file, the type is set to the basename of the file.  If it is specified as a type, 
@@ -52,16 +53,8 @@ a space and returned.
 If the supply type has been previously loaded, the previously loaded space is 
 returned.
 
-The **sc_fuel** API may be called as a function or as a region method.
-
-If called as a region method:
-
-The `supply` may be omitted, in which case the region must have a type, as the
-region type is used as the supply type. 
-
-Furthermore if the region has no children when **sc_fuel** is called, the region 
-is populated with the definitions in the space by calling [sc_set_children](sc_set_children)
-under the hood.
+If called as a region method the `supply` may be omitted, in which case the region 
+must have a type, as the region type is used as the supply type. 
 
 The **sc_fuel** API may be called with the following options in either context:
 
@@ -69,7 +62,6 @@ The **sc_fuel** API may be called with the following options in either context:
 |:-------------|:----------|:---:|:-----------------------------------------------------|
 | `-recursive` | `boolean` |  O  | Recursively load typed regions.                      |
 | `-embedded`  | `boolean` |  O  | Search for embedded definitions in .v and .sv files. |
-
 
 Example
 -------
@@ -80,7 +72,7 @@ $space = &sc_get_space();
 $space->sc_fuel("chip.rf", -recursive => 1);
 ```
 
-Here the top level space is recursively loaded from the "chip.rf" file.  
+Here the top level space is recursively loaded from the "chip.rf" file.
 
 This is equivalent to the following command line:
 
