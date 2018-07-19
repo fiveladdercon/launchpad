@@ -1,8 +1,29 @@
-VERSION=0.0.0
-ARCH=`uname -m`
-
-echo ln -s bin/spacecraft-${VERSION}-${ARCH} bin/spacecraft
-
+#
+# Set the SC_LAUNCHPAD environment variable to the root
+# of the launchpad repository so that the engines and
+# executable can be found.
+#
 export SC_LAUNCHPAD=$PWD
 
-PATH=$PATH:$SC_LAUNCHPAD/bin
+#
+# Identify the tool version
+#
+VERSION=1.0.0
+
+#
+# Identify the tool architecture
+#
+ARCH=`uname -m`
+
+#
+# Add a shortcut to the desired version and architecture 
+#
+rm -f bin/spacecraft
+ln -s $SC_LAUNCHPAD/bin/spacecraft-${VERSION}-${ARCH} bin/spacecraft
+
+#
+# Add the shortcut to the path (if needed)
+#
+if [[ "$PATH" != *"$SC_LAUNCHPAD"* ]]; then
+	PATH=$PATH:$SC_LAUNCHPAD/bin
+fi
