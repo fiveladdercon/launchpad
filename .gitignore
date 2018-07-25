@@ -1,5 +1,8 @@
 # the installation specific shortcut
 bin/spacecraft
 
-# the spacecraft log file
-spacecraft.log
+# the booster file
+BOOSTER
+
+# log files
+*.log
