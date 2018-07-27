@@ -267,7 +267,6 @@ sub ACQUIRE {
 
 package EngineAPI;
 
-sub SC_VERSION () { $EngineAPIc::SC_VERSION }
 sub SC_MAX_STRING_LENGTH () { $EngineAPIc::SC_MAX_STRING_LENGTH }
 sub SC_FUEL_RECURSIVE () { $EngineAPIc::SC_FUEL_RECURSIVE }
 sub SC_FUEL_EMBEDDED () { $EngineAPIc::SC_FUEL_EMBEDDED }
