@@ -50,7 +50,7 @@
 - sc_get_next_child
 - sc_get_next_property
 - sc_get_next_dimension
-- sc_number
+- sc_bits
 - sc_dimensions
 - sc_import
 - sc_detach

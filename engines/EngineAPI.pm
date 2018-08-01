@@ -101,7 +101,7 @@ package EngineAPI;
 *sc_get_next_child = *EngineAPIc::sc_get_next_child;
 *sc_get_next_property = *EngineAPIc::sc_get_next_property;
 *sc_get_next_dimension = *EngineAPIc::sc_get_next_dimension;
-*sc_number = *EngineAPIc::sc_number;
+*sc_bits = *EngineAPIc::sc_bits;
 *sc_dimensions = *EngineAPIc::sc_dimensions;
 *sc_import = *EngineAPIc::sc_import;
 *sc_detach = *EngineAPIc::sc_detach;
@@ -278,7 +278,7 @@ package EngineAPI;
 
 
 package EngineAPI;
-@EXPORT = qw(sc_get_space sc_fuel_supply sc_fuel sc_note sc_warn sc_error sc_fatal);
+@EXPORT = qw(sc_get_space sc_fuel_supply sc_fuel sc_bits sc_note sc_warn sc_error sc_fatal);
 
 sub sc_add_region {
 	my $region  = shift;

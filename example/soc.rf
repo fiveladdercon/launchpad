@@ -1,0 +1,48 @@
+---
+1GB DDR RAM
+---
+0GB 1GB RAM {};
+
+
+---
+On-chip Peripheral Region
+---
+1GB 128KB {
+
+	---
+	DMA
+	---
+	0KB  2KB  DMA  DMA_* dma;
+
+	--- 
+	4-port USB  
+	---
+	2KB  2KB  USB[x:4]_*  USB%  usb;
+
+	--- 
+	2-port Ethernet 
+	---
+	10KB  2KB  ETH[y:2]_*  ETH%  eth;
+	
+	--- 
+	4x PCIe slot controllers
+	---
+	14KB  2KB  PCIE[x:4]_* PCIE%  pcie;
+
+	---
+	DDR controller
+	---
+	22KB  2KB  DDR_* DDR  ddr;
+
+};
+
+---
+4x 1MB PCIe mapped off-chip regions
+---
+2GB 1MB SLOT[x:4]_* SLOT% {};
+
+
+---
+1KB Boot ROM located at the end of the 4GB space
+---
+FFFFFC00hB 1KB ROM {};
