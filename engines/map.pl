@@ -1,21 +1,9 @@
-sub usage { print <<'_';
-
-Usage : map.pl [--help|-h] [OUTPUT]
-
-  map.pl outputs named fields and regions in the space in a simple
-  line based format for diffing and quickly checking the input.
-
-  Output is sent to stdout unless an OUTPUT file is specified.
-
-_
-	&sc_error(@_) if @_; exit; 
-}
-
 #-------------------------------------------------------------------------------
 # Packages
 #-------------------------------------------------------------------------------
 
 use EngineAPI;
+use EngineHelp;
 use strict;
 
 #-------------------------------------------------------------------------------
@@ -46,8 +34,8 @@ my $OUTPUT;
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op eq "--help") { &usage;        }
-	elsif ($op eq "-h"    ) { &usage;        }
+	if    ($op eq "--help") { &help;         }
+	elsif ($op eq "-h"    ) { &help;         }
 	else                    { $OUTPUT = $op; }
 }
 

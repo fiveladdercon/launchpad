@@ -45,3 +45,11 @@ collections:
   engines:
     output: true
 
+defaults:
+  - scope:
+      path: ""
+      type: engines
+    values:
+      layout: default
+
+engine_baseurl: https://github.com/fiveladdercon/launchpad/blob/master/engines
