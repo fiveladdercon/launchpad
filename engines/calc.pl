@@ -1,6 +1,6 @@
-my $USAGE = <<'_';
+sub usage { print <<'_';
 
-  calc.pl [EXPRESSION]
+Usage: calc.pl [EXPRESSION]
 
   calc.pl performs rudamentary calculations with spacecraft bits.
 
@@ -19,7 +19,7 @@ my $USAGE = <<'_';
 
   e.g. Calculate the offset of a ROM in the last 2KB of a 4GB space:
 
-  spacecraft -Q calc.pl 4GB 2KB -
+  spacecraft -u -Q calc.pl 4GB 2KB -
 	34359721984b    7FFFFC000hb
 	4294965248B     FFFFF800hB
 	2147482624H     7FFFFC00hH
@@ -27,8 +27,19 @@ my $USAGE = <<'_';
 	4194302KB       3FFFFEhKB
 
 _
+	&sc_error(@_) if @_; exit;
+}
+
+#-------------------------------------------------------------------------------
+# Packages
+#-------------------------------------------------------------------------------
 
 use EngineAPI;
+use strict;
+
+#-------------------------------------------------------------------------------
+# Functions
+#-------------------------------------------------------------------------------
 
 sub calculate {
 	my $exp   = shift;
@@ -59,16 +70,28 @@ sub calculate {
 		}
 	}
 	my $result = pop @stack;
- 	printf &sc_bits("\t%b\t%hb\n\t%B\t%hB\n\t%H\t%hH\n\t%W\t%hW\n\t%U\t%hU\n\n","$result") if $result;
+ 	printf &sc_bits("\t%b\t%hb\n\t%B\t%hB\n\t%H\t%hH\n\t%W\t%hW\n\t%U\t%hU\n","$result") if $result;
 }
 
-if (@ARGV) {
-	my $expression = join " ", @ARGV;
-	&calculate($expression);
+#-------------------------------------------------------------------------------
+# Command Line
+#-------------------------------------------------------------------------------
+
+my $EXPRESSION = "";
+
+while (@ARGV) {
+	my $op = shift;
+	if    ($op eq "--help") { &usage;             }
+	elsif ($op eq "-h"    ) { &usage;             }
+	else                    { $EXPRESSION .= $op; }
+}
+
+if ($EXPRESSION) {
+	&calculate($EXPRESSION);
 } else {
 	print (">>");
-	while (my $expression = <STDIN>) { 
-		&calculate($expression);
+	while ($EXPRESSION = <STDIN>) { 
+		&calculate($EXPRESSION);
 		print (">>");
 	}
 	print "\n";
