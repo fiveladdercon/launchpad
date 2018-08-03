@@ -11,8 +11,10 @@ use strict;
 #-------------------------------------------------------------------------------
 
 sub map {
+	my $options = shift;
 	my $region  = shift;
 	while (my $node = $region->sc_get_next_child()) {
+		my $is_field = $node->sc_is_field;
 		
 		printf "%010xhb\t%010xhb\t%-10s\t%-10s\t%s\n",
 			$node->sc_get_address("%d"),
@@ -20,9 +22,9 @@ sub map {
 			$node->sc_is_region ? "-" : $node->sc_get_value,
 			$node->sc_is_typed ? $node->sc_get_type : "-",
 			$node->sc_get_identifier 
-			if $node->sc_is_named;
+			if $is_field ? $options->{fields} : ($node->sc_is_named && $options->{regions});
 
-		&map($node) if $node->sc_is_region;
+		&map($options,$node) unless $is_field;
 	}
 }
 
@@ -31,11 +33,17 @@ sub map {
 #-------------------------------------------------------------------------------
 
 my $OUTPUT;
+my $OPTIONS = {
+	fields  => 1,
+	regions => 1
+};
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op eq "--help") { &help;         }
-	elsif ($op eq "-h"    ) { &help;         }
+	if    ($op eq "--help") { &help;                   }
+	elsif ($op eq "-h"    ) { &help;                   }
+	elsif ($op eq "-f"    ) { $OPTIONS->{regions} = 0; }
+	elsif ($op eq "-r"    ) { $OPTIONS->{fields}  = 0; }
 	else                    { $OUTPUT = $op; }
 }
 
@@ -45,7 +53,7 @@ if ($OUTPUT) {
 }
 
 printf("#%-9s\t%-10s\t%-10s\t%-10s\t%s\n","Address","Size","Value","Type","Identifier");
-&map(&sc_get_space());
+&map($OPTIONS,&sc_get_space());
 
 if ($OUTPUT) {
 	close(OUTPUT);

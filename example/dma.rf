@@ -1,0 +1,79 @@
+---
+The mode register sets the parameters for the transfer.
+---
+0W  1W  MODE  {
+
+	---
+	Transfer width.  Indicates how many bytes are transfered each
+	bus cycle.  Valid settings are:
+
+	0 : Byte
+	1 : Halfword
+	2 : Word
+	---
+	0b  2b  0b  WIDTH  RW;
+
+	---
+	Transfer length.  The value +1 indicates how many cycles are 
+	issued.  e.g. 0 means 1 cycle, etc.
+	---
+	8b  4b  0b  LENGTH  RW;
+
+	---
+	Incrementing Address.  Enables or disables address incrementing
+	on the bus address to support both memory and FIFO transfers.
+	
+	1 : Increment the address according to transfer size.
+	0 : Do not increment the address.
+	---
+	16b  1b  1b  INCREMENT  RW;
+
+	---
+	Interrupt enable.
+	
+	1 : Interrupt enabled.  Trigger an interrupt when the transfer completes.
+	0 : Interrupt disabled
+	---
+	17b  1b  0b  IENABLE  RW;
+		
+};
+
+---
+The address of the source data.
+---
+2W  1W  0b  SRC  RW;
+
+---
+The address of the data destination.
+---
+3W  1W  0b  DEST  RW;
+
+//
+// Note that because the 4W address only has a single control
+// The status of the transfer bit, it is not named.
+//
+---
+Start the transfer.
+---
+4W.0 1b  0b  START  RWSC;
+
+---
+The status of the transfer.
+---
+5W  1W  STAT  {
+
+	---
+	0 : Channel is not running
+	1 : Channel is running
+	---
+	0b  1b  0b  RUNNING   RO;
+
+	---
+	0 : Channel is not interupting
+	1 : Channel is interupting
+	---
+	1b  1b  0b  INTR  RW1C;
+
+};
+
+

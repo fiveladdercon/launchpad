@@ -16,17 +16,30 @@ Usage
 -----
 
 ```
-$ spacecraft ... map.pl [-h|--help] [OUTPUT]
+$ spacecraft ... map.pl [-h|--help] [-f|-r] [OUTPUT]
 ```
 
 Output is sent to STDOUT unless an OUTPUT file is specified.
 
+-f := map only fields. blah blah blah,
+    blah, blah blah.
 
+-r :=
+	
+	map only fields. blah blah blah,
+	not lazy.
+
+    blah, blah blah. And
+now lazy.
 
 Example
 -------
 
 Recursively parse a rocketfuel file and summarize the address map:
+
+* First
+* Second
+* Third
 
 ```
 $ cd $SC_LAUNCHPAD/example
