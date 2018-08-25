@@ -1,3 +1,10 @@
+---
+layout: default
+title: Contributing
+permalink: /contribute/
+---
+
+
 1. Create a local workarea accessible from both machines:
 
 >mkdir /data/live/files/Business/SpacecraftRDL

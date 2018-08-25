@@ -17,11 +17,11 @@
       <nav>
         <h3>Basics</h3>
         <ul>
-          <li><a href="{{ '/basics/intro/'      | relative_url }}">Introduction</a></li>
-          <li><a href="{{ '/basics/install/'    | relative_url }}">Installation</a></li>
+          <li><a href="{{ '/basics/intro/'      | relative_url }}">Start Here</a></li>
+          <li><a href="{{ '/basics/install/'    | relative_url }}">Getting Spacecraft</a></li>
           <li><a href="{{ '/basics/cli/'        | relative_url }}">Command Line Interface</a></li>
         </ul>
-        <h3>Data Model</h3>
+        <h3>The Model</h3>
         <ul>
           <li><a href="{{ '/model/spaces/'      | relative_url }}">Spaces</a></li>
           <li><a href="{{ '/model/fields/'      | relative_url }}">Fields</a></li>
@@ -29,7 +29,7 @@
           <li><a href="{{ '/model/properties/'  | relative_url }}">Properties</a></li>
           <li><a href="{{ '/model/dimensions/'  | relative_url }}">Dimensions</a></li>
         </ul>
-        <h3>File Format</h3>
+        <h3>Rocket Fuel</h3>
         <ul>
           <li><a href="{{ '/format/numbers/'    | relative_url }}">Numbers</a></li>
           <li><a href="{{ '/format/spaces/'     | relative_url }}">Spaces</a></li>
@@ -39,23 +39,23 @@
           <li><a href="{{ '/format/dimensions/' | relative_url }}">Dimensions</a></li>
           <li><a href="{{ '/format/syntax/'     | relative_url }}">Syntax</a></li>
         </ul>
-        <h3>Engine API</h3>
-        <ul>
-          {% for api in site.data.api %}
-          <li><a href="{{ '/api/' | relative_url }}{{api}}">{{api}}</a></li>
-          {% endfor %}
-        </ul>
         <h3>Engines</h3>
         <ul>
           {% for engine in site.engines %}
           <li><a href="{{ engine.url | relative_url }}">{{engine.title}}</a></li>
           {% endfor %}
         </ul>
+        <h3>The EngineAPI</h3>
+        <ul>
+          {% for api in site.data.api %}
+          <li><a href="{{ '/api/' | relative_url }}{{api}}">{{api}}</a></li>
+          {% endfor %}
+        </ul>
         <h3>Launch Pad</h3>
         <ul>
-          <li>Contributing</li>
-          <li><a href="{{ '/about/' | relative_url }}">about</a></li>
-          <li><a href="{{ site.github.repository_url }}">github</a></li>
+          <li><a href="{{ '/contribe/' | relative_url }}">Contributing</a></li>
+          <li><a href="{{ '/about/' | relative_url }}">About</a></li>
+          <li><a href="{{ site.github.repository_url }}">Github</a></li>
         </ul>
       </nav>
 
