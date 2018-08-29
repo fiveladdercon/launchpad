@@ -205,14 +205,14 @@ but if you don't, you will need to write an engine to construct the model from
 whatever format you do code in.  Note that if you do write an engine for your 
 format, you can then output the model in Rocket Fuel format with the `rf.pl` 
 engine, meaning you can convert you're existing format, see the result and make 
-an informed choice.*
+an informed choice about which format to use.*
 
 
 Boosters
 --------
 
 Despite being freely available on [github](https://github.com/fiveladdercon/launchpad),
-spacecraft is not free, as in no-cost, software.
+spacecraft is not free -- as in no-cost -- software.
 
 While you can freely clone the Launch Pad, [install](/basics/install) the 
 spacecraft executable and start poking around for no-cost, spacecraft executes 

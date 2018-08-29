@@ -21,23 +21,24 @@
           <li><a href="{{ '/basics/install/'    | relative_url }}">Getting Spacecraft</a></li>
           <li><a href="{{ '/basics/cli/'        | relative_url }}">Command Line Interface</a></li>
         </ul>
-        <h3>The Model</h3>
+        <h3><a href="{{ '/model/' | relative_url }}">Data Model</a></h3>
         <ul>
-          <li><a href="{{ '/model/spaces/'      | relative_url }}">Spaces</a></li>
-          <li><a href="{{ '/model/fields/'      | relative_url }}">Fields</a></li>
-          <li><a href="{{ '/model/regions/'     | relative_url }}">Regions</a></li>
-          <li><a href="{{ '/model/properties/'  | relative_url }}">Properties</a></li>
-          <li><a href="{{ '/model/dimensions/'  | relative_url }}">Dimensions</a></li>
+          <li><a href="{{ '/model/#bits'        | relative_url }}">Bits</a></li>
+          <li><a href="{{ '/model/#spaces'      | relative_url }}">Spaces</a></li>
+          <li><a href="{{ '/model/#fields'      | relative_url }}">Fields</a></li>
+          <li><a href="{{ '/model/#regions'     | relative_url }}">Regions</a></li>
+          <li><a href="{{ '/model/#properties'  | relative_url }}">Properties</a></li>
+          <li><a href="{{ '/model/#dimensions'  | relative_url }}">Dimensions</a></li>
         </ul>
-        <h3>Rocket Fuel</h3>
+        <h3><a href="{{ '/fuel/' | relative_url }}">Rocket Fuel</a></h3>
         <ul>
-          <li><a href="{{ '/format/numbers/'    | relative_url }}">Numbers</a></li>
-          <li><a href="{{ '/format/spaces/'     | relative_url }}">Spaces</a></li>
-          <li><a href="{{ '/format/fields/'     | relative_url }}">Fields</a></li>
-          <li><a href="{{ '/format/regions/'    | relative_url }}">Regions</a></li>
-          <li><a href="{{ '/format/properties/' | relative_url }}">Properties</a></li>
-          <li><a href="{{ '/format/dimensions/' | relative_url }}">Dimensions</a></li>
-          <li><a href="{{ '/format/syntax/'     | relative_url }}">Syntax</a></li>
+          <li><a href="{{ '/fuel/#bits'       | relative_url }}">Bits</a></li>
+          <li><a href="{{ '/fuel/#spaces'     | relative_url }}">Spaces</a></li>
+          <li><a href="{{ '/fuel/#fields'     | relative_url }}">Fields</a></li>
+          <li><a href="{{ '/fuel/#regions'    | relative_url }}">Regions</a></li>
+          <li><a href="{{ '/fuel/#properties' | relative_url }}">Properties</a></li>
+          <li><a href="{{ '/fuel/#dimensions' | relative_url }}">Dimensions</a></li>
+          <li><a href="{{ '/fuel/#syntax'     | relative_url }}">Syntax</a></li>
         </ul>
         <h3>Engines</h3>
         <ul>
@@ -45,7 +46,7 @@
           <li><a href="{{ engine.url | relative_url }}">{{engine.title}}</a></li>
           {% endfor %}
         </ul>
-        <h3>The EngineAPI</h3>
+        <h3>EngineAPI</h3>
         <ul>
           {% for api in site.data.api %}
           <li><a href="{{ '/api/' | relative_url }}{{api}}">{{api}}</a></li>
