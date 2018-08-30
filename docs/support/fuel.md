@@ -81,11 +81,11 @@ The name of the file defines the **type** of space declared within it:
 ```
  module.rf
 ┌──────────────────────────────────────────────────────────┐
-│ /*                                                       │ 
-│  * This file contains field and region definitions for   │ 
-│  * the "module" type space.                              │ 
-│  */                                                      │ 
-│  ...                                                     │ 
+│ //                                                       │ 
+│ // This file contains field and region definitions for   │ 
+│ // the "module" type space.                              │ 
+│ //                                                       │ 
+│ ...                                                      │ 
 └──────────────────────────────────────────────────────────┘
 
 ```
@@ -212,12 +212,12 @@ An anonymous [region][] is one declared without a **name**:
 ---
 This is an anonymous child region that imports names without alteration.
 ---
-8KB   2KB   *   child   ; /*
+8KB   2KB   *   child   ; /-
 │     │     │   └────── region type
 │     │     └────────── region glob
 │     └──────────────── region size (in bits)
 └────────────────────── region offset (in bits)
-*/
+-/
 ```
 
 Lastly, a [region][] need not have children.  A childless [region][] results 
@@ -383,7 +383,7 @@ the [property][] **key** should include the **engine** name as a prefix:
 ---
 This is the description of the following THREE_BIT_FIELD
 ---
-4B.2   3b   5   THREE_BIT_FIELD   RW  -verilog:import -html:hook 1    ;
+4B.2   3b   5   THREE_BIT_FIELD   RW  -verilog:import -html:hook 1   ;
 //                                    │               └───────────── target the html engine
 //                                    │                              key   = "html:hook"
 //                                    │                              value = "1"
@@ -401,8 +401,8 @@ Dimensions
 ----------
 
 Both [fields][] and [regions][] can have [dimensions][].  Adding [dimensions][] 
-affects not only addresses, but identifiers too, so **dimension vectors** are 
-declared in the **names** of [fields][] and in the **globs** of [regions][]:
+affects not only addresses, but identifiers too, so **dimensions** are declared 
+in the **names** of [fields][] and in the **globs** of [regions][]:
 
 ```
 // Four copies of a 32-bit "register"
@@ -416,9 +416,19 @@ declared in the **names** of [fields][] and in the **globs** of [regions][]:
 4W  1b  0  UP_[y:0:31:1b];  // UP_y, y = 0..31
 ``` 
 
-Each [dimension][] declares the 4-tupple of mandatory members: **label**, **from**, 
-**to**, and **size**, in a **dimension vector**, which is a colon (**`:`**) 
-separated list of values enclosed in square brackets (**`[]`**).
+Each [dimension][] is declared as a colon (**`:`**) separated 4-tupple of 
+the mandatory members: **label**, **from**, **to**, and **size** enclosed 
+in square brackets (**`[]`**):
+
+```
+//            A dimension
+//            ┌────┴────┐
+4W  1b  0  UP_[y:0:31:1b]   ;
+//             │ │ │  └──── size
+//             │ │ └─────── to
+//             │ └───────── from
+//             └─────────── label
+```
 
 In most cases the [dimension][] size is the same as the [field][] or [region][] 
 size, in which case the [dimension][] size may be omitted, making the 
@@ -441,9 +451,10 @@ lowested indexed [dimension][] being _rightmost_ in the [field][] **name** or
 
 ```
 0B  1B  00h  ARRAY_[u:2]_[v:3]_[w:4];
-//                  │     │     └───── Dimension 1 : 4x 1B
-//                  │     └─────────── Dimension 2 : 3x (4x 1B)
-//                  └───────────────── Dimension 3 : 2x (3x (4x 1B))
+//                 ──┬── ──┬── ──┬──
+//                   │     │     └───── Dimension 1 : 4x 1B
+//                   │     └─────────── Dimension 2 : 3x (4x 1B)
+//                   └───────────────── Dimension 3 : 2x (3x (4x 1B))
 ```
 
 Note that the **size** declared is the size of a single [field][] or [region][], 
@@ -457,85 +468,151 @@ next node:
 ```
 
 Lastly, if a [region][] has [dimensions][] _and_ a **name**, the **name** must 
-be declared with hash characters (**`#`**) that specify the location of the 
-corresponding [dimension][] so as to uniquely identify each copy:
+be declared with placeholder characters (**`%`**) that specify the location of 
+the corresponding [dimension][] so as to uniquely identify each copy:
 
 ```
-0B  1B  *_[x:8]_[y:4]  LIST_#_#  list ;
+0B  1B  *_[x:8]_[y:4]  LIST_%_%  list ;
 //                          │ └────── Dimension 1 : y = 0..3
 //                          └──────── Dimension 2 : x = 0..7
 ```
 
 
 
-Syntax
-======
+Comments
+--------
 
-The following is a summary of the Rocket Fuel syntax:
+Anything after `//` on a line is a comment and anything between `/-` and `-/` 
+is a comment:
 
 ```
-space       := (node)*
+/- 
+   This is a multi-line 
+   comment
+-/
 
-node        := (field | region) ';'
+// This is a full line comment
 
-field       := description? offset size fvalue fname type options*
+0W  1W  0  EXAMPLE  RW;  // This is an end-of-line comment
 
-region      := description? offset size glob? rname? type options*
-            |  description? offset size glob? rname? '{' space '}' options*
+1W  1W  0  SAMPLE /- an inline comment -/  RW;
+```
 
-description := '---' string '---'
 
-offset      := bits
 
-size        := bits
+Embedded Fuel
+-------------
 
-fvalue      := bits
+Rocket Fuel can be embedded in Verilog and System Verilog files to keep the 
+Rocket Fuel definitions and the hardware that uses them together in the same 
+file.
 
-fname       := (identifier (dimension)?)+
+This is accomplished by enclosing Rocket Fuel between `/*{` and `}*/` in the 
+Verilog or SystemVerilog file, making the definitions Verilog comments:
 
-glob        := (identifer (dimension)?)* '*' (identifer (dimension)?)*
+```
+fifo.v
+┌───────────────────────────────────────────────────────────┐
+│ /*{                                                       │
+│                                                           │
+│   ---                                                     │
+│   The FIFO_STATUS register helps you figure out what's    │
+│   wrong with the FIFO.                                    │
+│   ---                                                     │
+│   0W  1W  FIFO_STATUS {                                   │
+│     0b  1b  0b  OVERFLOW   RW1C;                          │
+│     1b  1b  0b  UNDERFLOW  RW1C;                          │
+│   };                                                      │
+│                                                           │
+│ }*/                                                       │
+│                                                           │
+│ module fifo (                                             │
+│   output reg overflow;                                    │
+│   output reg underflow;                                   │
+│   ...                                                     │
+│ );                                                        │
+│                                                           │
+│ ...                                                       │
+│                                                           │
+│ endmodule                                                 │
+└───────────────────────────────────────────────────────────┘
+```
 
-rname       := identifier ('#' identifier)+  // One '#' per glob dimension
 
-type        := identifier
+Grammar
+-------
 
-options     := ('-' key value)
+The following is a summary of the Rocket Fuel grammar:
 
-key         := identifier (':' identifer)?
+```
+space        := (node)*
 
-value       := bits | identifier | '"' string '"'
+node         := (field | region) ';'
 
-dimension   :=  '[' label ':' from ':' to ':' size ']'
-            |   '[' label ':' from ':' to          ']'
-            |   '[' label ':' count                ']'
+field        := description? offset size fvalue fname type options*
 
-label       := identifier
+region       := description? offset size rglob? rname? type options*
+             |  description? offset size rglob? rname? '{' space '}' options*
 
-from        := integer
+description  := '---' string '---'
 
-to          := integer
+offset       := bits
 
-size        := bits
+size         := bits
 
-count       := integer
+fvalue       := bits
 
-bits        := [0-9]+b?                  // decimal bits
-            |  [0-9]+B[.[0-9]+]?         // decimal bytes
-            |  [0-9]+H[.[0-9]+]?         // decimal halfwords
-            |  [0-9]+W[.[0-9]+]?         // decimal words
-            |  [0-9]+KB                  // decimal kilobytes
-            |  [0-9]+MB                  // decimal megabytes
-            |  [0-9]+GB                  // decimal gigabytes
-            |  [0-9]+TB                  // decimal terabytes
-            |  [0-9a-fA-F]+hb?           // hexadecimal bits
-            |  [0-9a-fA-F]+hB[.[0-9]+]?  // hexadecimal bytes
-            |  [0-9a-fA-F]+hH[.[0-9]+]?  // hexadecimal halfwords
-            |  [0-9a-fA-F]+hW[.[0-9]+]?  // hexadecimal words
-            |  [0-9a-fA-F]+hKB           // hexadecimal kilobytes
-            |  [0-9a-fA-F]+hMB           // hexadecimal megabytes
-            |  [0-9a-fA-F]+hGB           // hexadecimal gigabytes
-            |  [0-9a-fA-F]+hTB           // hexadecimal terabytes
+fname        := alphas dims*  // A dimensioned identifier
 
-identifier  := [a-zA-Z0-9][a-zA-Z0-9_]*
+rglob        := (alphas dims*)? '*' dims* // A dimensioned identifier with an '*'
+
+rname        := alphas (alphanums | '%')*  // One '%' per glob dimension
+
+type         := identifier
+
+options      := ('-' key value)
+
+key          := identifier (':' alphanums*)?
+
+value        := bits | identifier | '"' string '"'
+
+bits         := [0-9]+ 'b'?                   // decimal bits
+             |  [0-9]+ 'B' (.[0-9]+)?         // decimal bytes
+             |  [0-9]+ 'H' (.[0-9]+)?         // decimal halfwords
+             |  [0-9]+ 'W' (.[0-9]+)?         // decimal words
+             |  [0-9]+ 'KB'                   // decimal kilobytes
+             |  [0-9]+ 'MB'                   // decimal megabytes
+             |  [0-9]+ 'GB'                   // decimal gigabytes
+             |  [0-9]+ 'TB'                   // decimal terabytes
+             |  [0-9a-fA-F]+ 'hb'?            // hexadecimal bits
+             |  [0-9a-fA-F]+ 'hB' (.[0-9]+)?  // hexadecimal bytes
+             |  [0-9a-fA-F]+ 'hH' (.[0-9]+)?  // hexadecimal halfwords
+             |  [0-9a-fA-F]+ 'hW' (.[0-9]+)?  // hexadecimal words
+             |  [0-9a-fA-F]+ 'hKB'            // hexadecimal kilobytes
+             |  [0-9a-fA-F]+ 'hMB'            // hexadecimal megabytes
+             |  [0-9a-fA-F]+ 'hGB'            // hexadecimal gigabytes
+             |  [0-9a-fA-F]+ 'hTB'            // hexadecimal terabytes
+
+identifier   := alphas alphanums*
+
+alphas       := [a-zA-Z_]
+
+alphanums    := [a-zA-Z0-9_]
+
+dims         := alphanums | dimension
+
+dimension    :=  '[' label ':' from ':' to ':' size ']'
+             |   '[' label ':' from ':' to          ']'
+             |   '[' label ':' count                ']'
+
+label        := identifier
+
+from         := integer
+
+to           := integer
+
+size         := bits
+
+count        := integer
 ```
 

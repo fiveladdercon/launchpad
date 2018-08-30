@@ -47,13 +47,12 @@ with the definitions declared in the file.  Otherwise the model is an empty spac
 -R
 :	**Recursively** populate the model.  Without the `-R` switch, typed regions
 	are left childless.  With the `-R` switch, typed regions are populated
-	with the definitions decared in the associated file - e.g. a region with
+	with the definitions decared in the associated file -- e.g. a region with
 	type X will populate with definitions declared in X.rf. 
 
 -I FUELSUPPLY
-:	**Include** **`FUELSUPPLY`** as a fuel supply, which is a list of search 
-    paths.  When locating a .rf file, spacecraft looks in the following paths 
-    in sequence:
+:	**Include** **`FUELSUPPLY`** in the list of fuel supplies (search paths).  
+    When locating a file, spacecraft looks in the following paths in sequence:
 
       1.  Paths included with the `-I` switch on the command line,
       2.  Paths included with the `&sc_fuel_supply` EngineAPI,
@@ -103,7 +102,7 @@ Regardless of the STDERR verbosity setting, everything is always logged to
 the `spacecraft.log` log file unless the following switches are used:
 
 -l LOGFILE
-:  	**Log** to `LOGFILE` instead of `spacecraft.log`.
+:  	**Log** to **`LOGFILE`** instead of `spacecraft.log`.
 
 -u
 :	**Unlogged** mission, meaning that no log file is created.
