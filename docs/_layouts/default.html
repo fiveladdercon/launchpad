@@ -48,7 +48,7 @@
           <li><a href="{{ engine.url | relative_url }}">{{engine.title}}</a></li>
           {% endfor %}
         </ul>
-        <h3>EngineAPI</h3>
+        <h3><a href="{{ '/engines/' | relative_url }}">EngineAPI</a></h3>
         <ul>
           {% for api in site.data.api %}
           <li><a href="{{ '/api/' | relative_url }}{{api}}">{{api}}</a></li>
