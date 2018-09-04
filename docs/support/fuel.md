@@ -333,7 +333,7 @@ reserves both the name & address space for these subcomponents.
 
 
 
-### Hiding Implementation Details with Regions ###
+### Hiding Implementation Details with Anonymous Regions ###
 
 There are many reasons why an address map may get partitioned for implemenation:
 
