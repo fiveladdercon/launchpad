@@ -364,17 +364,17 @@ value less than the node size, will cause the set to fail.
 Note that you can't set the span and count as these are calculated values.
 
 Also note that you can only get/set dimensions that exist, and passing an
-invalid dimension number will issue a warning and ultimately have no effect.
+invalid dimension number will issue a warning and have no effect.
 
 Quite often an engine is assembling a dimension into a formatted string, which
-makes the `sc_get_dimension_*` methods cumbersome.  To lighten the coding
-burden, you can use the `sc_get_dimension` method instead:
+makes the `sc_get_dimension_*` methods cumbersome.  To lighten the burden, you 
+can use the `sc_get_dimension` method instead:
 
 ```perl
 $node->sc_get_dimension($dim,$dimformat);
 ```
 
-Where the $dimformat is a printf-like format string with % specifiers that
+Where the `$dimformat` is a printf-like format string with % specifiers that
 extract dimension data members.  For example:
 
 ```perl
@@ -383,32 +383,126 @@ extract dimension data members.  For example:
 $node->sc_get_dimension(1,"%v");  # returns "[x:1:3]", the dimension vector
 ```
 
+See the [sc_get_dimension](/api/sc_get_dimension) API for details.
+
+To convert between unrolled & rolled representations, use the `sc_unroll`
+and `sc_reroll` APIs:
 
 ```perl
-$region->sc_unroll();
-$region->sc_roll();
+$node->sc_unroll();
+$node->sc_reroll();
 ```
 
+Note that these methods only make sense for nodes declared or constructed with 
+dimensions and they have no effect on non-dimensioned nodes.  Also note that
+this implies the initial state is rolled, which means you will always unroll
+first.
 
 
 ### Working with Hierarchy ###
 
+
+In addition to the iterative methods, the following two APIs are provided
+for working with hierarchy:
+
 ```perl
-$region->sc_detach();
-$region->sc_reattach();
+$space = $region->sc_detach();
+$space->sc_reattach();
 ```
+
+The `sc_detach` API moves all children from a region into a new separate 
+space, leaving the origininal region childless, while the `sc_reattach`
+reverts the change.
+
+For example, suppose we decide to instantiate two instances of a particular
+module:
+
+```
+0KB  8KB  EAST  EAST_* module;
+8KB  8KB  WEST  WEST_* module;
+```
+
+If we run this through a documentation engine, we'll get all `EAST_*` fields 
+followed by all `WEST_*` fields.  This is comprehensive but repetative.
+
+A better approach is to the document the module type, then document the 
+instances with cross references to the the type.  By detaching the space from
+it's region, 
+
+
 
 
 Fueling
 -------
 
+Though [Rocket Fuel](/fuel/) can be passed on the [spacecraft command line](/cli/),
+it doesn't have to be and the model and be fueled through the API:
+
 ```perl
+# Get the (empty) space
+$space = &sc_get_space();
+
+# Add "path" to the fuel supply (search list)
 &sc_fuel_supply("path");
 
-$space = &sc_fuel("type");
-
-$region->sc_set_children($space);
+# Read the type (.rf file) into the space
+$space->sc_fuel("type");    
 ```
+
+which is equivalent to:
+
+```
+$ spacecraft -R -I path type.rf
+```
+
+but stores it in an engine.  This can be a handy way to manage a long list of 
+fuel supplies rather than passing them on the command line each time.
+
+Though the previous example loaded the entire space, the fueling API can be
+used to fuel regions as well:
+
+```perl
+# Get the (empty) space
+$space = &sc_get_space();
+
+# Add a region
+my $region = $space->sc_add_region(-offset => '0KB', -size => '8KB');
+
+# Fuel the region fromt the "type.rf" file
+$region->sc_fuel("type.rf");
+```
+
+The fueling API also supports the instantiation of a region type:
+
+```perl
+# Get the (empty) space
+$space = &sc_get_space();
+
+# Add some regions
+my $east = $space->sc_add_region(
+  -offset => '0KB', 
+  -size   => '8KB', 
+  -name   => 'EAST',
+  -glob   => 'EAST_*'
+  );
+
+my $west = $space->sc_add_region(
+  -offset => '8KB', 
+  -size   => '8KB', 
+  -name   => 'WEST',
+  -glob   => 'WEST_*'
+  );
+
+# Load a region "type"
+my $module = &sc_fuel("module.rf");
+
+# Instantiate the type
+$east->sc_set_children($module);
+$west->sc_set_children($module);
+```
+
+Note that the same definition ($module) is used twice.
+
 
 
 Mission Control
@@ -440,7 +534,8 @@ Utilities
 Engine Patterns
 ===============
 
-Most **output engines** follow a very simple pattern:
+Most **output engines** follow a very simple pattern that recursively traverses
+the hierarchy of regions:
 
 ```perl
 #
@@ -464,7 +559,7 @@ sub work_on {
 
 		} else {
 
-			# recursively work on the sub-region
+			# recursively work on the child region
 
 			&work_on($child);
 		}
@@ -477,3 +572,4 @@ sub work_on {
 #
 &work_on(&sc_get_space());
 ```
+

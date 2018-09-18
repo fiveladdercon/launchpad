@@ -6,28 +6,26 @@ permalink: /engines/rf/
 
 
 rf.pl
-=====
+===========
 
-[rf.pl] outputs the space in rocketfuel format.
+[rf.pl] ...
 
 
 Usage
 -----
 
 ```
-spacecraft ... rf.pl [-h|--help] [-R] OUTPUT
+spacecraft ... rf.pl [OUTPUT] [-R DIRECTORY]
+                     [-offset FORMAT] 
+                     [-size FORMAT]
+
 ```
+
 
 
 Example
 -------
 
-Convert a proprietary format to rocketfuel format:
-
 ```
-$ spacecraft proprietary.pl rf.pl output
+$ spacecraft ... rf.pl
 ```
-
-Here the `proprietary.pl` engine would use the EngineAPI to construct the 
-space from the proprietary format and then the `rf.pl` engine would write
-it out in rocketfuel format, completing the conversion.

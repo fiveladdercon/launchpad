@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 
 use EngineAPI;
-use EngineHelp;
+use EngineUtils;
 use strict;
 
 #-------------------------------------------------------------------------------
@@ -49,10 +49,13 @@ my $EXPRESSION = "";
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op eq "--help") { &help;              }
-	elsif ($op eq "-h"    ) { &help;              }
-	else                    { $EXPRESSION .= $op; }
+	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;             }
+	else                          { $EXPRESSION .= $op; }
 }
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
 
 if ($EXPRESSION) {
 	&calculate($STACK,$EXPRESSION);

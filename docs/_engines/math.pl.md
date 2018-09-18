@@ -1,14 +1,14 @@
 ---
-title: calc.pl
-permalink: /engines/calc/
+title: math.pl
+permalink: /engines/math/
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/{{page.title}}
 
 
-calc.pl
+math.pl
 =======
 
-[calc.pl] is a utility for performing rudamentary calculations with spacecraft 
+[math.pl] is a utility for performing rudamentary calculations with spacecraft 
 bits.
 
 
@@ -16,7 +16,7 @@ Usage
 -----
 
 ```
-$ spacecraft ... calc.pl [-h|--help] [EXPRESSION]
+$ spacecraft ... math.pl [EXPRESSION]
 ```
 
 If an EXPRESSION is given on the command line, it is parsed and the result is 
@@ -39,7 +39,7 @@ Examples
 Calculate the offset of a ROM in the last 2KB of a 4GB space:
 
 ```
-$ spacecraft -u -Q calc.pl 4GB 2KB -
+$ spacecraft -u -Q math.pl 4GB 2KB -
 	34359721984b    7FFFFC000hb
 	4294965248B     FFFFF800hB
 	2147482624H     7FFFFC00hH
@@ -53,7 +53,7 @@ screen (-Q) and the log file (-u).
 Convert a number to a different scale:
 
 ```
-$ spacecraft -u -Q calc.pl 32W.6
+$ spacecraft -u -Q math.pl 32W.6
         1030b   406hb
         128B.6  80hB.6
         64H.6   40hH.6
@@ -61,10 +61,10 @@ $ spacecraft -u -Q calc.pl 32W.6
         128B.6  80hB.6
 ```
 
-Region a space into a series of 64KB regions:
+Interactively region a space into a series of 64KB regions:
 
 ```
-$ spacecraft -u -Q calc.pl
+$ spacecraft -u -Q math.pl
 >>512KB
         4194304b 400000hb
         524288B  80000hB
@@ -89,5 +89,5 @@ $ spacecraft -u -Q calc.pl
         360448H  58000hH
         180224W  2C000hW
         704KB    2C0hKB
->>
+>>CTRL+D
 ```

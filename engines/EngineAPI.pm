@@ -93,6 +93,8 @@ package EngineAPI;
 *sc_is_field = *EngineAPIc::sc_is_field;
 *sc_is_named = *EngineAPIc::sc_is_named;
 *sc_is_typed = *EngineAPIc::sc_is_typed;
+*sc_is_first_child = *EngineAPIc::sc_is_first_child;
+*sc_is_last_child = *EngineAPIc::sc_is_last_child;
 *sc_has_properties = *EngineAPIc::sc_has_properties;
 *sc_has_property = *EngineAPIc::sc_has_property;
 *sc_has_dimensions = *EngineAPIc::sc_has_dimensions;

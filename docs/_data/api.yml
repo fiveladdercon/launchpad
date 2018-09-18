@@ -42,6 +42,8 @@
 - sc_is_field
 - sc_is_named
 - sc_is_typed
+- sc_is_first_child
+- sc_is_last_child
 - sc_has_properties
 - sc_has_property
 - sc_has_dimensions

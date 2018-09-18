@@ -35,18 +35,21 @@ The mode register sets the parameters for the transfer.
 	0 : Interrupt disabled
 	---
 	17b  1b  0b  IENABLE  RW;
-		
+
 };
+
 
 ---
 The address of the source data.
 ---
 2W  1W  0b  SRC  RW;
 
+
 ---
 The address of the data destination.
 ---
-3W  1W  0b  DEST  RW;
+3W  1W  0b  DEST  RW  -html:link -verilog:retime;
+
 
 //
 // Note that because the 4W address only has a single control
@@ -56,6 +59,7 @@ The address of the data destination.
 Start the transfer.
 ---
 4W.0 1b  0b  START  RWSC;
+
 
 ---
 The status of the transfer.
