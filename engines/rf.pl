@@ -43,20 +43,19 @@ sub rocketfuel {
 	my $level   = shift; $level = 0 unless defined $level;
 	my $TAB     = $options->{tab};
 	my $INDENT  = $TAB x $level;
-	my @spaces  = ();
 	my $rf      = "";
 
 	while (my $node = $region->sc_get_next_child()) {
 		$rf .= &description($INDENT,$node);
 		$rf .= $INDENT . $node->sc_get_offset($options->{offset});
-		$rf .= $TAB    . $node->sc_get_size("%b");
+		$rf .= $TAB    . $node->sc_get_size($options->{size});
 		if ($node->sc_is_field) {
 			$rf .= $TAB . $node->sc_get_value();
 			$rf .= $TAB . $node->sc_get_name("%v");
 			$rf .= $TAB . $node->sc_get_type();
 		} else {
 			my $glob = $node->sc_get_glob("%v");
-			my $name = $node->sc_is_named() ? $node->sc_get_name("#") : "";
+			my $name = $node->sc_is_named() ? $node->sc_get_name("%") : "";
 			my $type = $node->sc_get_type();
 
 			$rf .= $TAB . $glob unless $glob eq "*";
@@ -64,11 +63,13 @@ sub rocketfuel {
 
 			if ($type) {
 				$rf .= $TAB . $type;
-				push @spaces, [$type, $node];
-			} else {
+				&fuelsupply($options,$node,$type) if $options->{recurse};
+			} elsif ($node->sc_has_children) {
 				$rf .= $TAB . "{\n\n";
 				$rf .= &rocketfuel($options,$node,$level+1);
 				$rf .= $INDENT . "}";
+			} else {
+				$rf .= $TAB . "{}";
 			}
 		}
 		$rf .= $TAB . join($TAB,&options($node)) if $node->sc_has_properties();
@@ -96,8 +97,8 @@ sub fuelsupply {
 
 my $OUTPUT  = "space.rf";
 my $OPTIONS = {
-	offset  => "%hW",
-	size    => "%hb",
+	offset  => "%U",
+	size    => "%U",
 	tab     => "    ",
 	dir     => undef,
 	recurse => 0,
@@ -113,7 +114,9 @@ while (@ARGV) {
 }
 
 $OPTIONS->{recurse} = defined $OPTIONS->{dir};
-$OPTIONS->{dir}     = "." unless $OPTIONS->{recurse};
+
+$OPTIONS->{dir} = "." unless $OPTIONS->{recurse};
+mkdir $OPTIONS->{dir} unless -d $OPTIONS->{dir};
 
 $OUTPUT =~ s/[.]rf$//;
 
