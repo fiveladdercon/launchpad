@@ -8,7 +8,7 @@ permalink: /engines/debug/
 data.pl
 ===========
 
-[data.pl] outputs complete model data in a tree format allowing for a 
+[data.pl] outputs the complete model data in a tree format allowing for a 
 detailed inspection of model construction.
 
 
