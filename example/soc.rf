@@ -43,6 +43,6 @@ On-chip Peripheral Region
 
 
 ---
-1KB Boot ROM located at the end of the 4GB space
+16KB Boot ROM located at the end of the 4GB space
 ---
-FFFFFC00hB 1KB ROM {};
+FFFFC000hB 16KB ROM {};
