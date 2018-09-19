@@ -38,32 +38,19 @@ function create() {
 }
 
 #
-# The docs command just changes directories to the engine documenation
-#
-function docs() {
-	cd $SC_LAUNCHPAD/docs/_engines;
-}
-
-#
-# The eg command just changes directories to the engines directory
-#
-function eg() {
-	cd $SC_LAUNCHPAD/engines;
-}
-
-#
-# The ex command just changes directories to the example directory
-#
-function ex() {
-	cd $SC_LAUNCHPAD/example;
-}
-
-#
 # The host command starts the documentation server
 #
 function host() {
 	cd $SC_LAUNCHPAD/docs;
 	bundle exec jekyll serve --host=0.0.0.0;
+}
+
+#
+# The run command runs the test suite
+#
+function run() {
+	cd $SC_LAUNCHPAD/tests;
+	perl run.pl
 }
 
 #┌─────────────────────────────────────────────────────────────────────────────┐
@@ -91,5 +78,5 @@ echo "┌───────────────────────�
 echo "│ SPACECRAFT LAUNCHPAD                                                              │"
 echo "├───────────────┬───────────────────────────────────────────────────────────────────┘"
 echo "│ \$SC_LAUNCHPAD │ $SC_LAUNCHPAD"
-echo "│ COMMANDS      │ create, docs, eg, ex, host"
+echo "│ COMMANDS      │ create, host, run"
 echo "└───────────────┴────────────────────────────────────────────────────────────────────"

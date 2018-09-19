@@ -1,0 +1,145 @@
+├─ REGION
+│    identifier  : MODE
+│    address     : 0hb (0B)
+│    span        : 20hb (4B)
+│    offset      : 0hb (0B)
+│    size        : 20hb (4B)
+│    glob        : *
+│    name        : MODE
+│    type        : 
+│    description : The mode register sets the parameters for the transfer.
+│    properties  : 
+│    filename    : ../../example/dma.rf
+│    lineno      : 4
+│    children    : ┐
+│                : ├─ FIELD
+│                : │    identifier  : WIDTH
+│                : │    address     : 0hb (0B)
+│                : │    span        : 2hb (0B.2)
+│                : │    offset      : 0hb (0B)
+│                : │    size        : 2hb (0B.2)
+│                : │    value       : 0b
+│                : │    name        : WIDTH
+│                : │    type        : RW
+│                : │    description : Transfer width.  Indicates how many bytes are transfered each\nbus cycle.  Valid settings are:\n\n0 : Byte\n1 : Halfword\n2 : Word
+│                : │    properties  : 
+│                : │    filename    : ../../example/dma.rf
+│                : │    lineno      : 14
+│                : ├─ FIELD
+│                : │    identifier  : LENGTH
+│                : │    address     : 8hb (1B)
+│                : │    span        : 4hb (0B.4)
+│                : │    offset      : 8hb (1B)
+│                : │    size        : 4hb (0B.4)
+│                : │    value       : 0b
+│                : │    name        : LENGTH
+│                : │    type        : RW
+│                : │    description : Transfer length.  The value +1 indicates how many cycles are \nissued.  e.g. 0 means 1 cycle, etc.
+│                : │    properties  : 
+│                : │    filename    : ../../example/dma.rf
+│                : │    lineno      : 20
+│                : ├─ FIELD
+│                : │    identifier  : INCREMENT
+│                : │    address     : 10hb (2B)
+│                : │    span        : 1hb (0B.1)
+│                : │    offset      : 10hb (2B)
+│                : │    size        : 1hb (0B.1)
+│                : │    value       : 1b
+│                : │    name        : INCREMENT
+│                : │    type        : RW
+│                : │    description : Incrementing Address.  Enables or disables address incrementing\non the bus address to support both memory and FIFO transfers.\n\n1 : Increment the address according to transfer size.\n0 : Do not increment the address.
+│                : │    properties  : 
+│                : │    filename    : ../../example/dma.rf
+│                : │    lineno      : 29
+│                : └─ FIELD
+│                :      identifier  : IENABLE
+│                :      address     : 11hb (2B.1)
+│                :      span        : 1hb (0B.1)
+│                :      offset      : 11hb (2B.1)
+│                :      size        : 1hb (0B.1)
+│                :      value       : 0b
+│                :      name        : IENABLE
+│                :      type        : RW
+│                :      description : Interrupt enable.\n\n1 : Interrupt enabled.  Trigger an interrupt when the transfer completes.\n0 : Interrupt disabled
+│                :      properties  : 
+│                :      filename    : ../../example/dma.rf
+│                :      lineno      : 37
+├─ FIELD
+│    identifier  : SRC
+│    address     : 40hb (8B)
+│    span        : 20hb (4B)
+│    offset      : 40hb (8B)
+│    size        : 20hb (4B)
+│    value       : 0b
+│    name        : SRC
+│    type        : RW
+│    description : The address of the source data.
+│    properties  : 
+│    filename    : ../../example/dma.rf
+│    lineno      : 45
+├─ FIELD
+│    identifier  : DEST
+│    address     : 60hb (12B)
+│    span        : 20hb (4B)
+│    offset      : 60hb (12B)
+│    size        : 20hb (4B)
+│    value       : 0b
+│    name        : DEST
+│    type        : RW
+│    description : The address of the data destination.
+│    properties  : html:link verilog:retime
+│    filename    : ../../example/dma.rf
+│    lineno      : 51
+├─ FIELD
+│    identifier  : START
+│    address     : 80hb (16B)
+│    span        : 1hb (0B.1)
+│    offset      : 80hb (16B)
+│    size        : 1hb (0B.1)
+│    value       : 0b
+│    name        : START
+│    type        : RWSC
+│    description : Start the transfer.
+│    properties  : 
+│    filename    : ../../example/dma.rf
+│    lineno      : 61
+└─ REGION
+     identifier  : STAT
+     address     : A0hb (20B)
+     span        : 20hb (4B)
+     offset      : A0hb (20B)
+     size        : 20hb (4B)
+     glob        : *
+     name        : STAT
+     type        : 
+     description : The status of the transfer.
+     properties  : 
+     filename    : ../../example/dma.rf
+     lineno      : 67
+     children    : ┐
+                 : ├─ FIELD
+                 : │    identifier  : RUNNING
+                 : │    address     : A0hb (20B)
+                 : │    span        : 1hb (0B.1)
+                 : │    offset      : 0hb (0B)
+                 : │    size        : 1hb (0B.1)
+                 : │    value       : 0b
+                 : │    name        : RUNNING
+                 : │    type        : RO
+                 : │    description : 0 : Channel is not running\n1 : Channel is running
+                 : │    properties  : 
+                 : │    filename    : ../../example/dma.rf
+                 : │    lineno      : 73
+                 : └─ FIELD
+                 :      identifier  : INTR
+                 :      address     : A1hb (20B.1)
+                 :      span        : 1hb (0B.1)
+                 :      offset      : 1hb (0B.1)
+                 :      size        : 1hb (0B.1)
+                 :      value       : 0b
+                 :      name        : INTR
+                 :      type        : RW1C
+                 :      description : 0 : Channel is not interupting\n1 : Channel is interupting
+                 :      properties  : 
+                 :      filename    : ../../example/dma.rf
+                 :      lineno      : 79
