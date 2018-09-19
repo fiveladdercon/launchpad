@@ -1,7 +1,10 @@
+#┌─────────────────────────────────────────────────────────────────────────────┐
+#│ VARIABLES                                                                   │
+#└─────────────────────────────────────────────────────────────────────────────┘
+
 #
-# Set the SC_LAUNCHPAD environment variable to the root
-# of the launchpad repository so that the engines and
-# executable can be found.
+# Set the SC_LAUNCHPAD environment variable to the root of the launchpad 
+# repository so that the engines and executable can be found.
 #
 export SC_LAUNCHPAD=$PWD
 
@@ -14,6 +17,58 @@ VERSION=0.3.0
 # Identify the tool architecture
 #
 ARCH=`uname -m`
+
+#┌─────────────────────────────────────────────────────────────────────────────┐
+#│ COMMANDS                                                                    │
+#└─────────────────────────────────────────────────────────────────────────────┘
+
+#
+# The create function adds a new engine from the template
+#
+function create() {
+	engine=$1;
+	if [[ "$engine" == "" ]]; then
+		echo "Usage: create ENGINE";
+	else
+		echo "Creating \$SC_LAUNCHPAD/engines/$engine.pl";
+		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl > $SC_LAUNCHPAD/engines/$engine.pl;
+		echo "Creating \$SC_LAUNCHPAD/docs/_engines/$engine.pl.md";
+		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl.md > $SC_LAUNCHPAD/docs/_engines/$engine.pl.md;
+	fi
+}
+
+#
+# The docs command just changes directories to the engine documenation
+#
+function docs() {
+	cd $SC_LAUNCHPAD/docs/_engines;
+}
+
+#
+# The eg command just changes directories to the engines directory
+#
+function eg() {
+	cd $SC_LAUNCHPAD/engines;
+}
+
+#
+# The ex command just changes directories to the example directory
+#
+function ex() {
+	cd $SC_LAUNCHPAD/example;
+}
+
+#
+# The host command starts the documentation server
+#
+function host() {
+	cd $SC_LAUNCHPAD/docs;
+	bundle exec jekyll serve --host=0.0.0.0;
+}
+
+#┌─────────────────────────────────────────────────────────────────────────────┐
+#│ SETUP                                                                       │
+#└─────────────────────────────────────────────────────────────────────────────┘
 
 #
 # Add a shortcut to the desired version and architecture 
@@ -28,17 +83,13 @@ if [[ "$PATH" != *"$SC_LAUNCHPAD"* ]]; then
 	PATH=$PATH:$SC_LAUNCHPAD/bin
 fi
 
-#
-# Add a function to create new engines
-#
-function create () {
-	engine=$1;
-	if [[ "$engine" == "" ]]; then
-		echo "Usage: create ENGINE";
-	else
-		echo "Creating \$SC_LAUNCHPAD/engines/$engine.pl";
-		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl > $SC_LAUNCHPAD/engines/$engine.pl;
-		echo "Creating \$SC_LAUNCHPAD/docs/_engines/$engine.pl.md";
-		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl.md > $SC_LAUNCHPAD/docs/_engines/$engine.pl.md;
-	fi
-}
+#┌─────────────────────────────────────────────────────────────────────────────┐
+#│ REPORT                                                                      │
+#└─────────────────────────────────────────────────────────────────────────────┘
+
+echo "┌───────────────────────────────────────────────────────────────────────────────────┐"
+echo "│ SPACECRAFT LAUNCHPAD                                                              │"
+echo "├───────────────┬───────────────────────────────────────────────────────────────────┘"
+echo "│ \$SC_LAUNCHPAD │ $SC_LAUNCHPAD"
+echo "│ COMMANDS      │ create, docs, eg, ex, host"
+echo "└───────────────┴────────────────────────────────────────────────────────────────────"
