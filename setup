@@ -34,6 +34,9 @@ function create() {
 		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl > $SC_LAUNCHPAD/engines/$engine.pl;
 		echo "Creating \$SC_LAUNCHPAD/docs/_engines/$engine.pl.md";
 		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/engine.pl.md > $SC_LAUNCHPAD/docs/_engines/$engine.pl.md;
+		echo "Creating \$SC_LAUNCHPAD/tests/$engine.pl/";
+		mkdir -p $SC_LAUNCHPAD/tests/$engine.pl;
+		sed "s/<engine>/$engine/" $SC_LAUNCHPAD/template/run.pl > $SC_LAUNCHPAD/tests/$engine.pl/run.pl;
 	fi
 }
 
