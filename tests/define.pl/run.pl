@@ -1,6 +1,6 @@
 use lib "$ENV{SC_LAUNCHPAD}/tests";
 use run;
 
-&spacecraft("def.pl");
+&spacecraft("define.pl");
 
-&report("def.pl");
+&report("define.pl");
