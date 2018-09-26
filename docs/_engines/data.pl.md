@@ -38,7 +38,6 @@ Example
 Debug rocketfuel fueled from the command line:
 
 ```
-$ cd $SC_LAUNCHPAD/example
 $ spacecraft dma.rf data.pl
 ```
 

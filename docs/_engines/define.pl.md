@@ -3,25 +3,51 @@ title: define.pl
 permalink: /engines/define/
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/{{page.title}}
-
+[cstruct.pl]: /engines/define/
 
 define.pl
 ===========
 
-[define.pl] ...
+[define.pl] outputs the model as a set of defines in a header file suitable for 
+including in *off-board* driver code (i.e. the processor executing 
+the code indirectly accesses the space via a bus peripheral).
+
+
+```c
+#include "space.h"  // Declaries a #FIELD macro per field.
+
+int x;              // A variable
+
+write(#FIELD,1);    // A write function is needed to access the field
+
+x = read(#FIELD);   // A read function is needed to access the field
+```
+
+This is in constrast to *on-board* driver code, which can directly access 
+the space since it resides directly on the processor bus.  The [cstruct.pl] 
+engine is better suited for on-board drivers.
 
 
 Usage
 -----
 
 ```
-spacecraft ... define.pl [-h|--help]
+spacecraft ... define.pl [-verilog] [OUTPUT]
 ```
+
+Writes the header to the OUTPUT if defined, or _type_.h otherwise.
+
+
+-verilog
+  : Output verilog defines instead of C defines so that they can be used in
+    simulations.
 
 
 Example
 -------
 
+Output a header file for designers to use in non-UVM simulations:
+
 ```
-$ spacecraft ... define.pl
+$ spacecraft -R soc.rf define.pl -verilog
 ```
