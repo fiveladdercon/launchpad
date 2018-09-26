@@ -1,7 +1,3 @@
-package Verilog;
-use EngineAPI;
-use base qw(Exporter);
-
 #-------------------------------------------------------------------------------
 package u;
 #-------------------------------------------------------------------------------
@@ -31,6 +27,55 @@ sub indented {
 	return $logic;
 }
 
+#
+# $power = &clog2($number);
+#
+# Returns the $power of the first 2^$power that is larger than the given $number.
+# i.e. ceiling(log2(x))
+#
+sub clog2 {
+	my $number = shift;
+	my $power  = 0;
+	while ((1<<$power)<$number) {$power++;}
+	return $power;
+}
+
+# sub mask {
+#   my $power = shift;
+#   return -1^(-1<<$power);
+# }
+
+# sub hexfmt {
+#   my $power = shift;
+#   return sprintf("%%0%dX",($power>>2)+(($power%4)?1:0));
+# }
+
+# sub vnum {
+#   my $num  = shift;
+#   my $size = &clog2($num);
+#   return sprintf("%d'h%X",$size,$num);
+# }
+
+#-------------------------------------------------------------------------------
+package Object;
+#-------------------------------------------------------------------------------
+#
+# A base class to help with debugging
+#
+use EngineAPI;
+
+sub error {
+	my $this = shift; &sc_error(@_);
+}
+
+sub debug {
+	my $this = shift;
+	printf("-----------------------------------\n");
+	foreach my $key (sort keys %{$this}) {
+		printf("%-8s = %s\n",$key,$this->{$key});
+	}
+}
+
 #-------------------------------------------------------------------------------
 package Signal;
 #-------------------------------------------------------------------------------
@@ -39,6 +84,7 @@ package Signal;
 #
 # The class is overloaded so that it behaves like a string in string contexts.
 #
+use base ('Object');
 
 use overload '""'  => sub { $_[0]->{name}; },
              'cmp' => sub { (ref($_[0]) ? $_[0]->{name} : $_[0]) cmp (ref($_[1]) ? $_[1]->{name} : $_[1]); };
@@ -61,7 +107,8 @@ sub new {
 		size    => $size,
 		lsb     => $lsb,
 		type    => undef,
-		port    => undef
+		port    => undef,
+		verilog => undef
 	};
 	$this->{msb} = $lsb+$size-1 if ($size > 1);
 	return bless $this, $class;
@@ -70,7 +117,7 @@ sub new {
 #
 # $verilog = $Signal->declaration
 #
-# A backstage method that returns a declaration string that depends on the
+# A backstage method that returns a verilog declaration that depends on the
 # Signal type and port.
 #
 #   "input  wire            name,\n"
@@ -86,140 +133,137 @@ sub new {
 #
 #
 sub declaration {
-	my $this    = shift;
-	my $verilog = "";
-	$verilog .= sprintf("  %-7s",$this->{port}) if $this->{port};
-	$verilog .= sprintf("%-4s",$this->{type});
-	$verilog .= sprintf("%-10s",$this->{msb} ? sprintf("[%d:%d]",$this->{msb},$this->{lsb}) : "");
-	$verilog .= $this->{name};
-	$verilog .= $this->{port} ? "," : ";";
-	$verilog .= "\n";
-	return $verilog;
-}
+	my $this = shift;
 
-#-------------------------------------------------------------------------------
-package Wire;
-#-------------------------------------------------------------------------------
-use base ('Signal');
+	return $this->{verilog} if $this->{verilog};
+	
+	$this->{verilog}  = "";
+	$this->{verilog} .= sprintf("  %-7s",$this->{port}) if $this->{port};
+	$this->{verilog} .= sprintf("%-4s ",$this->{type});
+	$this->{verilog} .= sprintf("%-10s",$this->{msb} ? sprintf("[%d:%d]",$this->{msb},$this->{lsb}) : "");
+	$this->{verilog} .= $this->{name};
+	$this->{verilog} .= $this->{port} ? "," : ";";
+	$this->{verilog} .= "\n";
 
-#
-# $Wire = new Wire($name);
-# $Wire = new Wire($name,$size);
-# $Wire = new Wire($name,$size,$lsb);
-#
-# A backstage method that returns a new instance of a Wire Signal.
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $signal   = Signal::new($class,@_); $signal->{type} = 'wire';
-	return $signal; 
+	return $this->{verilog};
 }
 
 #
-# $Wire = $Wire->input
+# $Signal = $Signal->input
 #
-# A public chainable method that turns the wire into an *input* wire.
+# A public chainable method that turns the Signal into an input.
 #
 sub input {
 	my $this = shift; $this->{port} = 'input'; return $this;
 }
 
 #
-# $Wire = $Wire->output
+# $Signal = $Signal->output
 #
-# A public chainable method that turns the wire into an *output* wire.
-#
-sub output {
-	my $this = shift; $this->{port} = 'output'; return $this;
-}
-
-#-------------------------------------------------------------------------------
-package Clock;
-#-------------------------------------------------------------------------------
-use base ('Wire');
-
-#
-# $Clock = new Clock("name");
-#
-# A backstage method that returns a posedge triggered input Wire Signal.
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $name     = shift;
-	my $wire     = Wire::new($class,$name); $wire->{edge} = 'posedge'; $wire->input;
-	return $wire; 
-}
-
-#-------------------------------------------------------------------------------
-package Reset;
-#-------------------------------------------------------------------------------
-use base ('Wire');
-
-#
-# $Reset = new Reset($name);
-#
-# A backstage method that returns a negedge triggered input Wire Signal.
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $name     = shift;
-	my $wire     = Wire::new($class,$name); $wire->{edge} = 'negedge'; $wire->input;
-	return $wire; 
-}
-
-#-------------------------------------------------------------------------------
-package Reg;
-#-------------------------------------------------------------------------------
-use base ('Signal');
-
-#
-# $Reg = new Reg($name);
-# $Reg = new Reg($name,$size);
-# $Reg = new Reg($name,$size,$lsb);
-#
-# A backstage method that returns a new instance of a Reg Signal.
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $signal   = Signal::new($class,@_); $signal->{type} = 'reg';
-	return $signal; 
-}
-
-#
-# $Reg = $Reg->output
-#
-# A public chainable method that turns the reg into an *output* reg.
+# A public chainable method that turns the Signal into an output.
 #
 sub output {
 	my $this = shift; $this->{port} = 'output'; return $this;
 }
 
 #
-# $Reg = $Reg->clocked($Clock)
-# $Reg = $Reg->clocked($Clock,$Reset)
-# $Reg = $Reg->clocked($Clock,$Reset,$default)
+# $Signal = $Signal->wire
 #
-# A public chainable method that clocks the register with the supplied $Clock 
-# Signal.  If a $Reset Signal is supplied the register will be reset by the 
-# signal, otherwise the register will not be reset.  If the register is reset 
-# the register will reset to the $default, if supplied, or {size}'d0 otherwise.
+# A public chainable method that turns the Signal into a wire.
 #
-sub clocked {
+sub wire {
+	my $this = shift; $this->{type} = 'wire'; return $this;
+}
+
+#
+# $Signal = $Signal->reg
+#
+# A public chainable method that turns the Signal into a reg.
+#
+#
+# $Signal = $Signal->reg($Clock)
+# $Signal = $Signal->reg($Clock,$Reset)
+# $Signal = $Signal->reg($Clock,$Reset,$default)
+#
+# A public chainable method that turns the Signal into a reg that is clocked by 
+# the supplied $Clock Signal and reset by the supplied $Reset Signal, if 
+# supplied.  If the register is reset register will reset to the $default, 
+# if supplied, or {size}'d0 otherwise.
+#
+sub reg {
 	my $this    = shift; 
-	my $clock   = shift;
-	my $reset   = shift;
+	my $Clock   = shift;
+	my $Reset   = shift;
 	my $default = shift;
 
-	$this->{Clock} = $clock;
-	if ($reset) {
-		$this->{Reset}   = $reset;
+ 	$this->error("Signal $Clock is not a clock.") unless $Clock->{class} eq 'clock';
+	$this->{type}  = 'reg';
+	$this->{Clock} = $Clock;
+	if ($Reset) {
+		$this->error("Signal $Reset is not a reset.") unless $Reset->{class} eq 'reset';
+		$this->{Reset}   = $Reset;
 		$this->{default} = $default || sprintf("%d'd0",$this->{size});
 	}
 	return $this;
+}
+
+#
+# $Signal = $Signal->clock
+#
+# A backstage chainable method that turns the Signal into a clock, which is
+# an input wire used to posedge trigger always blocks
+#
+sub clock {
+	my $this = shift; 
+	$this->{class} = 'clock'; 
+	$this->{edge}  = 'posedge';
+	return $this->input->wire;
+}
+
+#
+# $Signal = $Signal->reset
+#
+# A backstage chainable method that turns the Signal into a reset, which is
+# an input wire used to negedge triggered always blocks and set registers
+# to a default state when asserted.
+#
+sub reset {
+	my $this = shift; 
+	$this->{class} = 'reset'; 
+	$this->{edge}  = 'negedge'; 
+	return $this->input->wire;
+}
+
+#
+# $trigger = $Reg->trigger
+#
+# A backstage method that returns the condition that triggers the always
+# block of a register:
+#
+# always @($trigger) ...
+#
+sub trigger {
+	my $this     = shift; $this->error("Signal $Signal is not a reg.") unless $this->{type} eq 'reg';
+	my $Clock    = $this->{Clock};
+	my $Reset    = $this->{Reset};
+	my $trigger  = "$Clock->{edge} $Clock->{name}";
+	   $trigger .= " or $Reset->{edge} $Reset->{name}" if $Reset;
+	return $trigger;
+}
+
+#
+# $asserted = $Reset->asserted;
+#
+# A backstage method that returns the logic required to assert the reset 
+# condition in an always block:
+#
+# always @(trigger) begin
+#   if ($asserted) begin
+#     ...
+#
+sub asserted {
+	my $this = shift; $this->error("Signal $Signal is not a reset.") unless $this->{class} eq 'reset';
+	return sprintf("%s%s",$this->{edge} eq 'negedge' ? '~' : '',$this->{name});
 }
 
 #-------------------------------------------------------------------------------
@@ -228,6 +272,7 @@ package Block;
 #
 # A Block is a group of related assign & always statements within a Module.
 #
+use base ('Object');
 
 #
 # $Block = new Block($Module);
@@ -238,53 +283,49 @@ sub new {
 	my $invocant = shift;
 	my $class    = ref($invocant) || $invocant;
 	my $this     = {
-		Module   => shift
+		Module   => shift,
+		comment  => shift,
+		verilog  => undef
 	};
 	return bless $this, $class;
 }
 
+#----------------
+# Module proxies
+#----------------
+
 #
-# $Wire = $Block->wire($name);
-# $Wire = $Block->wire($name,$size);
-# $Wire = $Block->wire($name,$size,$lsb);
+# $boolean = $Block->has_signal($name);
 #
-# A public method that returns a Module Wire for Block assign and always.
+# A backstage method that returns true if the given Signal $name exists
+# in the Module, false otherwise.
 #
-sub wire {
-	my $this = shift; return $this->{Module}->signal(new Wire(@_));
+sub has_signal {
+	my $this = shift; return $this->{Module}->has_signal(shift);
 }
 
 #
-# $Reg = $Block->reg($name);
-# $Reg = $Block->reg($name,$size);
-# $Reg = $Block->reg($name,$size,$lsb);
+# $Signal = $Block->get_signal($name);
 #
-# A public method that returns a Module Reg for Block assign and always.
+# A backstage method the retrieves the Signal with the given $name.
 #
-sub reg {
-	my $this = shift; return $this->{Module}->signal(new Reg(@_));
+sub get_signal {
+	my $this = shift; return $this->{Module}->get_signal(shift);
 }
 
 #
-# $Clock = $Block->reg($name);
+# $Signal = $Block->add_signal($name);
+# $Signal = $Block->add_signal($name,$size);
+# $Signal = $Block->add_signal($name,$size,$lsb);
 #
-# A public method that returns a Module Clock for Block assign and always.
+# A backstage method that adds a new Signal to the Module.
 #
-sub clock {
-	my $this = shift; return $this->{Module}->signal(new Clock(@_));
+sub add_signal {
+	my $this = shift; return $this->{Module}->add_signal(@_);
 }
 
 #
-# $Clock = $block->reg($name);
-#
-# A public method that returns a Module Reset for Block assign and always.
-#
-sub reset {
-	my $this = shift; return $this->{Module}->signal(new Reset(@_));
-}
-
-#
-# $Block = $Block->assign($Wire,$format,...);
+# $Block = $Block->assign($Wire,$logic,...);
 #
 # A public chainable method that adds an assign statement to the Block 
 # implementation:
@@ -302,7 +343,7 @@ sub assign {
 }
 
 #
-# $Block = $Block->always($Reg,$format,...);
+# $Block = $Block->always($Reg,$logic,...);
 #
 # A public chainable method that adds an always statement to the Block
 # implemenation:
@@ -316,77 +357,81 @@ sub assign {
 # The clock, reset, and default values are dictated by the supplied $Reg.
 #
 sub always {
-	my $this   = shift;
-	my $Reg    = shift;
-	my $format = shift;
-	my $logic  = sprintf($format,@_);
-	my $Clock  = $Reg->{Clock};
-	my $Reset  = $Reg->{Reset} || {edge => "0", name => "0"};
-	my $ce     = $Clock->{edge};
-	my $cn     = $Clock->{name};
-	my $re     = $Reset->{edge};
-	my $rn     = $Reset->{name};
-	$this->{always}->{$ce}->{$cn}->{$re}->{$rn}->{$Reg->{name}} = {default => $Reg->{default}, logic => $logic};
+	my $this    = shift;
+	my $Reg     = shift;
+	my $format  = shift;
+	my $logic   = sprintf($format,@_);
+	my $trigger = $Reg->trigger;
+	my $Reset   = $Reg->{Reset};
+	if ($Reset) {
+		$this->{reset}->{$trigger} = $Reset->asserted;
+		$this->{always}->{$trigger}->{$Reg} = {
+			default => $Reg->{default},
+			clocked => $logic
+		};
+	} else {
+		$this->{always}->{$trigger}->{$Reg} = { 
+			clocked => $logic
+		};
+	}
 }
 
 #
-# $verilog = $block->implementation
+# $verilog = $block->declaration
 #
 # A backstage method that returns the Block implementation as a verilog string.
 #
-sub implementation {
-	my $this    = shift;
-	my $verilog = "";
+sub declaration {
+	my $this = shift;
 	my $width;
 	my $tab;
 
-	$verilog .= $this->{comment} . "\n" if $this->{comment};
+	return $this->{verilog} if $this->{verilog};
+
+	$this->{verilog}  = "";
+	$this->{verilog} .= $this->{comment} . "\n" if $this->{comment};
 
 	# implement combinatorial logic
 	if (exists $this->{assigns}) {
-		my @wires = sort keys %{$this->{assigns}};
-		$width = &u::maxlength(@wires);
+		my @Wires = sort keys %{$this->{assigns}};
+		$width = &u::maxlength(@Wires);
 		$tab   = " " x ($width + 8);
-		foreach my $wire (@wires) {
-			$verilog .= sprintf("assign %-${width}s = %s;\n",$wire,u::indented($tab,$this->{assigns}->{$wire}));
+		foreach my $Wire (@Wires) {
+			$this->{verilog} .= sprintf("assign %-${width}s = %s;\n",$Wire,u::indented($tab,$this->{assigns}->{$Wire}));
 		}
-		$verilog .= "\n";
+		$this->{verilog} .= "\n";
 	}
 
 	# implement sequential logic
 	if (exists $this->{always}) {
-		foreach my $ce (sort keys %{$this->{always}}) {
-			foreach my $cn (sort keys %{$this->{always}->{$ce}}) {
-				foreach my $re (sort keys %{$this->{always}->{$ce}->{$cn}}) {
-					foreach my $rn (sort keys %{$this->{always}->{$ce}->{$cn}->{$re}}) {
-						my @regs = sort keys %{$this->{always}->{$ce}->{$cn}->{$re}->{$rn}};
-						$width = &u::maxlength(@regs);
-						if ($rn eq "0") {
-							$tab = " " x ($width + 4);
-							$verilog .= "always @($ce $cn) begin\n";
-							foreach my $reg (@regs) {
-								$verilog .= sprintf("  %-${width}s <= %s;\n",$reg,u::indented($tab,$this->{always}->{$ce}->{$cn}->{$re}->{$rn}->{$reg}->{logic}));
-							}
-							$verilog .= "end\n\n";
-						} else {
-							$tab = " " x ($width + 6);
-							$verilog .= "always @($ce $cn or $re $rn) begin\n";
-							foreach my $reg (@regs) {
-								$verilog .= sprintf("    %-${width}s <= %s;\n",$reg,u::indented($tab,$this->{always}->{$ce}->{$cn}->{$re}->{$rn}->{$reg}->{default}));
-							}
-							$verilog .= "  end else begin\n";
-							foreach my $reg (@regs) {
-								$verilog .= sprintf("    %-${width}s <= %s;\n",$reg,u::indented($tab,$this->{always}->{$ce}->{$cn}->{$re}->{$rn}->{$reg}->{logic}));
-							}
-							$verilog .= "  end\nend\n\n";
-						}
-					}
+		foreach my $trigger (sort keys %{$this->{always}}) {
+			my $reset = $this->{reset}->{$trigger};
+			my @Regs  = sort keys %{$this->{always}->{$trigger}};
+			   $width = &u::maxlength(@Regs);
+			if ($reset) {
+				$tab      = " " x ($width + 6);
+				$this->{verilog} .= "always @($trigger) begin\n";
+				$this->{verilog} .= "  if ($reset) begin\n";
+				foreach my $Reg (@Regs) {
+					$this->{verilog} .= sprintf("    %-${width}s <= %s;\n",$Reg,u::indented($tab,$this->{always}->{$trigger}->{$Reg}->{default}));
 				}
+				$this->{verilog} .= "  end else begin\n";
+				foreach my $Reg (@Regs) {
+					$this->{verilog} .= sprintf("    %-${width}s <= %s;\n",$Reg,u::indented($tab,$this->{always}->{$trigger}->{$Reg}->{clocked}));
+				}
+				$this->{verilog} .= "  end\nend\n\n";
+			} else {
+				$tab      = " " x ($width + 4);
+				$this->{verilog} .= "always @($trigger) begin\n";
+				foreach my $Reg (@Regs) {
+					$this->{verilog} .= sprintf("  %-${width}s <= %s;\n",$Reg,u::indented($tab,$this->{always}->{$trigger}->{$Reg}->{clocked}));
+				}
+				$this->{verilog} .= "end\n\n";
 			}
 		}
 	}
 
-	return $verilog;
+	return $this->{verilog};
 }
 
 #-------------------------------------------------------------------------------
@@ -395,6 +440,8 @@ package Module;
 #
 # A Module is a named collection of Signals and Blocks
 #
+use EngineAPI;
+use base ('Object');
 
 #
 # $Module = new Module("name");
@@ -406,90 +453,110 @@ sub new {
 	my $class    = ref($invocant) || $invocant;
 	my $this     = {
 		name     => shift,
-		signals  => {}, 
-		blocks   => []
+		Signals  => {}, 
+		Blocks   => [],
+		Inputs   => [],
+		Outputs  => [],
+		Wires    => [],
+		Regs     => [],
+		verilog  => undef,
 	};
 	return bless $this, $class;
 }
 
 #
-# $Block = $Module->block;
+# $boolean = $Module->has_signal($name);
 #
-# A public method that returns a new Block to the $Module user.
+# A backstage method that returns true if the given Signal $name exists, 
+# false otherwise.
 #
-sub block {
-	my $this  = shift;
-	my $block = new Block($this);
-	push @{$this->{blocks}}, $block;
-	return $block;
+sub has_signal {
+	my $this = shift;
+	my $name = shift;
+	return exists $this->{Signals}->{$name};
 }
 
 #
-# $Signal = $Module->signal($Signal);
-# $Signal = $Module->signal($name);
+# $Signal = $Module->get_signal($name);
 #
-# An backstage method that creates and/or returns a $Signal from the $Module.
-# If a $Signal is provided, the existing $Signal with the same name is returned
-# if it exists, otherwise the $Signal is is added to the $Module and returned.
-# If only a $name is provided, the $Signal must exist and is returned.
+# A backstage method the retrieves the Signal with the given $name.
 #
-sub signal {
+sub get_signal {
+	my $this = shift;
+	my $name = shift;
+	return $this->{Signals}->{$name};
+}
+
+#
+# $Signal = $Module->add_signal($name);
+# $Signal = $Module->add_signal($name,$size);
+# $Signal = $Module->add_signal($name,$size,$lsb);
+#
+# A backstage method that adds a new Signal to the Module.
+#
+sub add_signal {
 	my $this   = shift;
-	my $signal = shift;
-	if (not exists $this->{signals}->{$signal}) {
-		&sc_fatal("$signal is not a Signal") unless ref $signal;
-		$this->{signals}->{$signal} = $signal;
-	}
-	return $this->{signals}->{$signal};
+	my $Signal = new Signal(@_);
+	$this->{Signals}->{$Signal->{name}} = $Signal;
+	return $Signal;
 }
 
 #
-# $verilog = $Module->implementation;
+# $Block = $Module->add_block;
+#
+# A backstage method that returns a new Block to the $Module user.
+#
+sub add_block {
+	my $this  = shift;
+	my $Block = shift || new Block($this);
+	push @{$this->{Blocks}}, $Block;
+	return $Block;
+}
+
+#
+# $verilog = $Module->declaration;
 #
 # A public method that returns the $Module implementation as a verilog string.
 #
-sub implementation {
+sub declaration {
 	my $this    = shift;
 	my $name    = $this->{name};
-	my $verilog = "";
-    my @inputs  = ();
-    my @outputs = ();
-    my @wires   = ();
-    my @regs    = ();
-    my $width;
 
-    foreach my $name (sort keys %{$this->{signals}}) {
-    	my $signal = $this->signal($name);
-    	if    ($signal->{port} eq 'input' ) { push @inputs,  $signal;        }
-    	elsif ($signal->{port} eq 'output') { push @outputs, $signal;        }
-    	elsif ($signal->{type} eq 'wire'  ) { push @wires,   $signal;        }
-    	elsif ($signal->{type} eq 'reg'   ) { push @regs,    $signal;        }
-    	else  {$signal->debug(); &sc_fatal("Unknown signal type $signal\n"); }
+	return $this->{verilog} if $this->{verilog};
+    
+    foreach my $name (sort keys %{$this->{Signals}}) {
+    	my $Signal = $this->get_signal($name);
+    	if    ($Signal->{port} eq 'input' ) { push @{$this->{Inputs}},  $Signal;  }
+    	elsif ($Signal->{port} eq 'output') { push @{$this->{Outputs}}, $Signal;  }
+    	elsif ($Signal->{type} eq 'wire'  ) { push @{$this->{Wires}},   $Signal;  }
+    	elsif ($Signal->{type} eq 'reg'   ) { push @{$this->{Regs}},    $Signal;  }
+    	else  {$Signal->debug(); &sc_fatal("Unknown Signal type $Signal");        }
     }
 
-    $verilog .= "module $name (\n";
-    foreach my $input (@inputs) { 
-    	$verilog .= $input->declaration; 
+    $this->{verilog} = "module $name (\n";
+    foreach my $Input (@{$this->{Inputs}}) { 
+    	$this->{verilog} .= $Input->declaration; 
     }
-    $verilog .= "\n";
-    foreach my $output (@outputs) {	
-    	$verilog .= $output->declaration; 
+    $this->{verilog} .= "\n";
+    foreach my $Output (@{$this->{Outputs}}) {	
+    	$this->{verilog} .= $Output->declaration; 
     }
-    $verilog =~ s/,$//;
-    $verilog .= ");\n\n";
-	foreach my $wire (@wires) { 
-		$verilog .= $wire->declaration; 
+    $this->{verilog} =~ s/,$//;
+    $this->{verilog} .= ");\n\n";
+	foreach my $Wire (@{$this->{Wires}}) { 
+		$this->{verilog} .= $Wire->declaration; 
 	}
-    $verilog .= "\n";
-	foreach my $reg (@reg) { 
-		$verilog .= $reg->declaration; 
+    $this->{verilog} .= "\n";
+	foreach my $Reg (@{$this->{Regs}}) { 
+		$this->{verilog} .= $Reg->declaration; 
 	}
-	foreach my $block (@{$this->{blocks}}) {
-		$verilog .= $block->implementation;
+    $this->{verilog} .= "\n";
+	foreach my $Block (@{$this->{Blocks}}) {
+		$this->{verilog} .= $Block->declaration;
 	}
-    $verilog .= "endmodule\n";
+    $this->{verilog} .= "\nendmodule\n";
 
-    return $verilog;
+    return $this->{verilog};
 }
 
 1;
