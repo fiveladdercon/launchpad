@@ -136,6 +136,38 @@ one chip spin to the next.  It is a much more compact representation of the
 change that eliminates maintaining multiple versions of source files that
 typically differ in near trivial ways.
 
+
+Here's another example of this kind of flow:
+
+```
+$ spacecraft -R chip.rf filter.pl -property verilog logical.pl pack.pl rocketfuel.pl customer.rf
+```
+
+This seemingly complex command line does the following:
+
+`-R chip.rf` 
+	: Recursively read the model from disk.
+
+`filter.pl -property verilog`
+	: Trim all verilog properties from the model, hiding implementation details
+	  like clock domains or RAM based implemenations.
+
+`logical.pl`
+    : Collapse the hierarchy of regions into something logical, hiding 
+      regions needed for purely for implementation (i.e. clock domains, 
+      engineering assignments, third-party integrations etc.).
+
+`pack.pl`
+	: Convert all typed regions into untyped regions with packed TYPE properties,
+	  effectively converting the space into a single file.
+
+`rocketfuel.pl customer.rf`
+	: Output the filtered, packed logical model in Rocket Fuel format for the
+	  customer.  
+
+The difference between what is implemented (`chip.rf`) and what is presented
+to the customer (`customer.rf`) is drastic.
+
 *You don't get this kind of flow with other tools.  Sharing the memory resident
 model between standard and custom engines is a major benefit of using spacecraft,
 as the model is flexible, fully API accessible and -- most importantly -- 
@@ -178,7 +210,7 @@ execute them in sequence.
 and how to use each of them.  It's when you find yourself stuck with an 
 input, output or migration problem that you'll graduate to an advanced user and 
 start hacking the Launch Pad engines or writing and possibly 
-[contributing](contribute) your own.*
+[contributing](/contribute) your own.*
 
 
 Launch Pad
@@ -220,9 +252,9 @@ a start-up check that will *waste your time* unless a **booster** is also
 installed.
 
 A **booster** is a cryptographically signed license that is locally installed and 
-enables your spacecraft executable to run at full speed.  You can purchase a 
-booster here or send an email with your company, name, and email to 
-<u>fiveladdercon[at]gmail.com</u> and request a trial.
+enables your spacecraft executable to run at full speed. To purchase a booster 
+or request a trial, send an email with your company, name, and email to 
+<u>fiveladdercon[at]gmail.com</u>.
 
 *Of course you can always just keep running spacecraft without a booster, but the
 engineering time wasted in the long haul is likely more expensive than a booster.*

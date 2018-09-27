@@ -6,44 +6,82 @@ permalink: /engines/filter/
 
 
 filter.pl
-===========
+=========
 
-[filter.pl] trims properties or nodes from the model, which is useful for
-tailoring the model for customer use.
+[filter.pl] removes selected nodes or node properties from the model.
+
+This is intended for tailoring the model for customer use by removing proprietary 
+information.
+
+Note that the engine does not output the model; it only removes selected parts 
+of it.
 
 
 Usage
 -----
 
 ```
-spacecraft ... filter.pl 
+spacecraft ... filter.pl PATTERN [PATTERN]
     [-property PATTERN] 
-    [-filter PATTERN] 
 ```
 
-The [filter.pl] engine does not output the model; it only removes selected parts
-of it.  The final output format
-
+Removes nodes that have a `filter` property that matches at least one of the 
+supplied PATTERNs.
 
 -property PATTERN
   : Remove properties from nodes that match the given PATTERN.  
-    More than one `-property` switch can be used to specify multiple PATTERNs,
-    and a PATTERN can be a regular expression or a simple string.
+    More than one `-property` switch can be used to specify multiple PATTERNs.
+
+PATTERNs can be strings or regular expressions.
+
+
+Properties
+----------
 
 -filter PATTERN
-  : Remove nodes with filter properties that match the given PATTERN.
-    More than one `-filter` switch can be used to specify multiple PATTERNs,
-    and a PATTERN can be a regular expression or a simple string.
+  : If a node's filter property PATTERN matches any PATTERN supplied on the 
+    command line, the node is removed from the model.  If a node's filter 
+    property PATTERN does not match ANY PATTERNs supplied on the command line,
+    the filter property is removed.  Note that this implies that filter 
+    properties are consumed by the filter engine so that all filtering based
+    on the property must occur in a single pass of the engine.
 
 
 Example
 -------
 
-Remove verilog properties from the model before shipping the map to customers
-in a flattened rocket fuel file.
+Remove verilog properties from the model before shipping the map to a customer
+in a packed rocket fuel file.
 
 ```
-$ spacecraft soc.rf filter.pl -property verilog pack.pl rf.pl
+$ spacecraft soc.rf filter.pl -property verilog pack.pl rf.pl customers.rf
 ```
 
+Suppose a rocket fuel file contains the following definitions:
 
+```
+0W  1W  0h  STANDARD  RW;
+
+1W  1W  0h  SPECIAL   RW  -filter customer_X;
+
+2W  1W  0h  DEBUG     RW  -filter private;
+```
+
+To remove all engineering fields and customer specific fields from general 
+customer documentation:
+
+```
+$ spacecraft ... filter.pl private customer_X ...
+```
+
+Here only the `STANDARD` field would be documented.
+
+
+To remove the engineering fields for a specific customer:
+
+```
+$ spacecraft ... filter.pl private ...
+```
+
+Here both the `STANDARD` & `SPECIAL` fields would be documented, and only the
+`DEBUG` field removed.

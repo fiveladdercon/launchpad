@@ -8,19 +8,22 @@ permalink: /engines/uvm/
 uvm.pl
 ===========
 
-[uvm.pl] ...
+[uvm.pl] outputs the model as a hierarcy of UVM register model instances 
+suitable for use in UVM simulations.
 
 
 Usage
 -----
 
 ```
-spacecraft ... uvm.pl [-h|--help]
+spacecraft ... uvm.pl
 ```
 
 
 Example
 -------
+
+Generate a UVM register model.
 
 ```
 $ spacecraft ... uvm.pl

@@ -15,12 +15,12 @@ permalink: /engines/
 [fields]:   /model/#field
 [property]: /model/#properties
 
-Engines & The EngineAPI
-=======================
+Custom Engines & The EngineAPI
+==============================
 
 An **engine** is a **[Perl](http://www.perl.org)** script that uses the 
 spacecraft **EngineAPI** package to access the spacecraft memory resident 
-**[model][]**.
+**[model]**.
 
 Every engine must include the EngineAPI as follows:
 
@@ -34,10 +34,10 @@ Working with Bits
 -----------------
 
 Because the Rocket Fuel fixed point numbering notation for working with spacecraft 
-[bits][] is not part of the Perl language<sup>a</sup>, the EngineAPI interface 
+[bits] is not part of the Perl language<sup>a</sup>, the EngineAPI interface 
 uses Perl strings to exchange the `sc_bit` type.  That is, when you see the 
 `sc_bit` type in the EngineAPI, think of it as string holding a spacecraft 
-fixed point [bit][] number, not as a number.  For example:
+fixed point [bit] number, not as a number.  For example:
 
 ```perl
 $offset = "64";
@@ -62,18 +62,18 @@ $size = 32KB;  # Not valid perl
 Working with Spaces, Regions and Fields
 ---------------------------------------
 
-The spacecraft [model][] -- which is a hierarchy of [regions][] within a 
-[space][] -- is accessible inside an engine as a hierarchy of Perl objects.
+The spacecraft [model] -- which is a hierarchy of [regions] within a 
+[space] -- is accessible inside an engine as a hierarchy of Perl objects.
 
-At the top of the hierarchy is a singleton instance of a [space][] object
-that is shared between engines.  To get a handle to the [space][] inside 
+At the top of the hierarchy is a singleton instance of a [space] object
+that is shared between engines.  To get a handle to the [space] inside 
 the engine, you use the `sc_get_space` function:
 
 ```perl
 my $space = &sc_get_space();
 ```
 
-A [space][] is a [region][] and a [region][] is a **node**.  A [field][] is 
+A [space] is a [region] and a [region] is a **node**.  A [field] is 
 also a **node** which leads to the following **inheritance hierarchy**<sup>a</sup>
 in the EngineAPI:
 
@@ -94,7 +94,7 @@ in the EngineAPI:
 <hr class="sc_footnote">
 <small>
   (a) not to be confused with the **instance hierarchy** actually mapped by 
-  the [space][].
+  the [space].
 </small>
 
 
@@ -117,13 +117,13 @@ print $node->sc_get_filename();
 print $node->sc_get_lineno();
 ```
 
-But only [regions][] have globs:
+But only [regions] have globs:
 
 ```perl
 print $region->sc_get_glob();
 ```
 
-And only [fields][] have values:
+And only [fields] have values:
 
 ```perl
 print $field->sc_get_value();
@@ -131,10 +131,11 @@ print $field->sc_get_value();
 
 Note: 
 
-* that the address & identifier is relative to the [space][], not the parent 
+* that the address & identifier is relative to the [space], not the parent 
   node; 
-* that the type and name of a [region][] are optional and may be `undef`; and 
-* that the span may be the same as the size if the node is not dimensioned.
+* that the type and name of a [region] are optional and may be `undef`; and 
+* that the span will be the same as the size if the node is not dimensioned.
+
 
 
 ### Set Methods ###
@@ -150,13 +151,13 @@ $node->sc_set_description($description) or &sc_error("set failed");
 $node->sc_set_property($key,$value)     or &sc_error("set failed");
 ```
 
-And again only [regions][] have globs:
+And again only [regions] have globs:
 
 ```perl
 $region->sc_set_glob($glob) or &sc_error("set failed");
 ```
 
-and only [fields][] has values:
+and only [fields] has values:
 
 ```perl
 $field->sc_set_value($value) or &sc_error("set failed");
@@ -170,7 +171,7 @@ the node is unchanged.
 
 Note that you can't directly set the address or identifier.  That's because they
 are calculated values that depend on the offset and name of a node _and_ the 
-node's place in the hierarchy of [regions][].
+node's place in the hierarchy of [regions].
 
 Also note that you can't set the filename & lineno because they are read-only.
 
@@ -187,6 +188,8 @@ print "true" if $node->sc_is_region();
 print "true" if $node->sc_is_field();          
 print "true" if $node->sc_is_named();          
 print "true" if $node->sc_is_typed();          
+print "true" if $node->sc_is_first_child();          
+print "true" if $node->sc_is_last_child();          
 print "true" if $node->sc_has_properties();     
 print "true" if $node->sc_has_property($key);  
 print "true" if $node->sc_has_dimensions();    
@@ -194,9 +197,10 @@ print "true" if $node->sc_has_children();
 ```
 
 
+
 ### Iteration Methods ###
 
-As the [space][] is a hierarchy of [regions][], all nodes have the following
+As the [space] is a hierarchy of [regions], all nodes have the following
 methods to sequentially traverse the hierarchy.
 
 To iterate bottom-up from child to parent, use `sc_get_parent`:
@@ -215,9 +219,9 @@ while ($child = $parent->sc_get_next_child()) {
 }
 ```
 
-Note that as [fields][] do not have children, calling `sc_get_next_child` on
-a [field][] will return `undef` and terminate the `while` loop before it starts
-and results in the desired behaviour.
+Note that as [fields] do not have children, calling `sc_get_next_child` on
+a [field] will return `undef`. This terminates the `while` loop before it 
+starts and results in the desired behaviour.
 
 
 
@@ -399,6 +403,7 @@ this implies the initial state is rolled, which means you will always unroll
 first.
 
 
+
 ### Working with Hierarchy ###
 
 
@@ -426,9 +431,46 @@ If we run this through a documentation engine, we'll get all `EAST_*` fields
 followed by all `WEST_*` fields.  This is comprehensive but repetative.
 
 A better approach is to the document the module type, then document the 
-instances with cross references to the the type.  By detaching the space from
-it's region, 
+instances with cross references to the the type.  This is done by detaching the 
+space from the region, reruning the engine on the detached space, then 
+reattaching the space:
 
+```
+sub subspaces {
+  my $region = shift;
+  my $list   = shift; $list = {} unless defined $list;
+
+  while (my $node = $region->sc_get_next_child) {
+    if ($node->sc_is_region) {
+      my $type = $node->sc_get_type;
+      if ($type) {
+        #
+        # Detach the space from the region and a copy of the type
+        #
+        $list->{$type} = $node->sc_detach unless $list->{$type};
+      } else {
+        &subspaces($node,$list);  
+      }
+    }
+  }
+  return $list;
+}
+
+my $space  = &sc_get_space
+my $linked = &subspaces($space);
+
+# Document the space
+&document($space);
+
+# Document the linked sub-spaces
+foreach my $type (sort keys %{$linked}) {
+  &document($linked->{$type});
+  #
+  # Reattach the detached space back into the model
+  #
+  $linked->{$type}->reattach;
+}
+```
 
 
 

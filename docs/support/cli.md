@@ -19,6 +19,7 @@ Spacecraft is a command line tool that constructs a memory resident model of
 an address space, then executes one or more engines that construct, alter or
 output the model.
 
+
 Engines
 -------
 
@@ -26,13 +27,13 @@ Each engine to be executed is passed on the command line as **`ENGINE.pl`**.
 
 The **`.pl`** extension is required, as it delimits where the **`OPTIONS`** to 
 one engine end and the next engine begins.  The implication is that the options 
-passed to spacecraft itself must be passed _before_ the first engine.
+passed to spacecraft proper must be passed _before_ the first engine.
 
 Well behaving engines show a help message when passed a `--help` option, so use 
 this option to find out details about the `OPTIONS` for a given `ENGINE.pl`.
 
-If the `ENGINE.pl` is not a fully qualified path, spacecraft will look for the
-engine in `$SC_LAUNCHPAD/engines` and then issue a warning if not found.
+If the `ENGINE.pl` does not a fully qualified path, spacecraft will look for the
+engine in `$SC_LAUNCHPAD/engines` and then terminate if not found.
 
 At least one `ENGINE.pl` should be specified, otherwise spacecraft has nothing 
 to do.

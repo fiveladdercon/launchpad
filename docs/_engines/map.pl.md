@@ -8,8 +8,8 @@ permalink: /engines/map/
 map.pl
 ======
 
-[map.pl] outputs named fields and regions in the space in a simple
-line based format suitable for diffing and quickly checking the input.
+[map.pl] outputs *named* fields and regions in the space in a simple
+line based format suitable for diffing and quickly inspecting the input.
 
 
 Usage
@@ -45,6 +45,5 @@ Example
 Recursively parse a rocketfuel file and summarize the address map:
 
 ```
-$ cd $SC_LAUNCHPAD/example
 $ spacecraft -R soc.rf map.pl 
 ```

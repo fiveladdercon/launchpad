@@ -30,7 +30,7 @@ Each EXPRESSION must be in reverse polish notation (RPN):
 | Multiply | X Y * |
 | Divide   | X Y / |
 
-where X & Y are bits.
+where X & Y are spacecraft bits.
 
 
 Examples

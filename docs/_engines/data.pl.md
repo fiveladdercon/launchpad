@@ -1,12 +1,12 @@
 ---
 title: data.pl
-permalink: /engines/debug/
+permalink: /engines/data/
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/{{page.title}}
 
 
 data.pl
-===========
+=======
 
 [data.pl] outputs the complete model data in a tree format allowing for a 
 detailed inspection of model construction.
@@ -21,7 +21,7 @@ spacecraft ... data.pl [OUTPUT]
                        [-size FORMAT] 
 ```
 
-Output is sent to STDOUT unless and OUTPUT file is specified.
+Output is sent to the OUTPUT file if specified or STDOUT otherwise.
 
 -offset FORMAT
   : Report offsets & addresses with the number FORMAT provided.

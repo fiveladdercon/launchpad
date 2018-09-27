@@ -44,6 +44,8 @@ plugins:
 collections:
   engines:
     output: true
+  types:
+    output: true
 
 defaults:
   - scope:

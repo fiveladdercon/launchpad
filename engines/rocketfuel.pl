@@ -63,7 +63,7 @@ sub rocketfuel {
 
 			if ($type) {
 				$rf .= $TAB . $type;
-				&fuelsupply($options,$node,$type) if $options->{recurse};
+				&fuelsupply($options,$node,$type);
 			} elsif ($node->sc_has_children) {
 				$rf .= $TAB . "{\n\n";
 				$rf .= &rocketfuel($options,$node,$level+1);
@@ -82,26 +82,28 @@ sub fuelsupply {
 	my $options = shift;
 	my $space   = shift;
 	my $type    = shift;
-	my $output  = $options->{dir}."/".$type.".rf";
+	my $output  = $options->{output}."/".$type.".rf";
 	my $rf      = &rocketfuel($options,$space);
 
-	&sc_note(2,"Writting $output");
-	&uopen($output);
-	print $rf;
-	&uclose($output);
+	if (not exists $options->{fueled}->{$type}) {
+		&sc_note(2,"Writting $output");
+		&uopen($output);
+		print $rf;
+		&uclose($output);
+		$options->{fueled}->{$type} = 1;
+	}
 }
 
 #-------------------------------------------------------------------------------
 # Command Line
 #-------------------------------------------------------------------------------
 
-my $OUTPUT  = "space.rf";
 my $OPTIONS = {
 	offset  => "%U",
 	size    => "%U",
 	tab     => "    ",
-	dir     => undef,
-	recurse => 0,
+	output  => "rocketfuel",
+	fueled  => {}
 };
 
 while (@ARGV) {
@@ -109,19 +111,16 @@ while (@ARGV) {
 	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;                     }
 	elsif ($op eq "-offset"     ) { $OPTIONS->{offset} = shift; }
 	elsif ($op eq "-size"       ) { $OPTIONS->{size}   = shift; }
-	elsif ($op eq "-R"          ) { $OPTIONS->{dir}    = shift; }
-	else                          { $OUTPUT = $op;              }
+	else                          { $OPTIONS->{output} = $op;   }
 }
 
-$OPTIONS->{recurse} = defined $OPTIONS->{dir};
-
-$OPTIONS->{dir} = "." unless $OPTIONS->{recurse};
-mkdir $OPTIONS->{dir} unless -d $OPTIONS->{dir};
-
-$OUTPUT =~ s/[.]rf$//;
+mkdir $OPTIONS->{output} unless -d $OPTIONS->{output};
 
 #-------------------------------------------------------------------------------
 # Main
 #-------------------------------------------------------------------------------
 
-&fuelsupply($OPTIONS,&sc_get_space,$OUTPUT);
+my $space = &sc_get_space;
+my $type  = $space->sc_get_type || "space";
+
+&fuelsupply($OPTIONS,&sc_get_space,$type);
