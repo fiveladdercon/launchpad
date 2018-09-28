@@ -1,0 +1,10 @@
+8hW.0   1b   0h  ALL_AUDIENCES       RW;
+8hW.1   1b   0h  CUSTOMER_X_FIELD    RW   -filter customer_X; 
+8hW.2   1b   0h  CUSTOMER_Y_FIELD    RW   -filter customer_Y;
+8hW.3   1b   0h  CUSTOMER_Z_FIELD    RW   -filter customer_Z;
+8hW.4   1b   0h  ENGINEERING_FIELD   RW   -filter engineering;
+
+9hW  1W  CUSTOMER_Z_REG CUSTOMER_Z_* {
+	0  1b  0  FIELD_A  RW;
+	1  1b  0  FIELD_B  RW;
+} -filter customer_Z;

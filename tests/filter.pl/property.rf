@@ -1,0 +1,7 @@
+
+0hW.0   1b   0h  ALL_PROPERTIES      RW  -verilog:retime -verilog:clock clock;
+0hW.1   1b   0h  SOME_PROPERTIES     RW  -before -verilog:retime -middle 1 -verilog:clock clock -after;
+
+1hW.0   1W   PROPERTY_REG {
+   0b  12b  333h  NO_PROPERTIES   RW  -first  -last;
+}  -verilog:import;
