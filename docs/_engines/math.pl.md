@@ -19,18 +19,20 @@ Usage
 $ spacecraft ... math.pl [EXPRESSION]
 ```
 
-If an EXPRESSION is given on the command line, it is parsed and the result is 
+If an **EXPRESSION** is given on the command line, it is parsed and the result is 
 displayed, otherwise an an interactive session will start to collect expressions
 from STDIN.
 
-Each EXPRESSION must be in reverse polish notation (RPN):
+An **EXPRESSION** can be a number or an algebraic expression, express in reverse 
+polish notation (RPN):
 
 | Add      | X Y - |
 | Subtract | X Y + |
 | Multiply | X Y * |
 | Divide   | X Y / |
 
-where X & Y are spacecraft bits.
+where X & Y are spacecraft bits, and each operation pushes the result onto
+the stack, allowing complex expressions to be formed without parentheses.
 
 
 Examples
@@ -47,8 +49,8 @@ $ spacecraft -u -Q math.pl 4GB 2KB -
 	4194302KB       3FFFFEhKB
 ```
 
-Note that passing -u -Q to spacecraft supresses logging to the
-screen (-Q) and the log file (-u).
+Note that passing `-u -Q` to spacecraft supresses logging to the
+screen (`-Q`) and the log file (`-u`).
 
 Convert a number to a different scale:
 
@@ -61,7 +63,8 @@ $ spacecraft -u -Q math.pl 32W.6
         128B.6  80hB.6
 ```
 
-Interactively region a space into a series of 64KB regions:
+Interactively region a space into a series of 64KB regions starting at
+an offset of 512KB:
 
 ```
 $ spacecraft -u -Q math.pl

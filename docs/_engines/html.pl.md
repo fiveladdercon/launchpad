@@ -20,23 +20,23 @@ spacecraft ... html.pl [OUTPUT]
                        [-css STYLESHEET | -link STYLESHEET] 
 ```
 
-Writes html files to the OUTPUT directory if supplied or the html directory
-otherwise.
+Writes html files to the **OUTPUT** directory if supplied or the **html** 
+directory otherwise.
 
 -R
 	: Recursively generate HTML output.
 
 -css STYLESHEET
-	: Include the contents of the STYLESHEET in a style block in the
+	: Include the contents of the **STYLESHEET** in a style block in the
 	  HTML document header.
 
 -link STYLESHEET
-	: Reference the STYLESHEET with a link tag in the HTML document header
-	  and copy the STYLESHEET into the OUTPUT directory.
+	: Reference the **STYLESHEET** with a link tag in the HTML document header
+	  and copy the **STYLESHEET** into the output directory.
 
 
-If no external STYLESHEET is provided with a `-css` or `-link` option, then
-a default STYLESHEET will be inserted in a style block in each HTML document.
+If no external **STYLESHEET** is provided with the **-css** or **-link** switches, 
+then a default stylesheet will be inserted in a style block in each HTML document.
 
 
 Example

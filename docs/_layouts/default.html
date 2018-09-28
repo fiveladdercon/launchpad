@@ -31,6 +31,7 @@
           <li><a href="{{ '/model/#regions'     | relative_url }}">Regions</a></li>
           <li><a href="{{ '/model/#properties'  | relative_url }}">Properties</a></li>
           <li><a href="{{ '/model/#dimensions'  | relative_url }}">Dimensions</a></li>
+          <li><a href="{{ '/model/logic'        | relative_url }}">Logical Representation</a></li>
         </ul>
         
         <h3>Rocket Fuel</h3>
@@ -49,8 +50,9 @@
         <h3>Field Types</h3>
         <ul>
           {% for type in site.types %}
-          <li><a href="{{ type.url | relative_url }}">{{type.title}}</a></li>
+          <li><a href="{{ type.url | relative_url }}">{{type.title}} Fields</a></li>
           {% endfor %}
+          <li><a href="{{ '/fields/' | relative_url }}">Custom Field Types</a></li>
         </ul>
 
         <h3>Engines</h3>
@@ -58,13 +60,10 @@
           {% for engine in site.engines %}
           <li><a href="{{ engine.url | relative_url }}">{{engine.title}}</a></li>
           {% endfor %}
+          <li><a href="{{ '/engines/' | relative_url }}">Custom Engines</a></li>
         </ul>
 
         <h3>EngineAPI</h3>
-        <ul>
-          <li><a href="{{ '/engines/' | relative_url }}">Custom Engines</a></li>
-        </ul>
-        <br>
         <ul>
           {% for api in site.data.api %}
           <li><a href="{{ '/api/' | relative_url }}{{api}}">{{api}}</a></li>

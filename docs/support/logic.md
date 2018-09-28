@@ -1,36 +1,11 @@
 ---
 layout: default
+title: Logical Representation
+permalink: /model/logic
 ---
 
-Spacecraft
-==========
-
-**Spacecraft** is an address mapping tool for hardware designers.
-
-It is built on the premise that hardware address maps are vital to so many 
-audiences that they are never quite in the right format for everyone. So rather 
-than dictate input and output formats, Spacecraft instead constructs a light 
-weight, flexible and _fast_ memory resident model of the hardware address map 
-and provides an extensive and powerful API that puts *you* in control of
-the input and output.
-
-Regions can be named or anonymous, allowing for the construction of a logical
-representation of the address space that is a designed subset of the physical 
-implementation.
-
-spacecraft is a tool that hosts the model and *delegates model manipulation*, 
-including model output, to engines
-
-### Abstraction Levels ###
-
-| Level      | Concerns                                 | Producers & Consumers                         |
-|:-----------|:-----------------------------------------|:----------------------------------------------|
-| functional | unique identification, logical structure | system architects & software, customers       |
-| access     | data width & ordering, channel           | lab validation, verification, driver software |
-| signal     | bus standard, clock domains              | designers                                     |
-
-
-### Logical Representation vs Physical Implementation ###
+Logical Representation vs Physical Implementation
+=================================================
 
 As all fields ultimately map into the space, the space is a **logical 
 representation** of the **physical implementation**.  
@@ -52,13 +27,8 @@ somewhere between these two extremes, where certain key regions in the physical
 implementation need to be highlighted in the logical representation, while 
 other regions need to be hidden.
 
-```
-└ ┴ ┬ ├ ─ ┼ ┐ │ ┤ ┘ ┌
-```Implementation Modelling with Rocket Fuel
+Implementation Modelling with Rocket Fuel
 -----------------------------------------
-
-
-
 
 * Fields are implemented according to their type and typically, but not
   always, result in ports on the verilog module.

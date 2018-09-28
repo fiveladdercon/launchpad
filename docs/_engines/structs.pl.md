@@ -10,8 +10,8 @@ structs.pl
 ==========
 
 [structs.pl] outputs the model as a hierarchy of structs in a header file 
-suitable for including in *on-board* driver code (i.e. the processor executing 
-the code accesses the space with bus cycles).
+suitable for including in an **on-board driver**, where the processor executing 
+the code directly accesses the space with bus transactions.
 
 ```c
 #include "space.h"  // Defines structs that can be directly dereferenced
@@ -28,8 +28,8 @@ space = 0x80000;    // Where the struct resides in the processor memory map,
 x = *space.field;   // A dereference reads the field
 ```
 
-This is in constrast to *off-board* driver code, which must use a bus peripheral
-(i.e. SPI, ICC, MDIO, etc) to indirectly access the space.  The [defines.pl] 
+This is in constrast to an **off-board driver**, where the processor executing
+the code indirectly accesses the space via a bus peripheral.  The [defines.pl] 
 engine is better suited for off-board drivers.
 
 
@@ -40,7 +40,7 @@ Usage
 spacecraft ... structs.pl [OUTPUT]
 ```
 
-Writes the header to the OUTPUT file if defined or _space type_.h otherwise.
+Writes the header to the **OUTPUT** file if defined or **{TYPE}.h** otherwise.
 
 
 Example

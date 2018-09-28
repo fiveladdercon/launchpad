@@ -64,7 +64,7 @@ designed to take them head on:
 Write your own engine to construct the model from the input:
 
 ```
-$ spacecraft vendor.pl vendor.in rf.pl
+$ spacecraft vendor.pl vendor.in rocketfuel.pl
 ```
 
 Here your custom `vendor.pl` engine reads definitions in the `vendor.in` file
@@ -137,33 +137,34 @@ change that eliminates maintaining multiple versions of source files that
 typically differ in near trivial ways.
 
 
-Here's another example of this kind of flow:
+Here's another example of a chained flow:
 
 ```
-$ spacecraft -R chip.rf filter.pl -property verilog logical.pl pack.pl rocketfuel.pl customer.rf
+$ spacecraft -R chip.rf filter.pl -p verilog logical.pl pack.pl rocketfuel.pl customer.rf
 ```
 
 This seemingly complex command line does the following:
 
 `-R chip.rf` 
-	: Recursively read the model from disk.
+  : Recursively read the model from disk.
 
-`filter.pl -property verilog`
-	: Trim all verilog properties from the model, hiding implementation details
-	  like clock domains or RAM based implemenations.
+`filter.pl -p verilog`
+  : Trim all verilog properties from the model, hiding implementation details
+    like clock domains or RAM based implemenations.  Also trim any nodes
+	that are tagged as private.
 
 `logical.pl`
-    : Collapse the hierarchy of regions into something logical, hiding 
-      regions needed for purely for implementation (i.e. clock domains, 
-      engineering assignments, third-party integrations etc.).
+  : Collapse the hierarchy of regions into something logical, hiding 
+    regions needed purely for implementation (i.e. clock domains, engineering 
+    assignments, third-party integrations etc.).
 
 `pack.pl`
-	: Convert all typed regions into untyped regions with packed TYPE properties,
-	  effectively converting the space into a single file.
+  : Convert all typed regions into untyped regions with packed TYPE properties,
+    effectively converting the space into a single file.
 
 `rocketfuel.pl customer.rf`
-	: Output the filtered, packed logical model in Rocket Fuel format for the
-	  customer.  
+  : Output the filtered, packed logical model in Rocket Fuel format for the
+    customer.  
 
 The difference between what is implemented (`chip.rf`) and what is presented
 to the customer (`customer.rf`) is drastic.
@@ -192,7 +193,8 @@ The Model
 ---------
 
 The **model** is a hierarchy of **regions** that map **fields** into an address 
-**space**.
+**space**.  It is a precise model of the physical implementation that is used
+for **logical representation**.
 
 *All users should understand the model, as you will either be coding it in a
 Rocket Fuel file, or manipulating it with the EngineAPI in an engine.*
@@ -248,7 +250,7 @@ spacecraft is not free -- as in no-cost -- software.
 
 While you can freely clone the Launch Pad, [install](/basics/install) the 
 spacecraft executable and start poking around for no-cost, spacecraft executes 
-a start-up check that will *waste your time* unless a **booster** is also 
+a start-up check that will *slow you down* unless a **booster** is also 
 installed.
 
 A **booster** is a cryptographically signed license that is locally installed and 
@@ -257,4 +259,4 @@ or request a trial, send an email with your company, name, and email to
 <u>fiveladdercon[at]gmail.com</u>.
 
 *Of course you can always just keep running spacecraft without a booster, but the
-engineering time wasted in the long haul is likely more expensive than a booster.*
+engineering time lost without one is likely more expensive than the booster.*

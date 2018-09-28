@@ -22,7 +22,7 @@ Usage
 spacecraft ... json.pl [OUTPUT]
 ```
 
-Outputs the model to the supplied OUTPUT file or _space type_.json otherwise.
+Outputs the model to the supplied **OUTPUT** file or **{TYPE}.json** otherwise.
 
 
 Example

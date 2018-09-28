@@ -1,6 +1,6 @@
 ---
 layout: default
-title: The EngineAPI
+title: Custom Engines & The EngineAPI
 permalink: /engines/
 ---
 

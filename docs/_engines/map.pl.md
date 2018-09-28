@@ -8,7 +8,7 @@ permalink: /engines/map/
 map.pl
 ======
 
-[map.pl] outputs *named* fields and regions in the space in a simple
+[map.pl] outputs **named** fields and regions in the space in a simple
 line based format suitable for diffing and quickly inspecting the input.
 
 
@@ -17,15 +17,15 @@ Usage
 
 ```
 $ spacecraft ... map.pl [OUTPUT]
-                        [-f|-r] 
+                        [-fields|-regions] 
 ```
 
-Output is sent to STDOUT unless an OUTPUT file is specified.
+Output is sent to **STDOUT** unless an **OUTPUT** file is specified.
 
--f 
+-f, -fields
   : map only fields.
 
--r 
+-r, -regions 
   : map only fields.
 
 

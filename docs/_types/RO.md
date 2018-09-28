@@ -1,12 +1,12 @@
 ---
-title: RW
-permalink: /engines/verilog/RW/
+title: RO
+permalink: /engines/verilog/RO/
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/Verilog/Fields.pm
 
 
-RW Fields
-=========
+Read-Only Fields
+================
 
 
 ```

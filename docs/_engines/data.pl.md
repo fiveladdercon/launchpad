@@ -21,21 +21,21 @@ spacecraft ... data.pl [OUTPUT]
                        [-size FORMAT] 
 ```
 
-Output is sent to the OUTPUT file if specified or STDOUT otherwise.
+Output is sent to the **OUTPUT** file if specified or **STDOUT** otherwise.
 
 -offset FORMAT
-  : Report offsets & addresses with the number FORMAT provided.
+  : Report offsets & addresses with the spacecraft bit **FORMAT** provided.
     Defaults to `%hb (%U)` when not specified.
 
 -size FORMAT
-  : Report sizes & spans with the number FORMAT provided.
+  : Report sizes & spans with the spacecraft bit **FORMAT** provided.
     Defaults to `%hb (%U)` when not specified.
 
 
 Example
 -------
 
-Debug rocketfuel fueled from the command line:
+Debug a space fueled from the command line:
 
 ```
 $ spacecraft dma.rf data.pl
