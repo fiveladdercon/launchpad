@@ -42,7 +42,7 @@ sub new {
 	$this->{Bus}    = $Bus;
 	$this->{Field}  = $Field;
 
-	$this->{comment} = "\n//\n// ${size}-bit ${type} field '$name' declared on line ${lineno} in ${filename}\n//\n";
+	$this->{comment} = "\n//\n// ${size}-bit ${type} field '${name}' declared on line ${lineno} in ${filename}\n//\n";
 
 	$Module->add_block($this);
 
@@ -204,9 +204,9 @@ sub delay {
 }
 
 #
-# $logic = $Signal->edge_detect($Signal,$Clock)
-# $logic = $Signal->edge_detect($Signal,$Clock,$Reset)
-# $logic = $Signal->edge_detect($Signal,$Clock,$Reset,$default)
+# $logic = $Field->edge_detect($Signal,$Clock)
+# $logic = $Field->edge_detect($Signal,$Clock,$Reset)
+# $logic = $Field->edge_detect($Signal,$Clock,$Reset,$default)
 #
 # A public method that returns the logic to edge detect a $Signal.
 #
@@ -218,9 +218,9 @@ sub edge_detect {
 }
 
 #
-# $logic = $Signal->posedge_detect($Signal,$Clock)
-# $logic = $Signal->posedge_detect($Signal,$Clock,$Reset)
-# $logic = $Signal->posedge_detect($Signal,$Clock,$Reset,$default)
+# $logic = $Field->posedge_detect($Signal,$Clock)
+# $logic = $Field->posedge_detect($Signal,$Clock,$Reset)
+# $logic = $Field->posedge_detect($Signal,$Clock,$Reset,$default)
 #
 # A public method that returns the logic to posedge detect a $Signal.
 #
@@ -232,9 +232,9 @@ sub posedge_detect {
 }
 
 #
-# $logic = $Signal->negedge_detect($Signal,$Clock)
-# $logic = $Signal->negedge_detect($Signal,$Clock,$Reset)
-# $logic = $Signal->negedge_detect($Signal,$Clock,$Reset,$default)
+# $logic = $Field->negedge_detect($Signal,$Clock)
+# $logic = $Field->negedge_detect($Signal,$Clock,$Reset)
+# $logic = $Field->negedge_detect($Signal,$Clock,$Reset,$default)
 #
 # A public method that returns the logic to negedge detect a $Signal.
 #
@@ -243,6 +243,19 @@ sub negedge_detect {
 	my $Signal = shift;
 	my $Delay  = $this->delay($Signal,@_);
 	return "$Delay & ~$Signal";
+}
+
+#
+# $logic = $Field->mux($Select,$Asserted,$Deasserted);
+#
+# A public method that implements a bitwise '?' operation.
+#
+sub mux {
+	my $this       = shift;
+	my $Select     = shift;
+	my $Asserted   = shift;
+	my $Deasserted = shift;
+	return "($Select & $Asserted) | (~$Select & $Deasserted)";
 }
 
 
@@ -271,7 +284,7 @@ sub implementation {
 	$this->set_bus_read_data($Value);
 
 	# Define how the field Value is updates on Bus writes.
-	$this->always($Value,"($Write & $Wdata) | (~$Write & $Value)");
+	$this->always($Value,$this->mux($Write,$Wdata,$Value)));
 
 	# Optionally retime the field Value on the with the field clock.
 	if ($this->has_property("retime")) {
