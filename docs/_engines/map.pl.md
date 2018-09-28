@@ -17,20 +17,10 @@ Usage
 
 ```
 $ spacecraft ... map.pl [OUTPUT]
-                        [-address FORMAT] 
-                        [-size FORMAT]
                         [-f|-r] 
 ```
 
 Output is sent to STDOUT unless an OUTPUT file is specified.
-
--address FORMAT
-  : Report addresses with the number FORMAT provided.
-    Defaults to `%hW` when not specified.
-
--size FORMAT
-  : Report sizes with the number FORMAT provided.
-    Defaults to `%hb` when not specified.
 
 -f 
   : map only fields.
