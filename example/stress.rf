@@ -1,0 +1,40 @@
+//
+// This file is not intended as a good representation of a model.
+// It is instead used to stress the conditions of the various
+// engines.
+//
+
+
+//
+// filter.pl
+//
+
+100W  100W  FILTER_*  {
+
+    //
+	// Property Filtering
+	//
+
+	0hW.0   1b   0h  ALL_PROPERTIES      RW  -verilog:retime -verilog:clock clock;
+	0hW.1   1b   0h  SOME_PROPERTIES     RW  -before -verilog:retime -middle 1 -verilog:clock clock -after;
+
+	1hW.0   1W   PROPERTY_REG {
+	   0b  12b  333h  NO_PROPERTIES   RW  -first  -last;
+	}  -verilog:import;
+
+	//
+	// Node Filtering
+    //
+
+	8hW.0   1b   0h  ALL_AUDIENCES       RW;
+	8hW.1   1b   0h  CUSTOMER_X_FIELD    RW   -filter customer_X; 
+	8hW.2   1b   0h  CUSTOMER_Y_FIELD    RW   -filter customer_Y;
+	8hW.3   1b   0h  CUSTOMER_Z_FIELD    RW   -filter customer_Z;
+	8hW.4   1b   0h  ENGINEERING_FIELD   RW   -filter engineering;
+
+	9hW  1W  CUSTOMER_Z_REG CUSTOMER_Z_* {
+		0  1b  0  FIELD_A  RW;
+		1  1b  0  FIELD_B  RW;
+	} -filter customer_Z;
+
+};
