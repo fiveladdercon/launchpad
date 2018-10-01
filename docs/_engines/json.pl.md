@@ -12,26 +12,30 @@ json.pl
 application.
 
 Note that despite being a hierarchical format, region type information is lost
-in the conversion.
+in the conversion of instances.
 
 
 Usage
 -----
 
 ```
-spacecraft ... json.pl [OUTPUT]
+spacecraft ... json.pl [-space NUMBER] [OUTPUT]
 ```
 
-Outputs the model to the supplied **OUTPUT** file or **{TYPE}.json** otherwise.
+Outputs the model to the supplied **OUTPUT** file or **STDOUT** otherwise.
+
+-s NUMBER, --space NUMBER
+  : Specifying a **NUMBER** greater than 0 will pretty print the JSON similar
+    to the **space** argument to the JSON.stringfy function.
 
 
 Example
 -------
 
-Output a packed logical model in JSON format:
+Output a packed logical model in pretty printed JSON format:
 
 ```
-$ spacecraft ... logical.pl pack.pl json.pl
+$ spacecraft ... logical.pl pack.pl json.pl -space 4
 ```
 
 See [logical.pl](/engines/logical/) and [pack.pl](/engines/pack/).
