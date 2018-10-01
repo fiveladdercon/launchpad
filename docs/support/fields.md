@@ -9,10 +9,10 @@ permalink: /fields/
 Custom Field Types
 ==================
 
-To spacecraft, the executable, field types are just strings.  To the verilog 
+To the spacecraft executable field types are just strings.  To the verilog 
 engine, however, a field type needs to translate into a verilog implementation.
-Hence the verilog engine dictates the set of field types supported, not 
-spacecraft, the executable.
+Hence the verilog engine dictates the set of field types supported, not the 
+spacecraft executable.
 
 The verilog engine has several [predefined types][1], but the engine 
 is built with an object oriented architecture that allows adding custom 

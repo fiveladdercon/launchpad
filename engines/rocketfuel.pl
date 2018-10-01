@@ -86,7 +86,6 @@ sub fuelsupply {
 	my $rf      = &rocketfuel($options,$space);
 
 	if (not exists $options->{fueled}->{$type}) {
-		&sc_note(2,"Writting $output");
 		&uopen($output);
 		print $rf;
 		&uclose($output);
@@ -123,4 +122,4 @@ mkdir $OPTIONS->{output} unless -d $OPTIONS->{output};
 my $space = &sc_get_space;
 my $type  = $space->sc_get_type || "space";
 
-&fuelsupply($OPTIONS,&sc_get_space,$type);
+&fuelsupply($OPTIONS,$space,$type);

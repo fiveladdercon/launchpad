@@ -2,9 +2,9 @@
 package Field;
 #-------------------------------------------------------------------------------
 #
-# A Field is a Block in a Slave Module that implements the function specified
-# in the field type.  This is a base class from which all implemented types
-# are derived.
+# A Field is a Block in a Slave Module that implements the function required
+# by the field type.  This is a base class from which all derived types
+# inherit the Field, Bus, Property and Logic APIs.
 #
 use EngineAPI;
 use base ('Block');

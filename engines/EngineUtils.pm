@@ -50,6 +50,7 @@ sub uhelp {
 sub uopen {
 	my $output = shift;
 	if ($output) {
+		&sc_note(2,"Writing $output");
 		open(OUTPUT,">$output") or &sc_fatal("Can't open $output for writting: $!\n");
 		select OUTPUT
 	}

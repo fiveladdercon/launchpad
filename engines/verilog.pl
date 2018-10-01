@@ -28,7 +28,7 @@ sub new {
 	my $class    = ref($invocant) || $invocant;
 	my $Bus      = shift;
 	my $space    = &sc_get_space();
-	my $this     = Module::new($class,$space->sc_get_type || "bobo");
+	my $this     = Module::new($class,$space->sc_get_type || "space");
 
 	$Bus->decoder($this);
 
@@ -41,7 +41,7 @@ sub new {
 			my $file = $node->sc_get_filename;
 			my $line = $node->sc_get_lineno;
 			eval { $this->{fields}->{$name} = $Type->new($this,$node); } or 
-				&sc_fatal("Field $name declared on line $line in $file has unknown type: $Type.");
+				&sc_fatal("Field ${name} declared on line ${line} in ${file} has unknown type: ${Type}.");
 		}
 	}
 
@@ -66,6 +66,7 @@ sub new {
 #
 #  o Fields
 #  o Typed Regions that are not imported
+#  o Untyped Regions that are exported
 #  o Named Childless Regions (i.e. RAMs and ROMS)
 #
 # Note that this is not a method of the Slave class, but just a regular
@@ -80,6 +81,8 @@ sub bounded {
 		} elsif ($node->sc_is_typed and not $node->sc_has_property("verilog:import")) {
 			push @nodes, $node;
 		} elsif ($node->sc_is_named and not $node->sc_has_children) {
+			push @nodes, $node;
+		} elsif (not $node->sc_is_typed and $node->sc_has_property("verilog:export")) {
 			push @nodes, $node;
 		} else {
 			push @nodes, &bounded($node);
@@ -102,7 +105,7 @@ package main;
 
 my $OUTPUT;
 my $BUS;
-my @TYPES   = ();
+my $TYPES;
 my %OPTIONS = (
 	addrwidth  => 32,
 	datawidth  => 32,
@@ -115,14 +118,18 @@ my %OPTIONS = (
 while (@ARGV) {
 	my $op = shift;
 	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;                      }
-	elsif ($op eq "-bus"        ) { $BUS = shift;                }
-	elsif ($op eq "-type"       ) { push @TYPES, shift;          }
+	elsif ($op eq "-bus"        ) { $BUS   = shift;              }
+	elsif ($op eq "-types"      ) { $TYPES = shift;              }
 	elsif ($op eq "-addrwidth"  ) { $OPTIONS{addrwidth} = shift; }
 	elsif ($op eq "-datawidth"  ) { $OPTIONS{datawidth} = shift; }
 	elsif ($op eq "-optimize"   ) { $OPTIONS{optimize}  = 1;     }
 	elsif ($op eq "-register"   ) { $OPTIONS{register}  = 1;     }
 	else                          { $OUTPUT = $op;               }
 }
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
 
 my $Bus   = new APB(%OPTIONS);
 my $Slave = new Slave($Bus);

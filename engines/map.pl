@@ -51,8 +51,6 @@ while (@ARGV) {
 #-------------------------------------------------------------------------------
 
 &uopen($OUTPUT);
-
 printf("#%-9s\t%-10s\t%-10s\t%-10s\t%s\n","Address","Size","Value","Type","Identifier");
 &map($OPTIONS,&sc_get_space());
-
 &uclose($OUTPUT);
