@@ -279,7 +279,7 @@ the existence of the key, not the value.
 
 The second thing to consider is that setting the value to `undef` does not
 remove the property.  It simply turns the property into an existence boolean.
-To remove the property, you must use the `sc_drop_property` method.
+To remove the property, you must use the `sc_unset_property` method.
 
 ```perl
 $node->sc_set_property("key","value");
@@ -288,7 +288,7 @@ print "exists\n" if $node->sc_has_property("key");  # prints
 $node->sc_set_property("key");
 print "exists\n" if $node->sc_has_property("key");  # prints
 
-$node->sc_drop_property("key");
+$node->sc_unset_property("key");
 print "exists\n" if $node->sc_has_property("key");  # does not print
 ```
 

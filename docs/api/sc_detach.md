@@ -42,7 +42,7 @@ to the detached node rather than the space.
 
 A detached node is intended to be reattached at a later time with [sc_reattach].  
 If the node is to be permanently removed,
-[sc_drop] should be used instead.
+[sc_unset] should be used instead.
 
 Detaching a node already in the detached state has no effect.
 

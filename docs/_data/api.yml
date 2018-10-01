@@ -1,7 +1,3 @@
-- sc_add_region
-- sc_add_field
-- sc_drop
-- sc_drop_property
 - sc_get_space
 - sc_get_address
 - sc_get_identifier
@@ -14,6 +10,7 @@
 - sc_get_name
 - sc_get_type
 - sc_get_description
+- sc_get_children
 - sc_get_property
 - sc_get_dimension_label
 - sc_get_dimension_from
@@ -31,12 +28,12 @@
 - sc_set_glob
 - sc_set_value
 - sc_set_description
+- sc_set_children
 - sc_set_property
 - sc_set_dimension_label
 - sc_set_dimension_from
 - sc_set_dimension_to
 - sc_set_dimension_size
-- sc_set_children
 - sc_is_space
 - sc_is_region
 - sc_is_field
@@ -52,6 +49,11 @@
 - sc_get_next_child
 - sc_get_next_property
 - sc_get_next_dimension
+- sc_add_region
+- sc_add_field
+- sc_unset
+- sc_unset_property
+- sc_unset_children
 - sc_bits
 - sc_dimensions
 - sc_import

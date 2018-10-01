@@ -32,12 +32,12 @@ sub filter {
 			my $value = $node->sc_get_property($key);
 			if ($key eq "filter") {
 				if (&match($value,$values)) {
-					$node->sc_drop_property($key);
+					$node->sc_unset_property($key);
 				} else {
-					$node = $node->sc_drop;
+					$node = $node->sc_unset;
 				}
 			} elsif (&match($key,$keys)) {
-				$node->sc_drop_property($key);
+				$node->sc_unset_property($key);
 			}
 			last unless $node; # Abort the loop when we've dropped the node
 		}

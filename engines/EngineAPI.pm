@@ -49,10 +49,6 @@ sub this {
 
 package EngineAPI;
 
-*sc__add_region = *EngineAPIc::sc__add_region;
-*sc__add_field = *EngineAPIc::sc__add_field;
-*sc_drop = *EngineAPIc::sc_drop;
-*sc_drop_property = *EngineAPIc::sc_drop_property;
 *sc_get_space = *EngineAPIc::sc_get_space;
 *sc_get_address = *EngineAPIc::sc_get_address;
 *sc_get_identifier = *EngineAPIc::sc_get_identifier;
@@ -65,6 +61,7 @@ package EngineAPI;
 *sc_get_name = *EngineAPIc::sc_get_name;
 *sc_get_type = *EngineAPIc::sc_get_type;
 *sc_get_description = *EngineAPIc::sc_get_description;
+*sc_get_children = *EngineAPIc::sc_get_children;
 *sc_get_property = *EngineAPIc::sc_get_property;
 *sc_get_dimension_label = *EngineAPIc::sc_get_dimension_label;
 *sc_get_dimension_from = *EngineAPIc::sc_get_dimension_from;
@@ -82,12 +79,12 @@ package EngineAPI;
 *sc_set_glob = *EngineAPIc::sc_set_glob;
 *sc_set_value = *EngineAPIc::sc_set_value;
 *sc_set_description = *EngineAPIc::sc_set_description;
+*sc_set_children = *EngineAPIc::sc_set_children;
 *sc_set_property = *EngineAPIc::sc_set_property;
 *sc_set_dimension_label = *EngineAPIc::sc_set_dimension_label;
 *sc_set_dimension_from = *EngineAPIc::sc_set_dimension_from;
 *sc_set_dimension_to = *EngineAPIc::sc_set_dimension_to;
 *sc_set_dimension_size = *EngineAPIc::sc_set_dimension_size;
-*sc_set_children = *EngineAPIc::sc_set_children;
 *sc_is_space = *EngineAPIc::sc_is_space;
 *sc_is_region = *EngineAPIc::sc_is_region;
 *sc_is_field = *EngineAPIc::sc_is_field;
@@ -103,6 +100,11 @@ package EngineAPI;
 *sc_get_next_child = *EngineAPIc::sc_get_next_child;
 *sc_get_next_property = *EngineAPIc::sc_get_next_property;
 *sc_get_next_dimension = *EngineAPIc::sc_get_next_dimension;
+*sc__add_region = *EngineAPIc::sc__add_region;
+*sc__add_field = *EngineAPIc::sc__add_field;
+*sc_unset = *EngineAPIc::sc_unset;
+*sc_unset_property = *EngineAPIc::sc_unset_property;
+*sc_unset_children = *EngineAPIc::sc_unset_children;
 *sc_bits = *EngineAPIc::sc_bits;
 *sc_dimensions = *EngineAPIc::sc_dimensions;
 *sc_import = *EngineAPIc::sc_import;
@@ -282,6 +284,8 @@ package EngineAPI;
 package EngineAPI;
 @EXPORT = qw(sc_get_space sc_fuel_supply sc_fuel sc_bits sc_note sc_warn sc_error sc_fatal);
 
+# C wrappers
+
 sub sc_add_region {
 	my $region  = shift;
 	my %options = (-glob => "*", -description => "", -lineno => 0, @_);
@@ -334,6 +338,18 @@ sub sc_fatal {
 	my $format = shift;
 	my @args   = @_;
 	&sc__fatal(sprintf($format,@args));
+}
+
+# Pure Perl
+
+sub sc_get_identifiers {
+	my $region = shift;
+	my $index  = shift; $index = {} unless defined $index;
+	while (my $child = $region->sc_get_next_child) {
+		$index->{$child->sc_get_identifier} = $child if $child->sc_is_named;
+		&sc_get_identifiers($child,$index) if $child->sc_is_region;
+	}
+	return %{$index};
 }
 
 1;

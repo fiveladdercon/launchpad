@@ -19,7 +19,7 @@ sub pack {
 				$node->sc_set_type(undef);
 			} elsif ($node->sc_has_property("pack")) {
 				$node->sc_set_type($node->sc_get_property("pack"));
-				$node->sc_drop_property("pack");
+				$node->sc_unset_property("pack");
 			}
 			&pack($node);
 		}
