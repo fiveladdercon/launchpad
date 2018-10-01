@@ -284,7 +284,7 @@ sub implementation {
 	$this->set_bus_read_data($Value);
 
 	# Define how the field Value is updates on Bus writes.
-	$this->always($Value,$this->mux($Write,$Wdata,$Value)));
+	$this->always($Value,$this->mux($Write,$Wdata,$Value));
 
 	# Optionally retime the field Value on the with the field clock.
 	if ($this->has_property("retime")) {
