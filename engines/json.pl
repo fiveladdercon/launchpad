@@ -59,7 +59,7 @@ sub JSONField {
 	my $field   = shift;
 	my @Object  = ();
 
-	push @Object, ["name"        , JSONString($field->sc_get_name)         ];
+	push @Object, ["name"        , JSONString($field->sc_get_name("%v"))   ];
 	push @Object, ["offset"      , $field->sc_get_offset                   ];
 	push @Object, ["size"        , $field->sc_get_size                     ];
 	push @Object, ["value"       , JSONString($field->sc_get_value)        ];
@@ -77,11 +77,11 @@ sub JSONRegion {
 	my @Object  = ();
 	my @List    = ();
 
-	push @Object, ["name"        , JSONString($region->sc_get_name)         ] if $region->sc_is_named;
+	push @Object, ["name"        , JSONString($region->sc_get_name("%"))    ] if $region->sc_is_named;
 	push @Object, ["offset"      , $region->sc_get_offset                   ];
 	push @Object, ["size"        , $region->sc_get_size                     ];
-	push @Object, ["glob"        , JSONString($region->sc_get_glob)         ];
-	push @Object, ["type"        , JSONString($region->sc_get_type)         ];
+	push @Object, ["glob"        , JSONString($region->sc_get_glob("%v"))   ];
+	push @Object, ["type"        , JSONString($region->sc_get_type)         ] if $region->sc_is_typed;
 	push @Object, ["description" , JSONString($region->sc_get_description)  ];
 	push @Object, ["properties"  , JSONProperties($options,$level+1,$region)] if $region->sc_has_properties;
 

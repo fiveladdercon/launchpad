@@ -1,0 +1,171 @@
+{
+    "offset"      : 0,
+    "size"        : 34359738368,
+    "glob"        : "*",
+    "type"        : "soc",
+    "description" : "",
+    "children"    : [{
+        "name"        : "RAM",
+        "offset"      : 0,
+        "size"        : 8589934592,
+        "glob"        : "*",
+        "description" : "1GB DDR RAM",
+        "children"    : []
+    },{
+        "offset"      : 8589934592,
+        "size"        : 1048576,
+        "glob"        : "*",
+        "description" : "On-chip Peripheral Region",
+        "children"    : [{
+            "name"        : "DMA",
+            "offset"      : 0,
+            "size"        : 16384,
+            "glob"        : "DMA_*",
+            "type"        : "dma",
+            "description" : "DMA",
+            "children"    : [{
+                "name"        : "MODE",
+                "offset"      : 0,
+                "size"        : 32,
+                "glob"        : "*",
+                "description" : "The mode register sets the parameters for the transfer.",
+                "children"    : [{
+                    "name"        : "WIDTH",
+                    "offset"      : 0,
+                    "size"        : 2,
+                    "value"       : "0b",
+                    "type"        : "RW",
+                    "description" : "Transfer width.  Indicates how many bytes are transfered each
+bus cycle.  Valid settings are:
+
+0 : Byte
+1 : Halfword
+2 : Word"
+                },{
+                    "name"        : "LENGTH",
+                    "offset"      : 8,
+                    "size"        : 4,
+                    "value"       : "0b",
+                    "type"        : "RW",
+                    "description" : "Transfer length.  The value +1 indicates how many cycles are 
+issued.  e.g. 0 means 1 cycle, etc."
+                },{
+                    "name"        : "INCREMENT",
+                    "offset"      : 16,
+                    "size"        : 1,
+                    "value"       : "1b",
+                    "type"        : "RW",
+                    "description" : "Incrementing Address.  Enables or disables address incrementing
+on the bus address to support both memory and FIFO transfers.
+
+1 : Increment the address according to transfer size.
+0 : Do not increment the address."
+                },{
+                    "name"        : "IENABLE",
+                    "offset"      : 17,
+                    "size"        : 1,
+                    "value"       : "0b",
+                    "type"        : "RW",
+                    "description" : "Interrupt enable.
+
+1 : Interrupt enabled.  Trigger an interrupt when the transfer completes.
+0 : Interrupt disabled"
+                }]
+            },{
+                "name"        : "SRC",
+                "offset"      : 64,
+                "size"        : 32,
+                "value"       : "0b",
+                "type"        : "RW",
+                "description" : "The address of the source data."
+            },{
+                "name"        : "DEST",
+                "offset"      : 96,
+                "size"        : 32,
+                "value"       : "0b",
+                "type"        : "RW",
+                "description" : "The address of the data destination.",
+                "properties"  : {
+                    "html:link"      : true,
+                    "verilog:retime" : true
+                }
+            },{
+                "name"        : "START",
+                "offset"      : 128,
+                "size"        : 1,
+                "value"       : "0b",
+                "type"        : "RWSC",
+                "description" : "Start the transfer."
+            },{
+                "name"        : "STAT",
+                "offset"      : 160,
+                "size"        : 32,
+                "glob"        : "*",
+                "description" : "The status of the transfer.",
+                "children"    : [{
+                    "name"        : "RUNNING",
+                    "offset"      : 0,
+                    "size"        : 1,
+                    "value"       : "0b",
+                    "type"        : "RO",
+                    "description" : "0 : Channel is not running
+1 : Channel is running"
+                },{
+                    "name"        : "INTR",
+                    "offset"      : 1,
+                    "size"        : 1,
+                    "value"       : "0b",
+                    "type"        : "RW1C",
+                    "description" : "0 : Channel is not interupting
+1 : Channel is interupting"
+                }]
+            }]
+        },{
+            "name"        : "USB%",
+            "offset"      : 16384,
+            "size"        : 16384,
+            "glob"        : "USB[x:4]_*",
+            "type"        : "usb",
+            "description" : "4-port USB",
+            "children"    : []
+        },{
+            "name"        : "ETH%",
+            "offset"      : 81920,
+            "size"        : 16384,
+            "glob"        : "ETH[y:2]_*",
+            "type"        : "eth",
+            "description" : "2-port Ethernet",
+            "children"    : []
+        },{
+            "name"        : "PCIE%",
+            "offset"      : 114688,
+            "size"        : 16384,
+            "glob"        : "PCIE[x:4]_*",
+            "type"        : "pcie",
+            "description" : "4x PCIe slot controllers",
+            "children"    : []
+        },{
+            "name"        : "DDR",
+            "offset"      : 180224,
+            "size"        : 16384,
+            "glob"        : "DDR_*",
+            "type"        : "ddr",
+            "description" : "DDR controller",
+            "children"    : []
+        }]
+    },{
+        "name"        : "SLOT%",
+        "offset"      : 17179869184,
+        "size"        : 8388608,
+        "glob"        : "SLOT[x:4]_*",
+        "description" : "4x 1MB PCIe mapped off-chip regions",
+        "children"    : []
+    },{
+        "name"        : "ROM",
+        "offset"      : 34359607296,
+        "size"        : 131072,
+        "glob"        : "*",
+        "description" : "16KB Boot ROM located at the end of the 4GB space",
+        "children"    : []
+    }]
+}
