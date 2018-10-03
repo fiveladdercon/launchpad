@@ -1,49 +1,49 @@
 ---------------------------------------------
-access_of  = 32
+grid_of    = 32
 size_of    = 8
 address_of = 1600
-is_valid   = 1
 name_of    = DEFINES_FIELD
 value_of   = DEADBEEFh
+is_valid   = 1
 ---------------------------------------------
-access_of  = 32
+grid_of    = 32
 size_of    = 8
 address_of = 1872
-is_valid   = 1
 name_of    = DEFINES_ARRAY_2_FIELD_1_1_2
 value_of   = Ah
+is_valid   = 1
 =============================================
-access_of  = 32
+grid_of    = 32
 size_of    = 8
 address_of = 1600
-is_valid   = 1
 name_of    = DEFINES_FIELD
 value_of   = DEADBEEFh
+is_valid   = 1
 =============================================
-access_of  = 32
+grid_of    = 32
 size_of    = 32
 address_of = 1632
-is_valid   = 1
 name_of    = DEFINES_REGISTER
 value_of   = (null)
+is_valid   = 1
 =============================================
-access_of  = 32
+grid_of    = 32
 size_of    = 4
 address_of = 1632
-is_valid   = 1
 name_of    = DEFINES_REGISTER_FIELD
 value_of   = Ch
+is_valid   = 1
 =============================================
-access_of  = 32
+grid_of    = 32
 size_of    = 8
 address_of = 1872
-is_valid   = 1
 name_of    = DEFINES_ARRAY_2_FIELD_1_1_2
 value_of   = Ah
+is_valid   = 1
 =============================================
-access_of  = 32
+grid_of    = 32
 size_of    = 8
 address_of = 1776
-is_valid   = 0
 name_of    = DEFINES_ARRAY_2_FIELD_1_1_5
 value_of   = Ah
+is_valid   = 0

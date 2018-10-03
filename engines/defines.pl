@@ -6,7 +6,6 @@ use EngineAPI;
 use EngineUtils;
 use strict;
 
-
 #-------------------------------------------------------------------------------
 package Node;
 #-------------------------------------------------------------------------------
@@ -62,19 +61,19 @@ sub macro {
 	return scalar @vars ? $macro."(".join(",",@vars).")" : $macro;
 }
 
-sub access {
-	my $this   = shift;
-	my $access = $this->{options}->{access};
-	my $node   = $this->{node};
+sub grid {
+	my $this = shift;
+	my $grid = $this->{options}->{GRID};
+	my $node = $this->{node};
 	while ($node) {
-		if ($node->sc_has_property("access")) {
-			$access = $node->sc_get_property("access");
-			$node   = undef;
+		if ($node->sc_has_property("grid")) {
+			$grid = $node->sc_get_property("grid");
+			$node = undef;
 		} else {
 			$node = $node->sc_get_parent;
 		}
 	}
-	return $access; 
+	return $grid; 
 }
 
 sub size {
@@ -129,20 +128,21 @@ sub identifier {
 	return $id;
 }
 
-sub define {
+sub constant {
 	my $this   = shift;
-	my $D      = $this->{options}->{C}      ? '#'          : '`';
-	my $O      = $this->{options}->{STRUCT} ? '(field_t){' : '';
-	my $C      = $this->{options}->{STRUCT} ? '}'          : '';
+	my $D      = $this->{options}->{C}      ? '#'         : '`';
+	my $O      = $this->{options}->{STRUCT} ? '(node_t){' : '';
+	my $C      = $this->{options}->{STRUCT} ? '}'         : '';
 	my @value  = (
-		$this->access,
+		$this->grid,
 		$this->size,
-		$this->address,
-		$this->valid
+		$this->address
 	);
-
-	push @value, $this->identifier unless $this->{options}->{OPTIMIZE};
-	push @value, $this->value      unless $this->{options}->{OPTIMIZE};
+	push @value, (
+		$this->identifier,
+		$this->value,
+		$this->valid
+	) unless $this->{options}->{OPTIMIZE};
 	
 	return sprintf "${D}define %-80s ${O}%s${C}\n", $this->macro, join(",", @value);
 }
@@ -156,7 +156,7 @@ sub defines {
 	my $options = shift;
 	my $region  = shift;
 	while (my $node = $region->sc_get_next_child) {
-		print new Node($node,$options)->define if $node->sc_is_named;
+		print new Node($node,$options)->constant if $node->sc_is_named;
 		&defines($options,$node) if $node->sc_is_region;
 	}
 }
@@ -169,28 +169,29 @@ my $OUTPUT;
 my $DIALECT   = 'C';
 my $FORMAT    = 'LIST';
 my $MODE      = 'DEBUG';
-my $ACCESS    = 1;
+my $STORAGE   = 1;
 my $CONSTANTS = 1;
-my $OPTIONS   = {
-	access    => 32,
-};
+my $GRID      = 32;
+my $OPTIONS   = {};
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op =~ /^-?-h(elp)?$/     ) { &uhelp;                  }
-	elsif ($op =~ /^-?-s(tructs)?$/  ) { $FORMAT    = 'STRUCT';   }
-	elsif ($op =~ /^-?-v(erilog)?$/  ) { $DIALECT   = 'VERILOG';  }
-	elsif ($op =~ /^-?-o(ptimize)?$/ ) { $MODE      = 'OPTIMIZE'; }
-	elsif ($op =~ /^-?-c(onstants)?$/) { $CONSTANTS = 0;          }
-	elsif ($op =~ /^-?-a(ccess)?$/   ) { $ACCESS    = 0;          }
-	else                               { $OUTPUT    = $op;        }
+	if    ($op =~ /^-?-h(elp)?$/       ) { &uhelp;                  }
+	elsif ($op =~ /^-?-g(rid)?$/       ) { $GRID      = shift;      }
+	elsif ($op =~ /^-?-v(erilog)?$/    ) { $DIALECT   = 'VERILOG';  }
+	elsif ($op =~ /^-?-o(ptimize)?$/   ) { $MODE      = 'OPTIMIZE'; }
+	elsif ($op =~ /^-?-s(tructs)?$/    ) { $FORMAT    = 'STRUCT';   }
+	elsif ($op =~ /^(--storage)?-off$/ ) { $STORAGE   = 0;          }
+	elsif ($op =~ /^(--storage)?-only$/) { $CONSTANTS = 0;          }
+	else                                 { $OUTPUT    = $op;        }
 }
 
-$OPTIONS->{$FORMAT}  = 1;
-$OPTIONS->{$DIALECT} = 1;
-$OPTIONS->{$MODE}    = 1;
-$OPTIONS->{ACCESS}   = $ACCESS;
+$OPTIONS->{$DIALECT}  = 1;
+$OPTIONS->{$MODE}     = 1;
+$OPTIONS->{$FORMAT}   = 1;
+$OPTIONS->{STORAGE}   = $STORAGE;
 $OPTIONS->{CONSTANTS} = $CONSTANTS;
+$OPTIONS->{GRID}      = $GRID;
 
 #-------------------------------------------------------------------------------
 # Main
@@ -203,144 +204,145 @@ my $TYPE  = uc $space->sc_get_type;
 
 &uopen($OUTPUT);
 
-print <<"_" if $OPTIONS->{ACCESS};
-${D}ifndef _ACCESS_DEFINES
-${D}define _ACCESS_DEFINES
+print <<"_" if $OPTIONS->{STORAGE};
+${D}ifndef _STORAGE_DEFINES
+${D}define _STORAGE_DEFINES
 
 /*
- * The 'fields' macro is used in the prototype of access functions, typing and
- * setting the locally scoped 'field' variable:
+ * The 'nodes' macro is used in the prototype of access routines, typing and
+ * setting the locally scoped 'node' variable:
  *
- *     void write(${U}fields, int wval);
- *     int  read(${U}fields);
+ *     void write(${U}nodes, int wval);
+ *     int  read(${U}nodes);
  *
- * Access functions declared with the 'fields' macro can then be invoked using
- * field constants:
+ * Access functions declared with the 'nodes' macro can then be invoked using
+ * node constants:
  *
  *     write(${U}FIELD_MACRO, 25);
  *
  */
 
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
-${D}define fields   int access, int size, int address, int valid, char *name, char *value
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
+${D}define nodes   int grid, int size, int address, char *name, char *value, int valid
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
-${D}define fields   int access, int size, int address, int valid
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
+${D}define nodes   int grid, int size, int address
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT};
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT};
 typedef struct {
-    int    access;
+    int    grid;
     int    size;
     int    address;
-    int    valid;
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT} and $OPTIONS->{DEBUG};
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT} and $OPTIONS->{DEBUG};
     char  *name;
     char  *value;
+    int    valid;
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT};
-} field_t;
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT};
+} node_t;
 
-${D}define fields  field_t field
+${D}define nodes  node_t node
 _
-print <<"_" if $OPTIONS->{ACCESS};
+print <<"_" if $OPTIONS->{STORAGE};
 
 /*
- * The 'field' macro is used in the body of access functions as a variable:
+ * The 'node' macro is used in the body of access functions as a variable:
  *
- *     void access(${U}fields) {
- *         printf("access_of  = %d\\n", ${U}access_of(${U}field)  );
- *         printf("size_of    = %d\\n", ${U}size_of(${U}field)    );
- *         printf("address_of = %d\\n", ${U}address_of(${U}field) );
- *         printf("is_valid   = %d\\n", ${U}is_valid(${U}field)   );
- *         printf("name_of    = %s\\n", ${U}name_of(${U}field)    );
- *         printf("value_of   = %s\\n", ${U}value_of(${U}field)   );
+ *     void access(${U}nodes) {
+ *         printf("grid_of    = %d\\n", ${U}grid_of(${U}node)    );
+ *         printf("size_of    = %d\\n", ${U}size_of(${U}node)    );
+ *         printf("address_of = %d\\n", ${U}address_of(${U}node) );
+ *         printf("name_of    = %s\\n", ${U}name_of(${U}node)    );
+ *         printf("value_of   = %s\\n", ${U}value_of(${U}node)   );
+ *         printf("is_valid   = %d\\n", ${U}is_valid(${U}node)   );
  *     } 
  *
  */
 
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
-${D}define field   access,size,address,valid,name,value
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
+${D}define node   grid,size,address,name,value,valid
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
-${D}define field   access,size,address,valid
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
+${D}define node   grid,size,address
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT};
-${D}define field   field
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT};
+${D}define node   node
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST};
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST};
 
 /*
  * The <parameter>_of macros that follow need an indirect implementation to 
  * properly pre-process the two-stage expansion required when passing the
- * 'field' macro to these macros.
+ * 'node' macro to these macros.
  *
  */
 
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
-${D}define __access_of(access,size,address,valid,name,value)  access
-${D}define __size_of(access,size,address,valid,name,value)    size
-${D}define __address_of(access,size,address,valid,name,value) address
-${D}define __is_valid(access,size,address,valid,name,value)   valid
-${D}define __name_of(access,size,address,valid,name,value)    name
-${D}define __value_of(access,size,address,valid,name,value)   value
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{DEBUG};
+${D}define __grid_of(grid,size,address,name,value,valid)    grid
+${D}define __size_of(grid,size,address,name,value,valid)    size
+${D}define __address_of(grid,size,address,name,value,valid) address
+${D}define __name_of(grid,size,address,name,value,valid)    name
+${D}define __value_of(grid,size,address,name,value,valid)   value
+${D}define __is_valid(grid,size,address,name,value,valid)   valid
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
-${D}define __access_of(access,size,address,valid)  access
-${D}define __size_of(access,size,address,valid)    size
-${D}define __address_of(access,size,address,valid) address
-${D}define __is_valid(access,size,address,valid)   valid
-${D}define __name_of(access,size,address,valid)    ""
-${D}define __value_of(access,size,address,valid)   ""
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST} and $OPTIONS->{OPTIMIZE};
+${D}define __grid_of(grid,size,address)    grid
+${D}define __size_of(grid,size,address)    size
+${D}define __address_of(grid,size,address) address
+${D}define __name_of(grid,size,address)    ""
+${D}define __value_of(grid,size,address)   ""
+${D}define __is_valid(grid,size,address)   1
 _
-print <<"_" if $OPTIONS->{ACCESS};
+print <<"_" if $OPTIONS->{STORAGE};
 
 /*
  * The <parameter>_of macros below abstract accessing the parameters of
- * a field and work on field constants or the 'field' variable:
+ * a node constant and work on node constants or the 'node' variable:
  *
- *    void access(${U}fields) {
- *       is_valid(${U}field);       // Passing the 'field' variable
+ *    void access(${U}nodes) {
+ *       is_valid(${U}node);       // Passing the 'node' variable
  *    }
  *
- *    is_valid(${U}FIELD_CONSTANT)  // Passing a field constant
+ *    is_valid(${U}NODE_CONSTANT)  // Passing a node constant
  *
- * ${U}access_of(field)  : returns the number of bits accessed per address
- * ${U}size_of(field)    : returns the number of bits accessed at the field address
- * ${U}address_of(field) : returns the bit address of the least significant bit of the field
- * ${U}is_valid(field)   : returns true if the dimension variables, if any, are in range
- * ${U}name_of(field)    : returns the field name as a string (debug)
- * ${U}value_of(field)   : returns the initial value of the field (debug)
+ * ${U}grid_of(node)    : returns the access grid size, in bits.
+ * ${U}size_of(node)    : returns the size of the node, in bits.
+ * ${U}address_of(node) : returns the bit address of the least significant bit of the node.
+ * ${U}name_of(node)    : returns the name of the node as a string, unless optimized.
+ * ${U}value_of(node)   : returns the default value of the node as a string, unless optimized.
+ * ${U}is_valid(node)   : returns true if the dimension indices, if any, are in range.
  *
  */
 
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{LIST};
-${D}define access_of(f)   __access_of(f)
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{LIST};
+${D}define grid_of(f)     __grid_of(f)
 ${D}define size_of(f)     __size_of(f)
 ${D}define address_of(f)  __address_of(f)
-${D}define is_valid(f)    __is_valid(f)
 ${D}define name_of(f)     __name_of(f) 
 ${D}define value_of(f)    __value_of(f)
+${D}define is_valid(f)    __is_valid(f)
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT};
-${D}define access_of(f)   f.access
-${D}define size_of(f)     f.size
-${D}define address_of(f)  f.address
-${D}define is_valid(f)    f.valid
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT};
+${D}define grid_of(n)     n.grid
+${D}define size_of(n)     n.size
+${D}define address_of(n)  n.address
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT} and $OPTIONS->{DEBUG};
-${D}define name_of(f)     f.name
-${D}define value_of(f)    f.value
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT} and $OPTIONS->{DEBUG};
+${D}define name_of(n)     n.name
+${D}define value_of(n)    n.value
+${D}define is_valid(n)    n.valid
 _
-print <<"_" if $OPTIONS->{ACCESS} and $OPTIONS->{STRUCT} and $OPTIONS->{OPTIMIZE};
-${D}define name_of(f)     "" 
-${D}define value_of(f)    ""
+print <<"_" if $OPTIONS->{STORAGE} and $OPTIONS->{STRUCT} and $OPTIONS->{OPTIMIZE};
+${D}define name_of(n)     "" 
+${D}define value_of(n)    ""
+${D}define is_valid(n)    1
 _
-print <<"_" if $OPTIONS->{ACCESS};
+print <<"_" if $OPTIONS->{STORAGE};
 
 ${D}endif
 

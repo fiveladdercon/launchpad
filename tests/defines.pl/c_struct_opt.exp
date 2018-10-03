@@ -1,79 +1,78 @@
-#ifndef _ACCESS_DEFINES
-#define _ACCESS_DEFINES
+#ifndef _STORAGE_DEFINES
+#define _STORAGE_DEFINES
 
 /*
- * The 'fields' macro is used in the prototype of access functions, typing and
- * setting the locally scoped 'field' variable:
+ * The 'nodes' macro is used in the prototype of access routines, typing and
+ * setting the locally scoped 'node' variable:
  *
- *     void write(fields, int wval);
- *     int  read(fields);
+ *     void write(nodes, int wval);
+ *     int  read(nodes);
  *
- * Access functions declared with the 'fields' macro can then be invoked using
- * field constants:
+ * Access functions declared with the 'nodes' macro can then be invoked using
+ * node constants:
  *
  *     write(FIELD_MACRO, 25);
  *
  */
 
 typedef struct {
-    int    access;
+    int    grid;
     int    size;
     int    address;
-    int    valid;
-} field_t;
+} node_t;
 
-#define fields  field_t field
+#define nodes  node_t node
 
 /*
- * The 'field' macro is used in the body of access functions as a variable:
+ * The 'node' macro is used in the body of access functions as a variable:
  *
- *     void access(fields) {
- *         printf("access_of  = %d\n", access_of(field)  );
- *         printf("size_of    = %d\n", size_of(field)    );
- *         printf("address_of = %d\n", address_of(field) );
- *         printf("is_valid   = %d\n", is_valid(field)   );
- *         printf("name_of    = %s\n", name_of(field)    );
- *         printf("value_of   = %s\n", value_of(field)   );
+ *     void access(nodes) {
+ *         printf("grid_of    = %d\n", grid_of(node)    );
+ *         printf("size_of    = %d\n", size_of(node)    );
+ *         printf("address_of = %d\n", address_of(node) );
+ *         printf("name_of    = %s\n", name_of(node)    );
+ *         printf("value_of   = %s\n", value_of(node)   );
+ *         printf("is_valid   = %d\n", is_valid(node)   );
  *     } 
  *
  */
 
-#define field   field
+#define node   node
 
 /*
  * The <parameter>_of macros below abstract accessing the parameters of
- * a field and work on field constants or the 'field' variable:
+ * a node constant and work on node constants or the 'node' variable:
  *
- *    void access(fields) {
- *       is_valid(field);       // Passing the 'field' variable
+ *    void access(nodes) {
+ *       is_valid(node);       // Passing the 'node' variable
  *    }
  *
- *    is_valid(FIELD_CONSTANT)  // Passing a field constant
+ *    is_valid(NODE_CONSTANT)  // Passing a node constant
  *
- * access_of(field)  : returns the number of bits accessed per address
- * size_of(field)    : returns the number of bits accessed at the field address
- * address_of(field) : returns the bit address of the least significant bit of the field
- * is_valid(field)   : returns true if the dimension variables, if any, are in range
- * name_of(field)    : returns the field name as a string (debug)
- * value_of(field)   : returns the initial value of the field (debug)
+ * grid_of(node)    : returns the access grid size, in bits.
+ * size_of(node)    : returns the size of the node, in bits.
+ * address_of(node) : returns the bit address of the least significant bit of the node.
+ * name_of(node)    : returns the name of the node as a string, unless optimized.
+ * value_of(node)   : returns the default value of the node as a string, unless optimized.
+ * is_valid(node)   : returns true if the dimension indices, if any, are in range.
  *
  */
 
-#define access_of(f)   f.access
-#define size_of(f)     f.size
-#define address_of(f)  f.address
-#define is_valid(f)    f.valid
-#define name_of(f)     "" 
-#define value_of(f)    ""
+#define grid_of(n)     n.grid
+#define size_of(n)     n.size
+#define address_of(n)  n.address
+#define name_of(n)     "" 
+#define value_of(n)    ""
+#define is_valid(n)    1
 
 #endif
 
 #ifndef _TEST_DEFINES
 #define _TEST_DEFINES
 
-#define DEFINES_FIELD                                                                    (field_t){32,8,1600,1}
-#define DEFINES_REGISTER                                                                 (field_t){32,32,1632,1}
-#define DEFINES_REGISTER_FIELD                                                           (field_t){32,4,1632,1}
-#define DEFINES_ARRAY_x_FIELD_i_x_y(x,i,x1,y)                                            (field_t){32,8,1664+(128*(3-(x)))+(16*(i))+(8*((x1)-1))+(32*(4-(y))),(0<=(x))&&((x)<=3)&&(0<=(i))&&((i)<=1)&&(1<=(x1))&&((x1)<=2)&&(1<=(y))&&((y)<=4)}
+#define DEFINES_FIELD                                                                    (node_t){32,8,1600}
+#define DEFINES_REGISTER                                                                 (node_t){32,32,1632}
+#define DEFINES_REGISTER_FIELD                                                           (node_t){32,4,1632}
+#define DEFINES_ARRAY_x_FIELD_i_x_y(x,i,x1,y)                                            (node_t){32,8,1664+(128*(3-(x)))+(16*(i))+(8*((x1)-1))+(32*(4-(y)))}
 
 #endif
