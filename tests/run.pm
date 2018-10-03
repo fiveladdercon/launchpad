@@ -1,7 +1,7 @@
 package run;
 use base qw(Exporter);
 
-@EXPORT = qw(pass fail execute spacecraft diff rm report);
+@EXPORT = qw(pass fail execute spacecraft diff rm report describe it);
 
 $FAIL = 0;
 $TEST = 0;
@@ -52,6 +52,44 @@ sub report {
 		&pass("$test passed.");
 		exit(0);
 	}
+}
+
+#
+# Mocha style testing:
+#
+
+binmode STDOUT, ":utf8";
+
+my $LEVEL = 1;
+my $TESTS = 0;
+
+sub describe {
+	my $string   = shift;
+	my $callback = shift;
+	my $TAB      = "  " x $LEVEL;
+	printf("\n") if ($LEVEL == 1);
+	printf("${TAB}\e[1m$string\e[0m\n");
+	$LEVEL++;
+	&$callback();
+	$LEVEL--;
+	return unless ($LEVEL == 1);
+	if ($FAIL) {
+		printf("\n${TAB}\e[31m\x{2717} ${FAIL} of ${TESTS} tests failed\e[0m\n\n");
+		exit(1);
+	} else {
+		printf("\n${TAB}\e[32m\x{2713} ${TESTS} tests complete\e[0m\n\n");
+		exit(0);
+	}
+}
+
+sub it {
+	my $string   = shift;
+	my $callback = shift;
+	my $baseline = $FAIL;
+	my $TAB      = "  " x $LEVEL;
+	&$callback(); $TESTS++;
+	my $result   = ($FAIL != $baseline) ? "\e[31m\x{2717}" : "\e[32m\x{2713}";
+	print ("${TAB}${result}\e[0m ${string}\n");
 }
 
 1;
