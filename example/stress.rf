@@ -4,7 +4,27 @@
 // engines.
 //
 
+//
+// defines.pl
+//
 
+50W 50W DEFINES_* {
+
+	0W  1B  DEADBEEFh FIELD  RW;
+ 
+ 	1W  1W  REGISTER {
+
+ 		0b  4b  Ch  REGISTER_FIELD  RW;
+
+ 	};
+
+    2W  1W  ARRAY_[x:3:0]_*_[y:4:1]  {
+		
+		0  1B  Ah  FIELD_[i:2]_[x:1:2]  RW;
+	};
+	
+};
+/-
 //
 // filter.pl
 //
@@ -38,3 +58,58 @@
 	} -filter customer_Z;
 
 };
+
+
+//
+// logical.pl
+//
+
+200W 100W LOGICAL_* {
+
+	// no glob, no name, no type, no properties, no dimensions (why?) : remove
+
+	0W 2W {
+
+		0W  1W  DEADh  NO_GLOB_NO_NAME_NO_PROPS_NO_DIMS_X      RW -passed;
+		1W  1B  BEEFh  NO_GLOB_NO_NAME_NO_PROPS_NO_DIMS_[y:4]  RW;
+
+	};
+
+	// glob, no name, no type, no properties, no dimensions : remove
+
+    2W 2W GLOB_* {
+
+		0W  1W  DEADh  NO_NAME_NO_PROPS_NO_DIMS_X      RW -passed;
+		1W  1B  BEEFh  NO_NAME_NO_PROPS_NO_DIMS_[y:4]  RW;
+
+    };
+
+    // no glob, name, no type, no properties, no dimensions : keep
+
+    4W 2W NAMED {
+
+		0W  1W  DEADh  NO_GLOB_NAME_NO_PROPS_NO_DIMS_X      RW -passed;
+		1W  1B  BEEFh  NO_GLOB_NAME_NO_PROPS_NO_DIMS_[y:4]  RW;
+
+    };
+
+    // no glob, no name, no type, properties, no dimensions : keep
+
+    6W 2W {
+
+		0W  1W  DEADh  NO_GLOB_NO_NAME_PROPS_NO_DIMS_X      RW -passed;
+		1W  1B  BEEFh  NO_GLOB_NO_NAME_PROPS_NO_DIMS_[y:4]  RW;
+
+    } -logical;
+
+	// no glob, no name, no type, no properties, dimensions : keep
+
+	10W 2W *_[x:2] {
+
+		0W  1W  DEADh  NO_GLOB_NO_NAME_NO_PROPS_DIMS_X      RW -passed;
+		1W  1B  BEEFh  NO_GLOB_NO_NAME_NO_PROPS_DIMS_[y:4]  RW;
+
+	};
+	
+};
+-/

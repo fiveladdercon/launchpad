@@ -1,0 +1,86 @@
+#ifndef _ACCESS_DEFINES
+#define _ACCESS_DEFINES
+
+/*
+ * The 'fields' macro is used in the prototype of access functions, typing and
+ * setting the locally scoped 'field' variable:
+ *
+ *     void write(fields, int wval);
+ *     int  read(fields);
+ *
+ * Access functions declared with the 'fields' macro can then be invoked using
+ * field constants:
+ *
+ *     write(FIELD_MACRO, 25);
+ *
+ */
+
+#define fields   int access, int size, int address, int valid
+
+/*
+ * The 'field' macro is used in the body of access functions as a variable:
+ *
+ *     void access(fields) {
+ *         printf("access_of  = %d\n", access_of(field)  );
+ *         printf("size_of    = %d\n", size_of(field)    );
+ *         printf("address_of = %d\n", address_of(field) );
+ *         printf("is_valid   = %d\n", is_valid(field)   );
+ *         printf("name_of    = %s\n", name_of(field)    );
+ *         printf("value_of   = %s\n", value_of(field)   );
+ *     } 
+ *
+ */
+
+#define field   access,size,address,valid
+
+/*
+ * The <parameter>_of macros that follow need an indirect implementation to 
+ * properly pre-process the two-stage expansion required when passing the
+ * 'field' macro to these macros.
+ *
+ */
+
+#define __access_of(access,size,address,valid)  access
+#define __size_of(access,size,address,valid)    size
+#define __address_of(access,size,address,valid) address
+#define __is_valid(access,size,address,valid)   valid
+#define __name_of(access,size,address,valid)    ""
+#define __value_of(access,size,address,valid)   ""
+
+/*
+ * The <parameter>_of macros below abstract accessing the parameters of
+ * a field and work on field constants or the 'field' variable:
+ *
+ *    void access(fields) {
+ *       is_valid(field);       // Passing the 'field' variable
+ *    }
+ *
+ *    is_valid(FIELD_CONSTANT)  // Passing a field constant
+ *
+ * access_of(field)  : returns the number of bits accessed per address
+ * size_of(field)    : returns the number of bits accessed at the field address
+ * address_of(field) : returns the bit address of the least significant bit of the field
+ * is_valid(field)   : returns true if the dimension variables, if any, are in range
+ * name_of(field)    : returns the field name as a string (debug)
+ * value_of(field)   : returns the initial value of the field (debug)
+ *
+ */
+
+#define access_of(f)   __access_of(f)
+#define size_of(f)     __size_of(f)
+#define address_of(f)  __address_of(f)
+#define is_valid(f)    __is_valid(f)
+#define name_of(f)     __name_of(f) 
+#define value_of(f)    __value_of(f)
+
+#endif
+
+#ifndef _TEST_DEFINES
+#define _TEST_DEFINES
+
+#define DEFINES_FIELD                                                                    32,8,1600,1
+#define DEFINES_REGISTER                                                                 32,32,1632,1
+#define DEFINES_REGISTER_FIELD                                                           32,4,1632,1
+#define DEFINES_ARRAY_x_FIELD_i_x_y(x,i,x1,y)                                            32,8,1664+(128*(3-(x)))+(16*(i))+(8*((x1)-1))+(32*(4-(y))),(0<=(x))&&((x)<=3)&&(0<=(i))&&((i)<=1)&&(1<=(x1))&&((x1)<=2)&&(1<=(y))&&((y)<=4)
+
+#endif

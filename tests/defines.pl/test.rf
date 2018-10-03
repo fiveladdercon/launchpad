@@ -1,0 +1,16 @@
+50W 50W DEFINES_* {
+
+	0W  1B  DEADBEEFh FIELD  RW;
+ 
+ 	1W  1W  REGISTER {
+
+ 		0b  4b  Ch  REGISTER_FIELD  RW;
+
+ 	};
+
+    2W  1W  ARRAY_[x:3:0]_*_[y:4:1]  {
+		
+		0  1B  Ah  FIELD_[i:2]_[x:1:2]  RW;
+	};
+	
+};
