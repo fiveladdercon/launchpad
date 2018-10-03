@@ -37,7 +37,7 @@ sub data {
 		my $I    = $last ? " " : "│";
 		if ($node->sc_is_field) {
 			printf "${TAB}${T}─ FIELD\n";
-			printf "${TAB}${I}    identifier  : %s\n", $node->sc_get_identifier();
+			printf "${TAB}${I}    identifier  : %s\n", $node->sc_get_identifier("%v");
 			printf "${TAB}${I}    address     : %s\n", $node->sc_get_address($options->{offset});
 			printf "${TAB}${I}    span        : %s\n", $node->sc_get_span($options->{size});
 			printf "${TAB}${I}    offset      : %s\n", $node->sc_get_offset($options->{offset});
@@ -51,7 +51,7 @@ sub data {
 			printf "${TAB}${I}    lineno      : %s\n", $node->sc_get_lineno();
 		} else {
 			printf "${TAB}${T}─ REGION\n";
-			printf "${TAB}${I}    identifier  : %s\n", $node->sc_get_identifier();
+			printf "${TAB}${I}    identifier  : %s\n", $node->sc_get_identifier("%v");
 			printf "${TAB}${I}    address     : %s\n", $node->sc_get_address($options->{offset});
 			printf "${TAB}${I}    span        : %s\n", $node->sc_get_span($options->{size});
 			printf "${TAB}${I}    offset      : %s\n", $node->sc_get_offset($options->{offset});

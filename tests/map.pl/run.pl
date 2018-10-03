@@ -4,6 +4,6 @@ use run;
 &rm("soc.act");
 &spacecraft("-R -I ../../example ../../example/soc.rf map.pl soc.act");
 &diff("soc.act","soc.exp");
-# &rm("soc.act");
+&rm("soc.act");
 
 &report("map.pl");

@@ -21,7 +21,7 @@ sub map {
 			$node->sc_get_size("%d"),
 			$node->sc_is_region ? "-" : $node->sc_get_value,
 			$node->sc_is_typed ? $node->sc_get_type : "-",
-			$node->sc_get_identifier 
+			$node->sc_get_identifier("%v")
 			if $is_field ? $options->{fields} : ($node->sc_is_named && $options->{regions});
 
 		&map($options,$node) unless $is_field;
