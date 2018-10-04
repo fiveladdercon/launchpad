@@ -52,8 +52,9 @@ Now when the verilog engine goes to implement the `METAL_VERSION` field, it
 effectively does:
 
 ```perl
-my $Field = new CONST;  # Create an instance of the CONST type
-$Field->implementation; # Add the implemenation to the module
+my $Type  = $node->sc_get_type; # Retreive the CONST type
+my $Field = new $Type;          # Create an instance of the CONST type
+$Field->implementation;         # Add the implemenation to the module
 ```
 
 Hence the `CONST.pm` package contains a `CONST` class with an `implementation` 
