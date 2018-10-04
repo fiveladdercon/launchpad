@@ -12,7 +12,7 @@ Prototype
 ---------
 
 ```
-$node = $node->sc_unset()
+$node = $node->sc_unset();
 ```
 
 
@@ -24,18 +24,29 @@ _None_
 Return Type
 -----------
 
-`SC_NODE`
+_undef_
 
 
 Description
 -----------
 
-**sc_unset** ...
+**sc_unset** removes the node from it's parent and destroys the node.
+
+As the node has been destroyed, the reference to it should no longer
+be dereferenced.  To facilitate the setting the reference to `undef`,
+the method returns `undef`.
 
 
 Example
 -------
 
 ```perl
-$node = $node->sc_unset();
+$space  = &sc_get_space();
+
+$field = $space->sc_add_field(...);
+
+$field = $field->sc_unset();
 ```
+
+The last statement removes the field from the space and effectively
+sets the reference to `undef` so that it can't be used again.
