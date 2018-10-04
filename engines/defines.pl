@@ -176,14 +176,14 @@ my $OPTIONS   = {};
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op =~ /^-?-h(elp)?$/       ) { &uhelp;                  }
-	elsif ($op =~ /^-?-g(rid)?$/       ) { $GRID      = shift;      }
-	elsif ($op =~ /^-?-v(erilog)?$/    ) { $DIALECT   = 'VERILOG';  }
-	elsif ($op =~ /^-?-o(ptimize)?$/   ) { $MODE      = 'OPTIMIZE'; }
-	elsif ($op =~ /^-?-s(tructs)?$/    ) { $FORMAT    = 'STRUCT';   }
-	elsif ($op =~ /^(--storage)?-off$/ ) { $STORAGE   = 0;          }
-	elsif ($op =~ /^(--storage)?-only$/) { $CONSTANTS = 0;          }
-	else                                 { $OUTPUT    = $op;        }
+	if    ($op =~ /^-?-h(elp)?$/     ) { &uhelp;                  }
+	elsif ($op =~ /^-?-g(rid)?$/     ) { $GRID      = shift;      }
+	elsif ($op =~ /^-?-v(erilog)?$/  ) { $DIALECT   = 'VERILOG';  }
+	elsif ($op =~ /^-?-o(ptimize)?$/ ) { $MODE      = 'OPTIMIZE'; }
+	elsif ($op eq "--structs"        ) { $FORMAT    = 'STRUCT';   }
+	elsif ($op =~ /^-?-s(torage)?$/  ) { $CONSTANTS = 0;          }
+	elsif ($op =~ /^-?-c(onstants)?$/) { $STORAGE   = 0;          }
+	else                               { $OUTPUT    = $op;        }
 }
 
 $OPTIONS->{$DIALECT}  = 1;

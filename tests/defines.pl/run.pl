@@ -70,15 +70,15 @@ describe("defines.pl", sub {
 
 			describe("debug mode", sub {
 
-				it("is generated with the -?-s(tructs)? switch", sub {
-					foreach my $structs ("-s","--s","-structs","--structs") {
+				it("is generated with the --structs switch", sub {
+					foreach my $structs ("--structs") {
 						spacecraft("test.rf defines.pl $structs c_struct_debug.act");
 						diff("c_struct_debug.act","c_struct_debug.exp");
 					}
 				});
 
 				it("compiles & executes", sub {
-					spacecraft("test.rf defines.pl -s test.h");
+					spacecraft("test.rf defines.pl --structs test.h");
 					compile("c_exec_debug");
 				});
 
@@ -86,8 +86,8 @@ describe("defines.pl", sub {
 
 			describe("optimized mode", sub {
 
-				it("is generated with the -?-s(tructs)? and -?-o(ptimize)? switches", sub {
-					foreach my $structs ("-s","--s","-structs","--structs") {
+				it("is generated with the --structs and -?-o(ptimize)? switches", sub {
+					foreach my $structs ("--structs") {
 						foreach my $optimize ("-o","--o","-optimize","--optimize") {
 							spacecraft("test.rf defines.pl $optimize $structs c_struct_opt.act");
 							diff("c_struct_opt.act","c_struct_opt.exp");
@@ -96,7 +96,7 @@ describe("defines.pl", sub {
 				});
 
 				it("compiles & executes", sub {
-					spacecraft("test.rf defines.pl -o -s test.h");
+					spacecraft("test.rf defines.pl -o --structs test.h");
 					compile("c_exec_opt");
 				});
 
@@ -106,18 +106,18 @@ describe("defines.pl", sub {
 
 		describe("storage abstraction macros", sub {
 
-			it("are omitted with the (--storage)?-off switch", sub {
-				foreach my $access ("-off","--storage-off") {
-					spacecraft("test.rf defines.pl $access c_list_debug.act");
+			it("are omitted with the -?-c(onstants) switch", sub {
+				foreach my $constants ("-c","--c","-constants","--constants") {
+					spacecraft("test.rf defines.pl $constants c_list_debug.act");
 					tail("c_list_debug.act","c_list_debug.exp",9);
 
-					spacecraft("test.rf defines.pl $access -o c_list_opt.act");
+					spacecraft("test.rf defines.pl $constants -o c_list_opt.act");
 					tail("c_list_opt.act","c_list_opt.exp",9);
 
-					spacecraft("test.rf defines.pl $access -s c_struct_debug.act");
+					spacecraft("test.rf defines.pl $constants --structs c_struct_debug.act");
 					tail("c_struct_debug.act","c_struct_debug.exp",9);
 
-					spacecraft("test.rf defines.pl $access -s -o c_struct_opt.act");
+					spacecraft("test.rf defines.pl $constants --structs -o c_struct_opt.act");
 					tail("c_struct_opt.act","c_struct_opt.exp",9);
 				}
 			});
@@ -126,21 +126,25 @@ describe("defines.pl", sub {
 
 		describe("node constants", sub {
 
-			it("are omitted with the (--storage)?-only switch", sub {
-				foreach my $constants ("-only","--storage-only") {
-					spacecraft("test.rf defines.pl $constants c_list_debug.act");
+			it("are omitted with the -?-s(torage) switch", sub {
+				foreach my $storage ("-s","--s","-storage","--storage") {
+					spacecraft("test.rf defines.pl $storage c_list_debug.act");
 					head("c_list_debug.act","c_list_debug.exp",77);
 
-					spacecraft("test.rf defines.pl $constants -o c_list_opt.act");
+					spacecraft("test.rf defines.pl $storage -o c_list_opt.act");
 					head("c_list_opt.act","c_list_opt.exp",77);
 
-					spacecraft("test.rf defines.pl $constants -s c_struct_debug.act");
+					spacecraft("test.rf defines.pl $storage --structs c_struct_debug.act");
 					head("c_struct_debug.act","c_struct_debug.exp",72);
 
-					spacecraft("test.rf defines.pl $constants -s -o c_struct_opt.act");
+					spacecraft("test.rf defines.pl $storage --structs -o c_struct_opt.act");
 					head("c_struct_opt.act","c_struct_opt.exp",69);
 				}
 			});
+
+		});
+
+		describe("grid size", sub {
 
 		});
 
