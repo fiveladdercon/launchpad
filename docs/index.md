@@ -2,43 +2,50 @@
 layout: default
 ---
 
-[model]:    /model/
-[language]: /fuel/
-
 Spacecraft
 ==========
 
-**Spacecraft** is an address mapping tool for hardware designers.
+**Spacecraft** is a register definition and mapping tool built for end-to-end 
+consistency.
 
-It is built on the premise that hardware address maps<sup>a</sup> are vital to 
-so many audiences that they are never quite in the right format for everyone. 
-So rather than dictate input and output formats, Spacecraft instead constructs 
-a light weight, flexible and _fast_ memory resident model of the hardware 
-address map and provides an extensive and powerful API that puts *you* in 
-control of the input, output and whatever else you might need to do.
+It is built on the premise that consistent hardware register definitions are 
+vital to so many audiences but are very rarely in the right format for everyone.
+
+So rather than focus on formats, Spacecraft executes **engines** that use an 
+**API** to interact with a memory resident **model** of an address space.  You 
+can use an engine from the open source library, or write your own.
+
 
 Features
 --------
 
-* A memory resident [model][] of an address map, with:
-   * Bitwise addressing & sizing using a [fixed point notation](/fuel/#bits) to 
-     detangle the access problem from the mapping problem;
-   * A [hierarchical structure](/model/#regions) to divide and conquer the 
-     mapping problem;
-   * Support for named regions like RAMs, ROMs and registers;
-   * Support for anonymous regions to _design_ a 
-     [logical representation](/model/#hiding-implementation-details-with-anonymous-regions) 
-     that is distinct from the physical representation;
-   * Support for custom name import rules;
-   * Multi-dimensional field & region arrays;
-   * Unlimited user defined properties per node; and
-   * Untyped fields to detangle the implementation problem from the mapping 
-     problem;
-* An open source library of engines that output the model in various formats; and
-* A simple, expressive [language](/fuel/) for persisting the model.
+* A fast, flexible memory resident **[model][1]** of an address space, with:
+   * **[Bit-wise addressing & sizing][2]**;
+   * **[Fields][3]** with no type semantics;
+   * Hierarchical structuring with **[regions][4]**;
+   * Named regions like RAMs, ROMs and registers; and anonymous regions;
+   * Typed, reusable regions and untyped, one-time regions;
+   * **[Multi-dimensional arrays][5]** of fields & regions; and
+   * Unlimited custom **[properties][6]**;
+* An extensive, object oriented **API** to interface with the model;
+* An **[open source library of engines][7]**; and
+* A simple, expressive **[language][8]** for persisting the model.
 
 
-<hr class="sc_footnote">
-<small>
-   (a) Also known as register maps or memory mapped I/O.
-</small>
+Status
+------
+
+See the [project status][9] page for the current state of affairs.
+
+[1]: /model/
+[2]: /model/#bits
+[3]: /model/#fields
+[4]: /model/#regions
+[5]: /model/#dimensions
+[6]: /model/#properties
+[7]: https://github.com/fiveladdercon/launchpad
+[8]: /fuel/
+[9]: /status
+
+
+

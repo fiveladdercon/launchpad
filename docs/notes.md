@@ -2,6 +2,7 @@
 layout: default
 ---
 
+
 Spacecraft
 ==========
 
@@ -13,6 +14,15 @@ than dictate input and output formats, Spacecraft instead constructs a light
 weight, flexible and _fast_ memory resident model of the hardware address map 
 and provides an extensive and powerful API that puts *you* in control of
 the input and output.
+
+<hr class="sc_footnote">
+<small>
+   (a) The term "register" is misleading: technically speaking a "register" is 
+   not thing in hardware - it just an **address** in an **address space**.  The 
+   hardware actually resides in one or more **fields** addressed by the address.  
+   The distinction is subtle, but clear when considering unused "register" bits: 
+   unused bits have no hardware implementation.
+</small>
 
 Regions can be named or anonymous, allowing for the construction of a logical
 representation of the address space that is a designed subset of the physical 
