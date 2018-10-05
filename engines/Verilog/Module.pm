@@ -45,10 +45,21 @@ sub clog2 {
 #   return -1^(-1<<$power);
 # }
 
-# sub hexfmt {
-#   my $power = shift;
-#   return sprintf("%%0%dX",($power>>2)+(($power%4)?1:0));
-# }
+sub hexfmt {
+  my $power = shift;
+  return sprintf("%%0%dX",($power>>2)+(($power%4)?1:0));
+}
+
+sub fanout {
+	my $Signal = shift;
+	my $size   = shift || $Signal->{size};
+	return ($size == 1) ? $Signal : sprintf("{%d{%s}}",$size,$Signal);
+}
+
+sub concat {
+	my @Signals = @_;
+	return scalar @Signals == 1 ? $Signals[0] : "{".join(",",@Signals)."}";
+}
 
 # sub vnum {
 #   my $num  = shift;

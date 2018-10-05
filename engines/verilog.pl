@@ -45,7 +45,7 @@ sub new {
 		}
 	}
 
-	foreach my $node (&bounded($space)) {
+	foreach my $node (@nodes) {
 		if ($node->sc_is_field) {
 			$this->{fields}->{$node->sc_get_identifier}->implementation;
 		} else {

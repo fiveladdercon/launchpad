@@ -22,29 +22,27 @@ sub new {
 	my $Bus      = $Module->{Bus};
 	my $this     = Block::new($class,$Module);
 
-	my $address  = $Field->sc_get_address;
 	my $name     = $Field->sc_get_identifier;
-	my $type     = $Field->sc_get_type;
+	my $address  = $Field->sc_get_address;
 	my $size     = $Field->sc_get_size;
+	my $type     = $Field->sc_get_type;
 	my $filename = $Field->sc_get_filename;  $filename =~ s/.*\///;
 	my $lineno   = $Field->sc_get_lineno;
 
-	$this->{port}   = "f_".lc $name;
-	$this->{value}  = $this->{port}."_value";
-	$this->{size}   = $size;
-	$this->{lsbit}  = $address;
-	$this->{lsfra}  = $this->{lsbit} % $Bus->{datasize};
-	$this->{lsint}  = ($this->{lsbit} - $this->{lsfra}) / $Bus->{datasize};
-	$this->{msbit}  = $this->{lsbit}+$this->{size}-1;
-	$this->{msfra}  = $this->{msbit} % $Bus->{datasize};
-	$this->{msint}  = ($this->{msbit} - $this->{msfra}) / $Bus->{datasize};
+	$this->{name}    = lc $name;
+	$this->{address} = $address;
+	$this->{size}    = $size;
+	$this->{type}    = $type;
+	$this->{port}    = lc $name;
+	$this->{value}   = $this->{port}."_value";
 
-	$this->{Bus}    = $Bus;
-	$this->{Field}  = $Field;
+	$this->{Bus}     = $Bus;
+	$this->{Field}   = $Field;
 
 	$this->{comment} = "\n//\n// ${size}-bit ${type} field '${name}' declared on line ${lineno} in ${filename}\n//\n";
 
 	$Module->add_block($this);
+	$Bus->access($this);
 
 	return $this;
 }
@@ -104,7 +102,7 @@ sub get_bus_write_data {
 sub set_bus_read_data {
 	my $this  = shift;
 	my $Rdata = shift;
-	$this->{Bus}->add_read_data($Rdata,$this);
+	$this->{Bus}->add_read_data($this,$Rdata);
 }
 
 sub set_bus_error {
