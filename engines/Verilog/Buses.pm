@@ -105,6 +105,26 @@ sub Wdata {
 	&sc_error("Bus->Wdata not implemented.");
 }
 
+#
+# $Rdata = $Bus->Rdata;
+#
+# A virtual method that creates a Signal of size DATABITS that gets assigned
+# the data read on a read.
+#
+sub Rdata {
+	&sc_error("Bus->Rdata not implemented.");
+}
+
+#
+# $Error = $Bus->Error;
+#
+# A virtual method that creates a Signal that outputs a bus error of undef
+# if not supported.
+#
+sub Error {
+	return undef;
+}
+
 #------------------------
 # Bus Implementation API
 #------------------------
@@ -132,6 +152,15 @@ sub decode {
 #
 sub Decoder {
 	return shift->{Decoder};
+}
+
+#
+# $Return = $Bus->Return;
+#
+# A public shortcut for dereferencing the Return Block.
+#
+sub Return {
+	return shift->{Return};
 }
 
 #
@@ -188,32 +217,13 @@ sub add_Return {
 
 	$Return->{comment} = "\n//\n// Return Path\n//\n";
 
-	my @Data = @{$Bus->{Data}};
+	# Return Data
+	my @Rdata = @{$Bus->{Values}};
+	$Return->assign($Bus->Rdata,join("\n| ",@Rdata)) if @Rdata;
 
-	if (@Data) {
-
-	}
-
-
-	# Return Path Signals
-	# if ($this->{registered}) {
-	# 	my $Rdata      = $Return->add_signal($this->{rdata},$this->{DATABITS})->output->reg($this->{Clock},$this->{Reset});
-	# 	$this->{Rdata} = $Return->add_signal($this->{rdata}."_q",$this->{DATABITS})->wire;
-
-	# 	my $Ready      = $Return->add_signal($this->{ready})->output->reg($this->{Clock},$this->{Reset});
-	# 	$this->{Ready} = $Return->add_signal($this->{ready}."_q")->wire;
-
-	# 	my $Error      = $Return->add_signal($this->{error})->output->reg($this->{Clock},$this->{Reset});
-	# 	$this->{Error} = $Return->add_signal($this->{error}."_q")->wire;
-		
-	# 	$Return->always($Rdata,$this->{Rdata}); delete $this->{rdata};
-	# 	$Return->always($Ready,$this->{Ready}); delete $this->{ready};
-	# 	$Return->always($Error,$this->{Error}); delete $this->{error};
-	# } else {
-	# 	$this->{Rdata} = $Return->add_signal($this->{rdata},$this->{datasize})->output->wire; delete $this->{rdata};
-	# 	$this->{Ready} = $Return->add_signal($this->{ready})->output->wire;                   delete $this->{ready};
-	# 	$this->{Error} = $Return->add_signal($this->{error})->output->wire;                   delete $this->{error};
-	# }
+	# Bus Errors
+	my @Errors = @{$Bus->{Errors}};
+	$Return->assign($Bus->Error,join("\n| ",@Errors)) if @Errors and $Bus->Error;
 }
 
 #----------------
@@ -301,7 +311,7 @@ sub map {
 sub return {
 	my $Bus   = shift;
 	my $Value = shift;
-	push @{$Bus->{Data}}, $Value;
+	push @{$Bus->{Values}}, $Value;
 }
 
 #
@@ -312,7 +322,7 @@ sub return {
 sub error {
 	my $Bus   = shift;
 	my $Error = shift;
-	push @{$Bus->{Error}}, $Error;
+	push @{$Bus->{Errors}}, $Error;
 }
 
 #
@@ -410,10 +420,19 @@ sub access {
 sub new {
 	my $invocant  = shift;
 	my $class     = ref($invocant) || $invocant;
-	my %params    = @_;
-	my $UNITPOWER = $params{UNITPOWER} || 3;
-	my $DATAPOWER = $params{DATAPOWER} || 2;
-	my $ADDRPOWER = &u::clog2(&sc_get_space()->sc_get_size>>$UNITPOWER);
+	my $UNITPOWER = 3;
+	my $DATAPOWER = 2;
+	my $ADDRPOWER = &u::clog2(&sc_get_space()->sc_get_size);
+	my $ADDRPORT;
+
+	while (@_) {
+		my $op = shift;
+		if    ($op eq "--unitpower") { $UNITPOWER = shift; }
+		elsif ($op eq "--datapower") { $DATAPOWER = shift; }
+		elsif ($op eq "--addrpower") { $ADDRPORT  = shift; }
+	}
+
+	$ADDRPOWER -= $UNITPOWER;
 
 	my $Bus = {
 		# Bus Parameters
@@ -421,13 +440,13 @@ sub new {
 		DATAPOWER => $DATAPOWER,
 		DATABITS  => 1<<$DATAPOWER<<$UNITPOWER,
 		ADDRPOWER => $ADDRPOWER,
-		ADDRPORT  => $params{ADDRPOWER} || $ADDRPOWER,
+		ADDRPORT  => $ADDRPORT || $ADDRPOWER,
 		# Blocks
 		Decoder  => undef, # Defined by $Bus->decoder
 		Return   => undef, # Defined by $Bus->return
-		# Return Path 
-		Data     => [],
-		Error    => [],
+		# Return Path
+		Values   => [],
+		Errors   => [],
 	};
 
 	return bless $Bus, $class;
@@ -448,6 +467,19 @@ sub new {
 package APB;
 #-------------------------------------------------------------------------------
 use base('Bus');
+
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $Bus      = new Bus(@_);
+
+	while (@_) {
+		my $op = shift;
+		if ($op eq "--pslverr") { $Bus->{pslverr} = 1; }
+	}
+
+	return bless $Bus, $class;
+}
 
 #-------------------------------
 # Virtual Signal Implementation
@@ -509,6 +541,25 @@ sub Wdata {
 		my $Pwdata_reg = shift->size($Bus->{DATABITS})->reg($Bus->Clock,$Bus->Reset);
 		my $Pwdata     = $Bus->Signal("pwdata")->size($Bus->{DATABITS})->input->wire;
 		$Bus->Decoder->always($Pwdata_reg," ".$Pwdata);
+	});
+}
+
+sub Rdata {
+	my $Bus = shift;
+	return $Bus->Signal("prdata",sub {
+		# Register the prdata
+		shift->size($Bus->{DATABITS})->output->reg($Bus->Clock,$Bus->Reset);
+		# Add and drive the pready signal
+		my $Pready = $Bus->Signal("pready")->output->reg($Bus->Clock,$Bus->Reset);
+		$Bus->Return->always($Pready,$Bus->Pactive_reg);
+	});
+}
+
+sub Error {
+	my $Bus = shift;
+	return undef unless $Bus->{pslverr};
+	return $Bus->Signal("pslverr", sub {
+		my $Pslverr = shift->output->reg($Bus->Clock,$Bus->Reset);
 	});
 }
 

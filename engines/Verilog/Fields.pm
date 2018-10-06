@@ -132,7 +132,7 @@ sub Wselect {
 	my $Bus   = $Field->Bus;
 	return $Field->Signal("wselect", sub {
 		my $Select  = $Field->Select;
-		my $WSelect = shift->size($Select)->wire;
+		my $WSelect = shift->size($Select->size)->wire;
 		my $Write   = $Bus->Write;
 		$Field->assign($WSelect,"%s & %s",u::fanout($Bus->Write,$Select->size),$Select);
 	});
@@ -149,7 +149,7 @@ sub Rselect {
 	my $Bus   = $Field->Bus;
 	return $Field->Signal("rselect", sub {
 		my $Select  = $Field->Select;
-		my $RSelect = shift->size($Select)->wire;
+		my $RSelect = shift->size($Select->size)->wire;
 		my $Write   = $Bus->Write;
 		$Field->assign($WSelect,"%s & %s",u::fanout("~".$Bus->Write,$Select->size),$Select);
 	});
@@ -254,7 +254,7 @@ sub return {
 sub error {
 	my $Field = shift;
 	my $Error = shift;
-	$Field->Bus->error($Error);
+	$Field->Bus->error(u::reduce("|",$Error,$Error->size));
 }
 
 #-----------
@@ -284,9 +284,10 @@ sub size {
 #
 # A public method to get the Field default value.
 #
+my $WARNED = 0;
 sub default {
 	my $Field = shift;
-	&sc_warn("Field->default does not return valid verilog.");
+	&sc_warn("Field->default does not return valid verilog.") unless $WARNED++;
 	return $Field->{Node}->sc_get_value;
 }
 
@@ -544,7 +545,7 @@ sub implementation {
 	$Field->always($Value,u::mux($Write,$Wdata,$Value));
 
 	# Optionally retime the field Value on the with the field clock.
-	if ($Field->has_property("clock")) {
+	if ($Field->has_property("retime") || $Field->has_property("clock")) {
 		$Reset = $Field->Reset if $Field->has_property("reset");
 		$Value = $Field->Retime($Value,$Field->Clock,$Reset);
 	}
@@ -600,7 +601,7 @@ sub implementation {
 		# Optionally retime the Port with the Bus Clock
 		if ($Field->has_property("retime")) {
 			$Reset = $Bus->Reset if $Field->has_property("reset");
-			$Port  = $Field->retime($Port,$Bus->Clock,$Reset,$default);
+			$Port  = $Field->Retime($Port,$Bus->Clock,$Reset,$default);
 		}
 
 		# Configure the Value to be a wire
@@ -613,6 +614,9 @@ sub implementation {
 		$Field->return($Value);
 
 	}
+
+	# Set an Error on a write, if supported/enabled
+	$Field->error($Field->Wselect) if $Bus->Error;
 }
 
 

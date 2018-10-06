@@ -101,6 +101,21 @@ sub mux {
 }
 
 #
+# $logic = u::reduce($op,$signal,$size);
+#
+# A public method that implements a reduce operation if needed.
+#
+#    u::reduce("|","abc",3) => "(|abc)"
+#    u::reduce("|","abc",1) => "abc"
+#
+sub reduce {
+	my $op     = shift;
+	my $signal = shift;
+	my $size   = shift;
+	return ($size == 1) ? $signal : "($op$signal)";
+}
+
+#
 # $width = u::maxlength(@strings);
 #
 # A backstage utility that returns the maximum length of a list of strings.
@@ -422,11 +437,15 @@ use base ('Object');
 #
 # assign wire = logic;
 #
+# If the $Wire is actually a $Reg the $logic is set with an always block 
+# instead.
+#
 sub assign {
 	my $this   = shift;
 	my $Wire   = shift;
 	my $format = shift;
 	my $logic  = sprintf($format,@_);
+	return $this->always($Wire,$logic) if $Wire->{Clock};
 	$this->{assigns}->{$Wire->{name}} = $logic;
 	return $this;
 
@@ -446,11 +465,15 @@ sub assign {
 #
 # The Clock, Reset, and default values are dictated by the supplied $Reg.
 #
+# If the $Reg is actually a $Wire the $logic is set with an assign statement
+# instead.
+#
 sub always {
 	my $this    = shift;
 	my $Reg     = shift;
 	my $format  = shift;
 	my $logic   = sprintf($format,@_);
+	return $this->assign($Reg,$logic) unless $Reg->{Clock};
 	my $trigger = $Reg->trigger;
 	my $Reset   = $Reg->{Reset};
 	if ($Reset) {

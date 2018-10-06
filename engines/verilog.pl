@@ -3,6 +3,7 @@
 #-------------------------------------------------------------------------------
 
 use strict;
+use lib (".");
 use EngineAPI;
 use EngineUtils;
 use Verilog::Buses;
@@ -107,32 +108,37 @@ sub region {
 #-------------------------------------------------------------------------------
 package main;
 
-my $OUTPUT;
 my $BUS;
 my $TYPES;
-my %OPTIONS = (
-	ADDRPOWER  => 32,
-	DATAPOWER  => 2,
-	UNITPOWER  => 3,
-);
+my $OUTPUT;
+my @ARGS = ();
 
 while (@ARGV) {
 	my $op = shift;
-	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;                      }
-	elsif ($op eq "-bus"        ) { $BUS   = shift;              }
-	elsif ($op eq "-types"      ) { $TYPES = shift;              }
-	elsif ($op eq "-optimize"   ) { $OPTIONS{ADDRPOWER} = undef; }
-	elsif ($op eq "-addrpower"  ) { $OPTIONS{ADDRPOWER} = shift; }
-	elsif ($op eq "-datapower"  ) { $OPTIONS{DATAPOWER} = shift; }
-	elsif ($op eq "-unitpower"  ) { $OPTIONS{UNITPOWER} = shift; }
-	else                          { $OUTPUT = $op;               }
+	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;          }
+	elsif ($op =~ /[.]v$/       ) { $OUTPUT = $op;   }
+	elsif ($op eq "-bus"        ) { $BUS    = shift; }
+	elsif ($op eq "-types"      ) { $TYPES  = shift; }
+	else                          { push @ARGS, $op; }
+}
+
+if ($TYPES) {
+	&uhelp("Type library $TYPES does not exist.") unless -e $TYPES;
+	require $TYPES;
+}
+
+if ($BUS) {
+	&uhelp("Bus $BUS does not exist.") unless -e $BUS;
+	require $BUS;
+} else {
+	$BUS = 'APB';
 }
 
 #-------------------------------------------------------------------------------
 # Main
 #-------------------------------------------------------------------------------
 
-my $Bus   = new APB(%OPTIONS);
+my $Bus   = new $BUS(@ARGS);
 my $Slave = new Slave($Bus);
 
 &uopen($OUTPUT);

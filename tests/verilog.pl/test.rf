@@ -19,11 +19,21 @@
    2W.16   1b   0h  RETIME_E  RW  -verilog:clock shared_clk -verilog:reset;
    2W.17   1b   0h  RETIME_F  RW  -verilog:clock shared_clk -verilog:reset shared_rstn;
    2W.18   1b   0h  RETIME_G  RW  -verilog:clock shared_clk -verilog:reset shared_rstn;
+   2W.19   1b   0h  RETIME_H  RW  -verilog:retime;
    
    --- MSB low W / LSB high W ---
    2W.30  5b    3h  DOUBLE_ACCESS  RW;
    
    --- MSB low W / W / LSB high W ---
    4W.31  34b   0h  TRIPPLE_ACCESS  RW;
+
+   --- Now some RO types ---
+   6W.16  2b  0h  RO_TEST_A  RO;
+   6W.18  1b  0h  RO_TEST_B  RO -verilog:constant;
+   6W.19  1b  0h  RO_TEST_C  RO -verilog:retime;
+   6W.20  1b  0h  RO_TEST_D  RO -verilog:retime -verilog:reset;
+
+   --- Check errors on RO that spans two addresses ---
+   7W.8  6B  0h  RO_ERR  RO;
 
 };
