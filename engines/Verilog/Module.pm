@@ -1,3 +1,55 @@
+################################################################################
+#
+#
+# This file one utility packages and three Classes for verilog generation:
+#
+#
+# u       : A collection of small utilities like faning out, muxing or 
+#           concatinating Signals.
+#
+# Signal  : A Signal is a verilog variable inside a Module.  Signals can be
+#           resized and configured as wires or regs, inputs or outputs,
+#           clocks or resets; and they are referenced like strings in logical
+#           expressions.
+# 
+# Block   : A Block is a related set of assign statements and always blocks.
+#
+# Module  : A Module is a named collection of Signals and Blocks
+#
+#
+# These Classes serve as the underlying verilog mechanic of using Buses to 
+# access Fields, since the task must be accomplished with Signals and Blocks
+# in a Module.
+#
+# The convention used throughout is that if a name is capitalized it refers
+# to an object class or instance or a method that returns an instance.  The
+# distinction is important when assembling names for Signals since there
+# is really no better way to distinguish the difference:
+#
+#    1 | my $decode = sprintf("address_%X",$address);
+#    2 | my $Decode = new Signal($decode);
+#    3 | $Block->assign($Decode,"$Address == %X",$address);
+#
+#    1 | $decode is a string and $address is a number.
+#    2 | The $decode string is turned into a $Decode object, which is an 
+#      | overloaded string, i.e. a string with methods.
+#    3 | The $Block object's assign method is used to assign the $Decode
+#      | the value of the comparison of the $Address Signal to the $address
+#      | number.  Yes - it's like this all over the place - which is why
+#      | the convention is important!
+#
+# Lastly, since the objects all play together, some methods are intended
+# for public use and some are not.  Since perl doesn't have the mechanics
+# to enforce protection, the function descriptions classify the function
+# as public, backstage or private:
+#
+#   public    : intended to be used by someone deriving Buses and Fields
+#   backstage : intended for use between objects, so technically "public"
+#               but not intended to be used by someone deriving Buses
+#               and Fields.
+#   private   : intended for use by the object itself.
+#
+################################################################################
 #-------------------------------------------------------------------------------
 package u;
 #-------------------------------------------------------------------------------
@@ -6,9 +58,52 @@ package u;
 #
 
 #
+# $logic = u::concat(@signals);
+# 
+# A public utility that verilog concatinates a list of strings.
+# If the list has only one element it that element is returned.
+# 
+#    u::concat("a","b","c") => "{a,b,c}"
+#    u::concat("a")         => "a"
+#
+sub concat {
+	my @signals = @_;
+	return (@signals == 1) ? $signals[0] : "{".join(",",@signals)."}";
+}
+
+#
+# $logic = u::fanout($signal,$size);
+#
+# A public utility that verilog replicates a string.
+# If the size is 1, the string is not replicated.
+#
+#    u::fanout("sig",3)   => "{3{sig}}"
+#    u::fanoud("sig",1)   => "sig"
+#
+sub fanout {
+	my $signal = shift;
+	my $size   = shift;
+	return ($size == 1) ? $signal : sprintf("{%d{%s}}",$size,$signal);
+}
+
+#
+# $logic = u::mux($select,$asserted,$deasserted);
+#
+# A public method that implements a bitwise '?' operation.
+#
+#    u::mux("sel","a","b")  =>  "(sel & a) | (~sel & b)"
+#
+sub mux {
+	my $select     = shift;
+	my $asserted   = shift;
+	my $deasserted = shift;
+	return "($select & $asserted) | (~$select & $deasserted)";
+}
+
+#
 # $width = u::maxlength(@strings);
 #
-# Returns the maximum length of a list of strings.
+# A backstage utility that returns the maximum length of a list of strings.
 #
 sub maxlength {
 	my $width = 0; foreach my $string (@_) { my $l = length $string; $width = $l if $l > $width; }
@@ -18,7 +113,8 @@ sub maxlength {
 #
 # $indented = u::indented($tab,$string);
 #
-# Return a string with the $tab inserted after each newline in the $string.
+# A backstage utility that return a string with the $tab inserted after each 
+# newline in the $string.
 #
 sub indented {
 	my $tab   = shift;
@@ -28,10 +124,10 @@ sub indented {
 }
 
 #
-# $power = &clog2($number);
+# $power = u::clog2($number);
 #
-# Returns the $power of the first 2^$power that is larger than the given $number.
-# i.e. ceiling(log2(x))
+# A backstage utlity that returns the $power of the first 2^$power that is 
+# larger than the given $number.  i.e. ceiling(log2(x))
 #
 sub clog2 {
 	my $number = shift;
@@ -40,32 +136,20 @@ sub clog2 {
 	return $power;
 }
 
-# sub mask {
-#   my $power = shift;
-#   return -1^(-1<<$power);
-# }
-
-sub hexfmt {
+#
+# $format = u::sized($power);
+#
+# A backstage utility that returns a zero padded %X format given a power. 
+# e.g. u::sized(5) -> %02X because 5 bits needs 2 hex characters.
+#
+sub sized {
   my $power = shift;
   return sprintf("%%0%dX",($power>>2)+(($power%4)?1:0));
 }
 
-sub fanout {
-	my $Signal = shift;
-	my $size   = shift || $Signal->{size};
-	return ($size == 1) ? $Signal : sprintf("{%d{%s}}",$size,$Signal);
-}
 
-sub concat {
-	my @Signals = @_;
-	return scalar @Signals == 1 ? $Signals[0] : "{".join(",",@Signals)."}";
-}
 
-# sub vnum {
-#   my $num  = shift;
-#   my $size = &clog2($num);
-#   return sprintf("%d'h%X",$size,$num);
-# }
+
 
 #-------------------------------------------------------------------------------
 package Object;
@@ -76,7 +160,7 @@ package Object;
 use EngineAPI;
 
 sub error {
-	my $this = shift; &sc_error(@_);
+	shift; &sc_error(@_);
 }
 
 sub debug {
@@ -86,6 +170,10 @@ sub debug {
 		printf("%-8s = %s\n",$key,$this->{$key});
 	}
 }
+
+
+
+
 
 #-------------------------------------------------------------------------------
 package Signal;
@@ -100,63 +188,29 @@ use base ('Object');
 use overload '""'  => sub { $_[0]->{name}; },
              'cmp' => sub { (ref($_[0]) ? $_[0]->{name} : $_[0]) cmp (ref($_[1]) ? $_[1]->{name} : $_[1]); };
 
-#
-# $Signal = new Signal($name);
-# $Signal = new Signal($name,$size);
-# $Signal = new Signal($name,$size,$lsb);
-#
-# A backstage method that returns a new instance of a Signal object
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $name     = shift;
-	my $size     = shift; $size = 1 unless defined $size;
-	my $lsb      = shift; $lsb  = 0 unless defined $lsb;
-	my $this     = { 
-		name    => $name,
-		size    => $size,
-		lsb     => $lsb,
-		type    => undef,
-		port    => undef,
-		verilog => undef
-	};
-	$this->{msb} = $lsb+$size-1 if ($size > 1);
-	return bless $this, $class;
-}
+#------------
+# Public API
+#------------
 
 #
-# $verilog = $Signal->declaration
+# $Signal = $Signal->size($Sized[,$lsb])
+# $Signal = $Signal->size($size[,$lsb])
+# $size   = $Signal->size
 #
-# A backstage method that returns a verilog declaration that depends on the
-# Signal type and port.
+# A public chainable method that resizes the Signal when passed a $size
+# or a shortcut method for getting the size.  Also sets the $lsb if passed.
 #
-#   "input  wire            name,\n"
-#   "input  wire [msb:lsb]  name,\n"
-#   "output wire            name,\n"
-#   "output wire [msb:lsb]  name,\n"
-#   "output reg             name,\n"
-#   "output reg  [msb:lsb]  name,\n"
-#   "wire            name;\n"
-#   "wire [msb:lsb]  name;\n"
-#   "reg             name;\n"
-#   "reg  [msb:lsb]  name;\n"
-#
-#
-sub declaration {
+sub size {
 	my $this = shift;
-
-	return $this->{verilog} if $this->{verilog};
-	
-	$this->{verilog}  = "";
-	$this->{verilog} .= sprintf("  %-7s",$this->{port}) if $this->{port};
-	$this->{verilog} .= sprintf("%-4s ",$this->{type});
-	$this->{verilog} .= sprintf("%-10s",$this->{msb} ? sprintf("[%d:%d]",$this->{msb},$this->{lsb}) : "");
-	$this->{verilog} .= $this->{name};
-	$this->{verilog} .= $this->{port} ? "," : ";";
-	$this->{verilog} .= "\n";
-
-	return $this->{verilog};
+	my $size = shift; 
+	if ($size) {
+		$this->{size} = ref $size ? $size->size : $size;
+		my $lsb = shift; $this->{lsb} = $lsb if defined $lsb;
+		$this->{msb} = $this->{lsb}+$size-1 if ($size > 1);
+		return $this;
+	} else {
+		return $this->{size};
+	}
 }
 
 #
@@ -221,7 +275,7 @@ sub reg {
 #
 # $Signal = $Signal->clock
 #
-# A backstage chainable method that turns the Signal into a clock, which is
+# A public chainable method that turns the Signal into a clock, which is
 # an input wire used to posedge trigger always blocks
 #
 sub clock {
@@ -234,8 +288,8 @@ sub clock {
 #
 # $Signal = $Signal->reset
 #
-# A backstage chainable method that turns the Signal into a reset, which is
-# an input wire used to negedge triggered always blocks and set registers
+# A public chainable method that turns the Signal into a reset, which is
+# an input wire used to negedge trigger always blocks and set registers
 # to a default state when asserted.
 #
 sub reset {
@@ -244,6 +298,73 @@ sub reset {
 	$this->{edge}  = 'negedge'; 
 	return $this->input->wire;
 }
+
+#------------------
+# Module Interface
+#------------------
+
+#
+# $Signal = new Signal($name);
+# $Signal = new Signal($name,$size);
+# $Signal = new Signal($name,$size,$lsb);
+#
+# A backstage method that returns a new instance of a Signal object
+#
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $name     = shift;
+	my $size     = shift; $size = 1 unless defined $size;
+	my $lsb      = shift; $lsb  = 0 unless defined $lsb;
+	my $this     = { 
+		name    => $name,
+		size    => $size,
+		lsb     => $lsb,
+		type    => undef,
+		port    => undef,
+		verilog => undef
+	};
+	$this->{msb} = $lsb+$size-1 if ($size > 1);
+	return bless $this, $class;
+}
+
+#
+# $verilog = $Signal->declaration
+#
+# A backstage method that returns a verilog declaration that depends on the
+# Signal type and port.
+#
+#   "input  wire            name,\n"
+#   "input  wire [msb:lsb]  name,\n"
+#   "output wire            name,\n"
+#   "output wire [msb:lsb]  name,\n"
+#   "output reg             name,\n"
+#   "output reg  [msb:lsb]  name,\n"
+#   "wire            name;\n"
+#   "wire [msb:lsb]  name;\n"
+#   "reg             name;\n"
+#   "reg  [msb:lsb]  name;\n"
+#
+#
+sub declaration {
+	my $this = shift;
+
+	return $this->{verilog} if $this->{verilog};
+	
+	$this->{verilog}  = "";
+	$this->{verilog} .= sprintf("  %-7s",$this->{port}) if $this->{port};
+	$this->{verilog} .= sprintf("%-4s ",$this->{type});
+	$this->{verilog} .= sprintf("%-10s",$this->{msb} ? sprintf("[%d:%d]",$this->{msb},$this->{lsb}) : "");
+	$this->{verilog} .= $this->{name};
+	$this->{verilog} .= $this->{port} ? "," : ";";
+	$this->{verilog} .= "\n";
+
+	return $this->{verilog};
+}
+
+#------------------
+# Block Interface
+#------------------
 
 #
 # $trigger = $Reg->trigger
@@ -277,6 +398,10 @@ sub asserted {
 	return sprintf("%s%s",$this->{edge} eq 'negedge' ? '~' : '',$this->{name});
 }
 
+
+
+
+
 #-------------------------------------------------------------------------------
 package Block;
 #-------------------------------------------------------------------------------
@@ -284,6 +409,63 @@ package Block;
 # A Block is a group of related assign & always statements within a Module.
 #
 use base ('Object');
+
+#------------
+# Public API
+#------------
+
+#
+# $Block = $Block->assign($Wire,$logic,...);
+#
+# A public chainable method that adds an assign statement to the Block 
+# implementation:
+#
+# assign wire = logic;
+#
+sub assign {
+	my $this   = shift;
+	my $Wire   = shift;
+	my $format = shift;
+	my $logic  = sprintf($format,@_);
+	$this->{assigns}->{$Wire->{name}} = $logic;
+	return $this;
+
+}
+
+#
+# $Block = $Block->always($Reg,$logic,...);
+#
+# A public chainable method that adds an always statement to the Block
+# implemenation:
+#
+# always @(posedge clock or negedge reset) begin
+#   reg <= 1'd0;
+# end else begin
+#   reg <= logic;
+# end
+#
+# The Clock, Reset, and default values are dictated by the supplied $Reg.
+#
+sub always {
+	my $this    = shift;
+	my $Reg     = shift;
+	my $format  = shift;
+	my $logic   = sprintf($format,@_);
+	my $trigger = $Reg->trigger;
+	my $Reset   = $Reg->{Reset};
+	if ($Reset) {
+		$this->{reset}->{$trigger} = $Reset->asserted;
+		$this->{always}->{$trigger}->{$Reg} = {
+			default => $Reg->{default},
+			clocked => $logic
+		};
+	} else {
+		$this->{always}->{$trigger}->{$Reg} = { 
+			clocked => $logic
+		};
+	}
+	return $this;
+}
 
 #
 # $Block = new Block($Module);
@@ -335,62 +517,14 @@ sub add_signal {
 	my $this = shift; return $this->{Module}->add_signal(@_);
 }
 
-#
-# $Block = $Block->assign($Wire,$logic,...);
-#
-# A public chainable method that adds an assign statement to the Block 
-# implementation:
-#
-# assign wire = logic;
-#
-sub assign {
-	my $this   = shift;
-	my $Wire   = shift;
-	my $format = shift;
-	my $logic  = sprintf($format,@_);
-	$this->{assigns}->{$Wire->{name}} = $logic;
-	return $this;
-
-}
+#------------------
+# Module Interface
+#------------------
 
 #
-# $Block = $Block->always($Reg,$logic,...);
+# $verilog = $Block->declaration
 #
-# A public chainable method that adds an always statement to the Block
-# implemenation:
-#
-# always @(posedge clock or negedge reset) begin
-#   reg <= 1'd0;
-# end else begin
-#   reg <= logic;
-# end
-#
-# The clock, reset, and default values are dictated by the supplied $Reg.
-#
-sub always {
-	my $this    = shift;
-	my $Reg     = shift;
-	my $format  = shift;
-	my $logic   = sprintf($format,@_);
-	my $trigger = $Reg->trigger;
-	my $Reset   = $Reg->{Reset};
-	if ($Reset) {
-		$this->{reset}->{$trigger} = $Reset->asserted;
-		$this->{always}->{$trigger}->{$Reg} = {
-			default => $Reg->{default},
-			clocked => $logic
-		};
-	} else {
-		$this->{always}->{$trigger}->{$Reg} = { 
-			clocked => $logic
-		};
-	}
-}
-
-#
-# $verilog = $block->declaration
-#
-# A backstage method that returns the Block implementation as a verilog string.
+# A backstage method that returns the Block declaration as a verilog string.
 #
 sub declaration {
 	my $this = shift;
@@ -445,6 +579,10 @@ sub declaration {
 	return $this->{verilog};
 }
 
+
+
+
+
 #-------------------------------------------------------------------------------
 package Module;
 #-------------------------------------------------------------------------------
@@ -454,26 +592,9 @@ package Module;
 use EngineAPI;
 use base ('Object');
 
-#
-# $Module = new Module("name");
-#
-# A public method that returns a new instance of a Module.
-#
-sub new {
-	my $invocant = shift;
-	my $class    = ref($invocant) || $invocant;
-	my $this     = {
-		name     => shift,
-		Signals  => {}, 
-		Blocks   => [],
-		Inputs   => [],
-		Outputs  => [],
-		Wires    => [],
-		Regs     => [],
-		verilog  => undef,
-	};
-	return bless $this, $class;
-}
+#---------------------
+# Backstage Interface
+#---------------------
 
 #
 # $boolean = $Module->has_signal($name);
@@ -524,10 +645,35 @@ sub add_block {
 	return $Block;
 }
 
+#------------------
+# Engine Interface
+#------------------
+
+#
+# $Module = new Module("name");
+#
+# A backstage method that returns a new instance of a Module.
+#
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $this     = {
+		name     => shift,
+		Signals  => {}, 
+		Blocks   => [],
+		Inputs   => [],
+		Outputs  => [],
+		Wires    => [],
+		Regs     => [],
+		verilog  => undef,
+	};
+	return bless $this, $class;
+}
+
 #
 # $verilog = $Module->declaration;
 #
-# A public method that returns the $Module implementation as a verilog string.
+# A backstage method that returns the $Module implementation as a verilog string.
 #
 sub declaration {
 	my $this    = shift;
@@ -569,5 +715,9 @@ sub declaration {
 
     return $this->{verilog};
 }
+
+
+
+
 
 1;

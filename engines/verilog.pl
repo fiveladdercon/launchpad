@@ -18,44 +18,48 @@ use Verilog::Module;
 use Verilog::Fields;
 use base ('Module');
 
+#------------------
+# Engine Interface
+#------------------
+
 #
 # $Slave = new Slave($Bus);
 #
-# A public method that returns a new instance of a Slave.
+# A backstage method that returns a new instance of a Slave.
 #
 sub new {
 	my $invocant = shift;
 	my $class    = ref($invocant) || $invocant;
 	my $Bus      = shift;
-	my $space    = &sc_get_space();
-	my $this     = Module::new($class,$space->sc_get_type || "space");
+	my $Space    = &sc_get_space();
+	my $Slave    = Module::new($class,$Space->sc_get_type || "space");
 
-	$Bus->decoder($this);
+	$Bus->add_Decoder($Slave);
 
-	my @nodes = &bounded($space);
+	my @Nodes = &bounded($Space);
 
-	foreach my $node (@nodes) {
-		if ($node->sc_is_field) {
-			my $name = $node->sc_get_identifier;
-			my $Type = $node->sc_get_type;
-			my $file = $node->sc_get_filename;
-			my $line = $node->sc_get_lineno;
-			eval { $this->{fields}->{$name} = $Type->new($this,$node); } or 
+	foreach my $Node (@Nodes) {
+		if ($Node->sc_is_field) {
+			my $name = $Node->sc_get_identifier;
+			my $Type = $Node->sc_get_type;
+			my $file = $Node->sc_get_filename;
+			my $line = $Node->sc_get_lineno;
+			eval { $Slave->{Fields}->{$name} = $Type->new($Slave,$Node); } or 
 				&sc_fatal("Field ${name} declared on line ${line} in ${file} has unknown type: ${Type}.");
 		}
 	}
 
-	foreach my $node (@nodes) {
-		if ($node->sc_is_field) {
-			$this->{fields}->{$node->sc_get_identifier}->implementation;
+	foreach my $Node (@Nodes) {
+		if ($Node->sc_is_field) {
+			$Slave->{Fields}->{$Node->sc_get_identifier}->implementation;
 		} else {
-			$this->region($node);
+			$Slave->region($Node);
 		}
 	}
 
-	$Bus->return($this);
+	$Bus->add_Return($Slave);
 
-	return $this;
+	return $Slave;
 }
 
 #
@@ -107,12 +111,9 @@ my $OUTPUT;
 my $BUS;
 my $TYPES;
 my %OPTIONS = (
-	addrwidth  => 32,
-	datawidth  => 32,
-	optimize   => 0,
-	register   => 0,
-	errors     => 1,
-	errorports => 0,
+	ADDRPOWER  => 32,
+	DATAPOWER  => 2,
+	UNITPOWER  => 3,
 );
 
 while (@ARGV) {
@@ -120,10 +121,10 @@ while (@ARGV) {
 	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;                      }
 	elsif ($op eq "-bus"        ) { $BUS   = shift;              }
 	elsif ($op eq "-types"      ) { $TYPES = shift;              }
-	elsif ($op eq "-addrwidth"  ) { $OPTIONS{addrwidth} = shift; }
-	elsif ($op eq "-datawidth"  ) { $OPTIONS{datawidth} = shift; }
-	elsif ($op eq "-optimize"   ) { $OPTIONS{optimize}  = 1;     }
-	elsif ($op eq "-register"   ) { $OPTIONS{register}  = 1;     }
+	elsif ($op eq "-optimize"   ) { $OPTIONS{ADDRPOWER} = undef; }
+	elsif ($op eq "-addrpower"  ) { $OPTIONS{ADDRPOWER} = shift; }
+	elsif ($op eq "-datapower"  ) { $OPTIONS{DATAPOWER} = shift; }
+	elsif ($op eq "-unitpower"  ) { $OPTIONS{UNITPOWER} = shift; }
 	else                          { $OUTPUT = $op;               }
 }
 

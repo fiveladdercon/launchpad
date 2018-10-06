@@ -254,7 +254,7 @@ sub return {
 sub error {
 	my $Field = shift;
 	my $Error = shift;
-	$Field->Bus->error(u::reduceOr($Error));
+	$Field->Bus->error($Error);
 }
 
 #-----------
