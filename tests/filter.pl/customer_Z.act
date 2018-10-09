@@ -1,6 +1,0 @@
-#Address  	Size      	Value     	Type      	Identifier
-0000000100h	0000000001h	0h        	RW        	ALL_AUDIENCES
-0000000103h	0000000001h	0h        	RW        	CUSTOMER_Z_FIELD
-0000000120h	0000000020h	-         	-         	CUSTOMER_Z_REG
-0000000120h	0000000001h	0         	RW        	CUSTOMER_Z_FIELD_A
-0000000121h	0000000001h	0         	RW        	CUSTOMER_Z_FIELD_B

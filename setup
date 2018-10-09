@@ -55,7 +55,7 @@ function run() {
     if [ ! -f run.pl ]; then
 		cd $SC_LAUNCHPAD/tests;
 	fi
-	perl run.pl
+	perl -I $SC_LAUNCHPAD/tests -Mrun run.pl
 }
 
 #┌─────────────────────────────────────────────────────────────────────────────┐

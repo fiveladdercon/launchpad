@@ -15,7 +15,7 @@ Usage
 -----
 
 ```
-spacecraft ... <engine>.pl [-h|--help]
+spacecraft ... <engine>.pl
 ```
 
 
@@ -25,3 +25,4 @@ Example
 ```
 $ spacecraft ... <engine>.pl
 ```
+

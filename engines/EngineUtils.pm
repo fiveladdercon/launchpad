@@ -33,7 +33,6 @@ sub uhelp {
 			$print = /=/ unless $print;	print if $print;
 		}
 		close(MD);
-		print "\n";
 	} else {
 		print shift;
 	}

@@ -1,18 +1,34 @@
-use lib "$ENV{SC_LAUNCHPAD}/tests";
-use run;
+describe("verilog.pl", sub {
 
-&rm("*.v");
+	it("is documented", sub {
+		execute("sed '1,6d' $ENV{SC_LAUNCHPAD}/docs/_engines/verilog.pl.md > help.exp");
+		foreach my $help ("-h","-help","--help") {
+			rm("help.act");
+			spacecraft("verilog.pl $help > help.act");
+			diff("help.act","help.exp");
+		}
+		rm("help.*");
+	});
 
-&spacecraft("test.rf verilog.pl test.v");
-&diff("test.v","test.exp");
-&rm("test.v");
+	it("generates a verilog module from the model", sub {
+		rm("*.v");
+		spacecraft("test.rf verilog.pl test.v");
+		diff("test.v","test.exp");
+		rm("*.v");
+	});
 
-&spacecraft("test.rf verilog.pl --pslverr test.v");
-&diff("test.v","pslverr.exp");
-&rm("test.v");
+	it("optionally generates an bus with errors via a bus option", sub {
+		rm("*.v");
+		spacecraft("test.rf verilog.pl --pslverr test.v");
+		diff("test.v","pslverr.exp");
+		rm("*.v");
+	});
 
-&spacecraft("types.rf verilog.pl -types Types.pm types.v");
-&diff("types.v","types.exp");
+	it("generates verilog with custom field types", sub {
+		rm("*.v");
+		spacecraft("types.rf verilog.pl -types Types.pm types.v");
+		diff("types.v","types.exp");
+		rm("*.v");
+	});
 
-
-&report("verilog.pl");
+});

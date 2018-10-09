@@ -1,6 +1,13 @@
-use lib "$ENV{SC_LAUNCHPAD}/tests";
-use run;
+describe("<engine>.pl", sub {
 
-&spacecraft("<engine>.pl");
+	it("is documented", sub {
+		execute("sed '1,6d' $ENV{SC_LAUNCHPAD}/docs/_engines/<engine>.pl.md > help.exp");
+		foreach my $help ("-h","-help","--help") {
+			rm("help.act");
+			spacecraft("<engine>.pl $help > help.act");
+			diff("help.act","help.exp");
+		}
+		rm("help.*");
+	});
 
-&report("<engine>.pl");
+});

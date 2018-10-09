@@ -1,3 +1,0 @@
-#Address  	Size      	Value     	Type      	Identifier
-0000000100h	0000000001h	0h        	RW        	ALL_AUDIENCES
-0000000104h	0000000001h	0h        	RW        	ENGINEERING_FIELD
