@@ -91,8 +91,8 @@ The open source documentation is a work in progress:
 | [/model/]()                     | Missing diagrams. Needs space as type, region as instance clarification. |
 | [/model/logic]()                | Notes only.  Needs details why different types regions are added.        |
 | [/fuel/]()                      | Missing diagrams. Needs review - check comment delimiters in examples.   |
-| [/fields/RO]()                  | Broken layout & incomplete                                               |
-| [/fields/RW]()                  | Broken layout & incomplete                                               |
+| [/fields/RO]()                  | Incomplete                                                               |
+| [/fields/RW]()                  | Incomplete                                                               |
 | [/fields/]()                    | Needs more detail on [verilog.pl] classes for custom fields.             |
 | [/engines/data/]()              | Complete                                                                 | 
 | [/engines/defines/]()           | Needs grid section                                                       | 
