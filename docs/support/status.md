@@ -1,11 +1,12 @@
 ---
 layout: default
+permalink: /status
 ---
 
 > As of October 9th, 2018, the Spacecraft project is being shelved - not because
 > I want to stop working on it, but because my new employer will not exempt the
 > project from their NDA that I must sign on that date.  Since my work on 
-> Spacecraft may fall under the NDA, I'd rather stall the project than have it 
+> Spacecraft may fall under the NDA, I'd rather park the project than have it 
 > expropriated.
 
 
@@ -36,7 +37,7 @@ email & company to fiveladdercon[at]gmail.com.
 
 [1]: /fuel/
 [2]: https://github.com/fiveladdercon/launchpad
-[3]: /basics/install
+[3]: /install
 
 
 Engine Library
@@ -83,9 +84,9 @@ The open source documentation is a work in progress:
 | Page                            | Status                                                                   |
 |:--------------------------------|:-------------------------------------------------------------------------|
 | [/]()                           | Complete                                                                 |
-| [/basics/intro]()               | Complete                                                                 |
-| [/basics/install]()             | Complete                                                                 |
-| [/basics/cli]()                 | Complete                                                                 |
+| [/intro]()                      | Complete                                                                 |
+| [/install]()                    | Complete                                                                 |
+| [/cli]()                        | Complete                                                                 |
 | /access/                        | **Need a discussion on access systems and access system parameters.**    |
 | [/model/]()                     | Missing diagrams. Needs space as type, region as instance clarification. |
 | [/model/logic]()                | Notes only.  Needs details why different types regions are added.        |
@@ -176,5 +177,5 @@ The open source documentation is a work in progress:
 | [/api/sc_warn]()                | Complete                                                                 |
 | [/api/sc_error]()               | Complete                                                                 |
 | [/api/sc_fatal]()               | Complete                                                                 |
-| [/contribute/]()                | Notes only.                                                              |
+| [/contribute/]()                | Complete                                                                 |
 | [/about/]()                     | Not bad.  Maybe a section on fiveladdercon.                              |

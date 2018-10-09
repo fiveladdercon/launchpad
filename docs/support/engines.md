@@ -15,29 +15,147 @@ permalink: /engines/
 [fields]:   /model/#field
 [property]: /model/#properties
 
+[1]:(http://www.perl.org)
+[Rocket Fuel]: /fuel/
+
+
 Custom Engines & The EngineAPI
 ==============================
 
-An **engine** is a **[Perl](http://www.perl.org)** script that uses the 
-spacecraft **EngineAPI** package to access the spacecraft memory resident 
-**[model]**.
+An **engine** is a [Perl][1] script that uses the **EngineAPI** package to access 
+the spacecraft memory resident [model].
 
-Every engine must include the EngineAPI as follows:
+
+Hello World
+-----------
+
+You can create an engine anywhere, as an engine is just a [Perl][1] script:
+
+```
+$ touch hello.pl
+```
+
+And then execute it with spacecraft:
+
+```
+$ spacecraft hello.pl
+** NOTE : Firing engine hello.pl.
+** NOTE : Engine hello.pl finished in 0.001364661 seconds.
+** NOTE : Finished in 0.004851019 seconds with 0 warnings, 0 errors.
+```
+
+To turn the script into an engine, you must include the **EngineAPI**:
 
 ```perl
 use EngineAPI;
+
+&sc_note(0,"Hello World!");
 ```
 
+Now when you execute, you're hooked into spacecraft:
+
+```
+$ spacecraft hello.pl
+** NOTE : Firing engine hello.pl.
+** NOTE : Hello World!
+** NOTE : Engine hello.pl finished in 0.009796026 seconds.
+** NOTE : Finished in 0.013642397 seconds with 0 warnings, 0 errors.
+```
+
+The first step is generally to get a handle to the memory resident [model] using 
+the **[sc_get_space](/api/sc_get_space)** API:
+
+```perl
+use EngineAPI;
+
+# Get a handle to the model:
+my $space = &sc_get_space();
+
+# And use the object oriented methods:
+&sc_note(0,"Hello %s!", $space->sc_get_type);
+```
+
+Now when you execute, you've dereferenced the [model].  But since you've started 
+from a blank canvas, the space doesn't even have a type!
+
+```
+$ spacecraft hello.pl
+** NOTE : Firing engine hello.pl.
+** NOTE : Hello !
+** NOTE : Engine hello.pl finished in 0.009796026 seconds.
+** NOTE : Finished in 0.013642397 seconds with 0 warnings, 0 errors.
+```
+
+To see the power of the memory resident [model], let's create another script:
+
+```
+$ touch world.pl
+```
+
+With the following in it:
+
+```perl
+use EngineAPI;
+
+my $space = &sc_get_space();
+
+$space->sc_set_type("World");
+```
+
+Now when you execute, execute **both** engines!  First the `world.pl` engine
+to construct the model, then the orignal `hello.pl` engine to output the
+model:
+
+```
+$ spacecraft world.pl hello.pl
+** NOTE : Firing engine world.pl.
+** NOTE : Engine world.pl finished in 0.009658130 seconds.
+** NOTE : Firing engine hello.pl.
+** NOTE : Hello World!
+** NOTE : Engine hello.pl finished in 0.006746967 seconds.
+** NOTE : Finished in 0.020468362 seconds with 0 warnings, 0 errors.
+```
+
+Notice how the `hello.pl` now reports the type set in `world.pl` -- the
+[model] is passed between the scripts and you've separated model construction
+from model output!
+
+You can always construct the [model] with the EngineAPI -- and you'd do this 
+when you need to convert an existing format -- but it's easier to describe the 
+model in [Rocket Fuel] and load it that way.
+
+So let's try adding some [Rocket Fuel] and executing again:
+
+```
+$ touch World.rf
+$ spacecraft World.rf hello.pl
+** NOTE : Parsed World.rf in 0.000246411 seconds. Found 0 regions and 0 fields.
+** NOTE : Firing engine hello.pl.
+** NOTE : Hello World!
+** NOTE : Engine hello.pl finished in 0.010435138 seconds.
+** NOTE : Finished in 0.014355259 seconds with 0 warnings, 0 errors.
+```
+
+And voila, you've loaded the space defined in the World.rf [Rocket Fuel] and
+have a handle to it in your engine.
+
+Now it's a matter of using the EngineAPI to do what ever cool stuff you 
+need to do with your definitions -- including converting them to [Rocket Fuel]!
+
+If at some point your engines become useful for more than just you, you can 
+promote them to your local launchpad.  If you do go that far, consider 
+following the instructions for [contributing](/contribute/), because you may 
+at some point decide your engine is good for the rest of us.
 
 
 Working with Bits
 -----------------
 
-Because the Rocket Fuel fixed point numbering notation for working with spacecraft 
-[bits] is not part of the Perl language<sup>a</sup>, the EngineAPI interface 
-uses Perl strings to exchange the `sc_bit` type.  That is, when you see the 
-`sc_bit` type in the EngineAPI, think of it as string holding a spacecraft 
-fixed point [bit] number, not as a number.  For example:
+Because the [Rocket Fuel] fixed point numbering notation for working with 
+spacecraft [bits] is not part of the Perl language<sup>a</sup>, the EngineAPI 
+interface uses Perl strings to exchange the `sc_bit` type.  That is, when you 
+see the `sc_bit` type in the EngineAPI, think of it as string holding a 
+spacecraft fixed point [bit] number, not as a number.  For example:
 
 ```perl
 $offset = "64";
@@ -73,9 +191,12 @@ the engine, you use the `sc_get_space` function:
 my $space = &sc_get_space();
 ```
 
-A [space] is a [region] and a [region] is a **node**.  A [field] is 
-also a **node** which leads to the following **inheritance hierarchy**<sup>a</sup>
-in the EngineAPI:
+A [space] is a [region] and a [region] is a **node**.  
+
+A [field] is also a **node**.
+
+This leads to the following **inheritance hierarchy**<sup>a</sup> in the 
+EngineAPI:
 
 ```
  ┌─────────┐
@@ -131,8 +252,8 @@ print $field->sc_get_value();
 
 Note: 
 
-* that the address & identifier is relative to the [space], not the parent 
-  node; 
+* that the address & identifier is relative to the [space], while the offset
+  and name is relative to the parent node; 
 * that the type and name of a [region] are optional and may be `undef`; and 
 * that the span will be the same as the size if the node is not dimensioned.
 

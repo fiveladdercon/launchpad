@@ -4,8 +4,8 @@ title: Data Model
 permalink: /model/
 ---
 
-[Rocket Fuel]: ../fuel/
-[EngineAPI]:   ../api/
+[Rocket Fuel]: /fuel/
+[EngineAPI]:   /engines/
 [bits]:        #bits
 [space]:       #spaces
 [spaces]:      #spaces
@@ -19,13 +19,12 @@ permalink: /model/
 [dimensions]:  #dimensions
 
 
-The Data Model
-==============
+The Model
+=========
 
-Using spacecraft to work with an address map requires knowing how it is 
-modelled in spacecraft, as you'll either code the model in [Rocket Fuel][] or 
-manipulate the model in an engine with the [EngineAPI][].
-
+Using spacecraft to work with an address map requires knowing the **model**, as 
+you'll either code the model in **[Rocket Fuel][]** or manipulate the model in 
+an **engine** with the **[EngineAPI][]**.
 
 
 Bits

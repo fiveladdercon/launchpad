@@ -1,11 +1,11 @@
 ---
 layout: default
 title: Introduction
-permalink: /basics/intro/
+permalink: /intro
 ---
 
-[contributing]: contribute/
-[contribute]:   contribute/
+[contributing]: /contribute
+[contribute]:   /contribute
 
 
 What is Spacecraft?
@@ -37,7 +37,7 @@ Use spacecraft to read in a hierarchy of definitions and output the structure
 in multiple formats for various audiences:
 
 ```
-$ spacecraft -R chip.rf sim.pl lab.pl sw.pl doc.pl doc.pl -customer X ...
+$ spacecraft -R chip.rf sim.pl lab.pl sw.pl doc.pl filter.pl customer_X doc.pl
 ```
 
 
@@ -52,8 +52,8 @@ following conditions:
 
 Experience has shown that these conditions rarely hold, especially when
 integrating inputs from multiple vendors.  Where most tools leave designers or
-integrators to deal with input and output formatting issues, spacecraft is 
-designed to take them head on:
+integrators to deal with input and output formatting issues with scripting, 
+spacecraft is designed to take them head on:
 
 > spacecraft constructs a memory resident **model** of an address space, then 
 > executes one or more **engines** that construct, alter or output the model.
@@ -68,8 +68,8 @@ $ spacecraft vendor.pl vendor.in rocketfuel.pl
 ```
 
 Here your custom `vendor.pl` engine reads definitions in the `vendor.in` file
-and constructs the model, while the open source `rf.pl` engine writes out the 
-model in **Rocket Fuel** format -- the spacecraft native format.
+and constructs the model, while the open source `rocketfuel.pl` engine writes 
+out the model in **Rocket Fuel** format -- the spacecraft native format.
 
 
 ### Have your own format?
@@ -100,8 +100,8 @@ particularly nice when yet another vendor format comes along:
 $ spacecraft vendor2.pl vendor2.in proprietary.pl
 ```
 
-Here the `proprietary.pl` engine is reused for output, so you can focus on the 
-new vendor input.
+Here the `proprietary.pl` engine is reused **as is** for output, so you can 
+focus on the new vendor input.
 
 *The separation of the input problem from the output problem is a major
 benefit of using spacecraft.*
@@ -114,7 +114,7 @@ Spacecraft engines are open source, so go ahead and hack what you need.
 
 ### Is it good for the rest of us?  
 
-Consider [contributing](/contribute) your changes.
+Consider [contributing] your changes to your team, or the world!
 
 
 ### Is that all?
@@ -166,17 +166,18 @@ This seemingly complex command line does the following:
   : Output the filtered, packed logical model in Rocket Fuel format for the
     customer.  
 
-The difference between what is implemented (`chip.rf`) and what is presented
-to the customer (`customer.rf`) is drastic.
+The difference between what is actually implemented (`chip.rf`) and what is 
+presented to the customer (`customer.rf`) is drastic.
 
-*You don't get this kind of flow with other tools.  Sharing the memory resident
-model between standard and custom engines is a major benefit of using spacecraft,
-as the model is flexible, fully API accessible and -- most importantly -- 
-**fast**.*
+*You don't get this kind of pipelined flow with other tools.  Sharing the memory 
+resident model between library and custom engines is a major benefit of using 
+spacecraft, as the model is flexible, fully API accessible and **very fast**.*
 
 
 What you need to know
 =====================
+
+If you're going to use spacecraft, then this is what you'll need to know:
 
 Spacecraft
 ----------
@@ -194,7 +195,7 @@ The Model
 
 The **model** is a hierarchy of **regions** that map **fields** into an address 
 **space**.  It is a precise model of the physical implementation that is used
-for **logical representation**.
+for logical representation.
 
 *All users should understand the model, as you will either be coding it in a
 Rocket Fuel file, or manipulating it with the EngineAPI in an engine.*
@@ -212,14 +213,14 @@ execute them in sequence.
 and how to use each of them.  It's when you find yourself stuck with an 
 input, output or migration problem that you'll graduate to an advanced user and 
 start hacking the Launch Pad engines or writing and possibly 
-[contributing](/contribute) your own.*
+[contributing] your own.*
 
 
 Launch Pad
 ----------
 
 The **Launch Pad** is an open source library of engines.  It is also home to the 
-documentation and the spacecraft binaries.
+documentation and the spacecraft executables.
 
 *If you're reading this, then you've found the Launch Pad.*
 
@@ -227,7 +228,7 @@ documentation and the spacecraft binaries.
 Rocket Fuel
 -----------
 
-**Rocket Fuel** is native file format for peristing the spacecraft model to 
+**Rocket Fuel** is the native file format for peristing the spacecraft model to 
 disk.
 
 Populating the model from Rocket Fuel is the only form of model manipulation 
@@ -237,9 +238,9 @@ Fuel -- is delegated to engines.
 *As a spacecraft user you are not obligated to code the model with Rocket Fuel, 
 but if you don't, you will need to write an engine to construct the model from 
 whatever format you do code in.  Note that if you do write an engine for your 
-format, you can then output the model in Rocket Fuel format with the `rf.pl` 
-engine, meaning you can convert you're existing format, see the result and make 
-an informed choice about which format to use.*
+format, you can then output the model in Rocket Fuel format with the 
+`rocketfuel.pl` engine, meaning you can convert you're existing format, see the 
+result and make an informed choice about which format to use.*
 
 
 Boosters
@@ -250,13 +251,14 @@ spacecraft is not free -- as in no-cost -- software.
 
 While you can freely clone the Launch Pad, [install](/basics/install) the 
 spacecraft executable and start poking around for no-cost, spacecraft executes 
-a start-up check that will *slow you down* unless a **booster** is also 
-installed.
+a time consuming start-up check that will *slow you down* unless a **booster** 
+is also installed.
 
-A **booster** is a cryptographically signed license that is locally installed and 
-enables your spacecraft executable to run at full speed. To purchase a booster 
-or request a trial, send an email with your company, name, and email to 
-<u>fiveladdercon[at]gmail.com</u>.
+A **booster** is a cryptographically signed license that is locally installed 
+and enables your spacecraft executable to run at full speed. To purchase a 
+booster or request a free trial, send an email with your company, name, and 
+email to <u>fiveladdercon[at]gmail.com</u>.
 
-*Of course you can always just keep running spacecraft without a booster, but the
-engineering time lost without one is likely more expensive than the booster.*
+*Of course you can always just keep running spacecraft without a booster, but 
+the engineering time consumed without one is likely more expensive than the 
+booster.*

@@ -1,11 +1,18 @@
 ---
 layout: default
 title: Changes
-permalink: /changes/
+permalink: /changes
 ---
 
 Spacecraft Versions
 ===================
+
+### 0.4.0 ###
+
+- Major additions to the engine library: defines.pl, filter.pl, json.pl,
+  logical.pl, pack.pl, verilog.pl
+- Solid work in the tests directory, adding the run command, to run the
+  local run.pl script and a mocha-like framework.
 
 ### 0.3.0 ###
 

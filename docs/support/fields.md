@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Custom Fields
-permalink: /fields/
+permalink: /fields
 ---
 
 [1]: {{site.engine_baseurl}}/Verilog/Fields.pm

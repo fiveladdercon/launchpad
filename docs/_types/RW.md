@@ -1,6 +1,7 @@
 ---
 title: RW
-permalink: /engines/verilog/RW/
+layout: default
+permalink: /engines/verilog/RW
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/Verilog/Fields.pm
 

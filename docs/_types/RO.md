@@ -1,6 +1,7 @@
 ---
 title: RO
-permalink: /engines/verilog/RO/
+layout: default
+permalink: /engines/verilog/RO
 ---
 [{{page.title}}]: {{site.engine_baseurl}}/Verilog/Fields.pm
 

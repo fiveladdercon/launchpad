@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Installation
-permalink: /basics/install/
+permalink: /install
 ---
 
 [github]:                  http://github.com
@@ -44,13 +44,13 @@ Spacecraft is distributed as a repository hosted on [github].
 	   $ git clone https://github.com/fiveladdercon/launchpad
 	   ```
 
-	   but realize you're on your own and that that any changes you make 
+	   but realize you're really on your own and that that any changes you make 
 	   can't be merged back in without a [github] account.
 
    If in doubt, fork then clone.
 
-4. Link the appropriate binary for your architecture to `spacecraft` in the 
-   launchpad bin directory:
+4. Link the appropriate executable for your architecture to `spacecraft` in the 
+   `launchpad/bin` directory:
 
    ```
    $ cd launchpad/bin
@@ -58,10 +58,11 @@ Spacecraft is distributed as a repository hosted on [github].
    ```
 
 5. Set the `SC_LAUNCHPAD` environment variable to the local launchpad repository 
-   and add the bin sub directory to your path:
+   and add the bin sub directory to your path.  This needs to happen each
+   time you log in, so these instructions add it to your `.profile`.
 
    ```
-   $ cd launchpad
+   $ cd ..
    $ echo "export SC_LAUNCHPAD=$PWD"      >> ~/.profile  # Note double quotes
    $ echo 'PATH=$PATH:$SC_LAUNCHPAD/bin'  >> ~/.profile  # Note single quotes
    $ source ~/.profile
@@ -70,9 +71,9 @@ Spacecraft is distributed as a repository hosted on [github].
 6. Try out an example:
 
    ```
-   $ cd $SC_LAUNCHPAD/example
+   $ cd $SC_LAUNCHPAD/example/
    $ spacecraft -R soc.rf data.pl
    ```
 
-   In fact most documented examples can be tried by executing the command in the
-   $SC_LAUNCHPAD/example/ directory.
+   Many documented examples can be tried by executing the command in the
+   `$SC_LAUNCHPAD/example/` directory.
