@@ -331,7 +331,7 @@ sub Reset {
 # that has the Node identifier as it's name.  It is the final interface to
 # the hardware.
 #
-# The returned Port sized but NOT configured as an input or output, reg or wire.
+# The returned Port is sized but NOT configured as an input or output, reg or wire.
 #
 sub Port {
 	my $Field = shift;
@@ -346,7 +346,7 @@ sub Port {
 # than the actual value on the module port.  (i.e. different clock domains, etc.) 
 # It is the Field name suffixed by 'value'
 #
-# The returned Value sized but NOT configured as an input or output, reg or wire.
+# The returned Value is sized but NOT configured as an input or output, reg or wire.
 #
 sub Value {
 	my $Field = shift;
@@ -547,7 +547,7 @@ sub implementation {
 	# Optionally retime the field Value on the with the field clock.
 	if ($Field->has_property("retime") || $Field->has_property("clock")) {
 		$Reset = $Field->Reset if $Field->has_property("reset");
-		$Value = $Field->Retime($Value,$Field->Clock,$Reset);
+		$Value = $Field->Retime($Value,$Field->Clock,$Reset,$default);
 	}
 
 	# Drive the Port with the (optionally retimed) Value.

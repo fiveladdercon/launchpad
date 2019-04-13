@@ -36,7 +36,7 @@ no longer managing flat spaces, but **logical representations**, which I define
 as: a selected subset of the physical implementation.
 
 A flat space is one logical representation.  However a flat space does not 
-convey any hardware reuse information, so it not conveyed to software.  A 
+convey any hardware reuse information, so it is not conveyed to software.  A 
 fully elaborated physical implementation is another logical representation. 
 This representation carries the hardware reuse information, but carries it to 
 the extreme, as it also includes all the "dirty laundry" of the physical 

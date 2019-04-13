@@ -1,7 +1,7 @@
 ################################################################################
 #
 #
-# This file one utility packages and three Classes for verilog generation:
+# This file has one utility package and three Classes for verilog generation:
 #
 #
 # u       : A collection of small utilities like faning out, muxing or 
@@ -128,7 +128,7 @@ sub maxlength {
 #
 # $indented = u::indented($tab,$string);
 #
-# A backstage utility that return a string with the $tab inserted after each 
+# A backstage utility that returns a string with the $tab inserted after each 
 # newline in the $string.
 #
 sub indented {
@@ -458,8 +458,16 @@ sub assign {
 # implemenation:
 #
 # always @(posedge clock or negedge reset) begin
-#   reg <= 1'd0;
-# end else begin
+#   if (~reset) begin
+#     reg <= 1'd0;
+#   end else begin
+#     reg <= logic;
+#   end
+# end
+#
+# -OR-
+#
+# always @(posedge clock) begin
 #   reg <= logic;
 # end
 #

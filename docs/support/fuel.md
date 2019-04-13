@@ -96,13 +96,13 @@ Fields
 ------
 
 ```
-4B.2   3b   5   THREE_BIT_FIELD   RW       ;  /*
+4B.2   3b   5   THREE_BIT_FIELD   RW       ;  /-
 │      │    │   │                 └─────── field type
 │      │    │   └───────────────────────── field name
 │      │    └───────────────────────────── field value
 │      └────────────────────────────────── field size (in bits)
 └───────────────────────────────────────── field offset (in bits)
-*/
+-/
 ```
 
 A **[field][]** declaration is an ordered, whitespace separated 5-tupple 
@@ -132,13 +132,13 @@ A **[region][]** is declared very much like a [field][]:
 ---
 This is a 2KB child region.
 ---
-8KB   2KB   CH_*   CHILD   child   ; /*
+8KB   2KB   CH_*   CHILD   child   ; /-
 │     │     │      │       └────── region type
 │     │     │      └────────────── region name
 │     │     └───────────────────── region glob
 │     └─────────────────────────── region size (in bits)
 └───────────────────────────────── region offset (in bits)
-*/
+-/
 ```
 
 The first notable difference is that where a [field][] specifies a **value**, a 

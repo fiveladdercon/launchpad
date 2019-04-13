@@ -8,12 +8,12 @@ use base qw(Exporter);
 @EXPORT = qw(uhelp uopen uclose);
 
 #
-#  &help()                    : print <engine>.md & exit
-#  &help(error)               : print <engine>.md, print error & exit
-#  &help(format,args)         : print <engine>.md, printf format, args & exit
-#  &help(message)             : print message & exit
-#  &help(message,error)       : print message, print error & exit
-#  &help(message,format,args) : print message, printf format, args & exit
+#  &uhelp()                    : print <engine>.md & exit
+#  &uhelp(error)               : print <engine>.md, print error & exit
+#  &uhelp(format,args)         : print <engine>.md, printf format, args & exit
+#  &uhelp(message)             : print message & exit
+#  &uhelp(message,error)       : print message, print error & exit
+#  &uhelp(message,format,args) : print message, printf format, args & exit
 #
 #  Prints a help message and an optional error message, then exits.
 #

@@ -269,7 +269,7 @@ sub add_signal {
 #
 # A backstage method that maps fields to one or more bus accesses.
 # This does the heavy lifting of splitting a field into multiple accesses
-# up front, so that the rest of the field methods lighter.
+# up front, so that the rest of the field methods are lighter.
 #
 sub map {
 	my $Bus    = shift;

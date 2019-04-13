@@ -312,7 +312,7 @@ is either a string or absent, making the key a existance/non-existance boolean.
 Properties are intended for altering the behavior of a specific engine for the 
 given field or region. **Spacecraft has no awareness of what a given property 
 may do**; it simply annotates the item with the property for retrieval through 
-the [Engine API][].
+the [EngineAPI][].
 
 Since properties are generally targetted to a particular engine, it is 
 recommended that the key be prefixed the name of the engine.

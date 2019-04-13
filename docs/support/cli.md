@@ -32,8 +32,8 @@ passed _before_ the first engine.
 Well behaving engines show a help message when passed a `--help` option, so use 
 this option to find out details about the `OPTIONS` for a given `ENGINE.pl`.
 
-If the `ENGINE.pl` does not a fully qualified path, spacecraft will look for the
-engine in `$SC_LAUNCHPAD/engines` and then terminate if not found.
+If the `ENGINE.pl` does not have a fully qualified path, spacecraft will look for 
+the engine in `$SC_LAUNCHPAD/engines` and then terminate if not found.
 
 At least one `ENGINE.pl` should be specified, otherwise spacecraft has nothing 
 to do.
