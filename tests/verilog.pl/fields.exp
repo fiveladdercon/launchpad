@@ -1,4 +1,4 @@
-module test (
+module fields (
   input  wire [5:0]     paddr,
   input  wire           pclk,
   input  wire           penable,
@@ -22,7 +22,6 @@ module test (
   output wire [4:0]     double_access_field,
   output reg  [31:0]    prdata,
   output reg            pready,
-  output reg            pslverr,
   output wire           retime_a_field,
   output wire           retime_b_field,
   output wire           retime_c_field,
@@ -98,34 +97,24 @@ wire           retime_h_field_write;
 wire [31:0]    ro_err_field_rdata;
 wire [47:0]    ro_err_field_read;
 wire [47:0]    ro_err_field_rvalue;
-wire [1:0]     ro_err_field_select;
 wire [47:0]    ro_err_field_value;
-wire [1:0]     ro_err_field_wselect;
 wire [31:0]    ro_test_a_field_rdata;
 wire [1:0]     ro_test_a_field_read;
 wire [1:0]     ro_test_a_field_rvalue;
-wire [1:0]     ro_test_a_field_select;
 wire [1:0]     ro_test_a_field_value;
-wire [1:0]     ro_test_a_field_wselect;
 wire           ro_test_b_field;
 wire [31:0]    ro_test_b_field_rdata;
 wire           ro_test_b_field_read;
 wire           ro_test_b_field_rvalue;
-wire           ro_test_b_field_select;
 wire           ro_test_b_field_value;
-wire           ro_test_b_field_wselect;
 wire [31:0]    ro_test_c_field_rdata;
 wire           ro_test_c_field_read;
 wire           ro_test_c_field_rvalue;
-wire           ro_test_c_field_select;
 wire           ro_test_c_field_value;
-wire           ro_test_c_field_wselect;
 wire [31:0]    ro_test_d_field_rdata;
 wire           ro_test_d_field_read;
 wire           ro_test_d_field_rvalue;
-wire           ro_test_d_field_select;
 wire           ro_test_d_field_value;
-wire           ro_test_d_field_wselect;
 wire [31:0]    single_bit_field_rdata;
 wire           single_bit_field_read;
 wire           single_bit_field_rvalue;
@@ -185,15 +174,15 @@ reg  [33:0]    tripple_access_field_value;
 // Address Decoding
 //
 
-assign paddr_reg_00h = pactive_reg && (paddr_reg == 5'h0);
-assign paddr_reg_04h = pactive_reg && (paddr_reg == 5'h1);
-assign paddr_reg_08h = pactive_reg && (paddr_reg == 5'h2);
-assign paddr_reg_0Ch = pactive_reg && (paddr_reg == 5'h3);
-assign paddr_reg_10h = pactive_reg && (paddr_reg == 5'h4);
-assign paddr_reg_14h = pactive_reg && (paddr_reg == 5'h5);
-assign paddr_reg_18h = pactive_reg && (paddr_reg == 5'h6);
-assign paddr_reg_1Ch = pactive_reg && (paddr_reg == 5'h7);
-assign paddr_reg_20h = pactive_reg && (paddr_reg == 5'h8);
+assign paddr_reg_00h = pactive_reg && (paddr_reg == 4'h0);
+assign paddr_reg_04h = pactive_reg && (paddr_reg == 4'h1);
+assign paddr_reg_08h = pactive_reg && (paddr_reg == 4'h2);
+assign paddr_reg_0Ch = pactive_reg && (paddr_reg == 4'h3);
+assign paddr_reg_10h = pactive_reg && (paddr_reg == 4'h4);
+assign paddr_reg_14h = pactive_reg && (paddr_reg == 4'h5);
+assign paddr_reg_18h = pactive_reg && (paddr_reg == 4'h6);
+assign paddr_reg_1Ch = pactive_reg && (paddr_reg == 4'h7);
+assign paddr_reg_20h = pactive_reg && (paddr_reg == 4'h8);
 
 always @(posedge pclk or negedge presetn) begin
   if (~presetn) begin
@@ -203,7 +192,7 @@ always @(posedge pclk or negedge presetn) begin
     pwrite_reg  <= 1'd0;
   end else begin
     pactive_reg <=  psel && !penable;
-    paddr_reg   <= (psel && !penable) ? paddr[6:2] : paddr_reg;
+    paddr_reg   <= (psel && !penable) ? paddr[5:2] : paddr_reg;
     pwdata_reg  <=  pwdata;
     pwrite_reg  <=  pwrite;
   end
@@ -211,7 +200,7 @@ end
 
 
 //
-// 8-bit RW field 'SUB_ATOMIC_FIELD' declared on line 8 in test.rf
+// 8-bit RW field 'SUB_ATOMIC_FIELD' declared on line 8 in fields.rf
 //
 
 assign sub_atomic_field        = sub_atomic_field_value;
@@ -231,11 +220,11 @@ end
 
 
 //
-// 1-bit RW field 'SINGLE_BIT_FIELD' declared on line 9 in test.rf
+// 1-bit RW field 'SINGLE_BIT_FIELD' declared on line 9 in fields.rf
 //
 
 assign single_bit_field        = single_bit_field_value;
-assign single_bit_field_rdata  = {23'd0,single_bit_field_rvalue[0],8'd0};
+assign single_bit_field_rdata  = {23'd0,single_bit_field_rvalue,8'd0};
 assign single_bit_field_read   = ~pwrite_reg & paddr_reg_00h;
 assign single_bit_field_rvalue = single_bit_field_read & single_bit_field_value;
 assign single_bit_field_wdata  = pwdata_reg[8];
@@ -251,7 +240,7 @@ end
 
 
 //
-// 32-bit RW field 'ATOMIC_FIELD' declared on line 12 in test.rf
+// 32-bit RW field 'ATOMIC_FIELD' declared on line 12 in fields.rf
 //
 
 assign atomic_field        = atomic_field_value;
@@ -271,11 +260,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_A_FIELD' declared on line 15 in test.rf
+// 1-bit RW field 'RETIME_A_FIELD' declared on line 15 in fields.rf
 //
 
 assign retime_a_field        = retime_a_field_value_sync;
-assign retime_a_field_rdata  = {19'd0,retime_a_field_rvalue[0],12'd0};
+assign retime_a_field_rdata  = {19'd0,retime_a_field_rvalue,12'd0};
 assign retime_a_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_a_field_rvalue = retime_a_field_read & retime_a_field_value;
 assign retime_a_field_wdata  = pwdata_reg[12];
@@ -296,11 +285,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_B_FIELD' declared on line 16 in test.rf
+// 1-bit RW field 'RETIME_B_FIELD' declared on line 16 in fields.rf
 //
 
 assign retime_b_field        = retime_b_field_value_sync;
-assign retime_b_field_rdata  = {18'd0,retime_b_field_rvalue[0],13'd0};
+assign retime_b_field_rdata  = {18'd0,retime_b_field_rvalue,13'd0};
 assign retime_b_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_b_field_rvalue = retime_b_field_read & retime_b_field_value;
 assign retime_b_field_wdata  = pwdata_reg[13];
@@ -321,11 +310,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_C_FIELD' declared on line 17 in test.rf
+// 1-bit RW field 'RETIME_C_FIELD' declared on line 17 in fields.rf
 //
 
 assign retime_c_field        = retime_c_field_value_sync;
-assign retime_c_field_rdata  = {17'd0,retime_c_field_rvalue[0],14'd0};
+assign retime_c_field_rdata  = {17'd0,retime_c_field_rvalue,14'd0};
 assign retime_c_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_c_field_rvalue = retime_c_field_read & retime_c_field_value;
 assign retime_c_field_wdata  = pwdata_reg[14];
@@ -346,11 +335,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_D_FIELD' declared on line 18 in test.rf
+// 1-bit RW field 'RETIME_D_FIELD' declared on line 18 in fields.rf
 //
 
 assign retime_d_field        = retime_d_field_value_sync;
-assign retime_d_field_rdata  = {16'd0,retime_d_field_rvalue[0],15'd0};
+assign retime_d_field_rdata  = {16'd0,retime_d_field_rvalue,15'd0};
 assign retime_d_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_d_field_rvalue = retime_d_field_read & retime_d_field_value;
 assign retime_d_field_wdata  = pwdata_reg[15];
@@ -376,11 +365,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_E_FIELD' declared on line 19 in test.rf
+// 1-bit RW field 'RETIME_E_FIELD' declared on line 19 in fields.rf
 //
 
 assign retime_e_field        = retime_e_field_value_sync;
-assign retime_e_field_rdata  = {15'd0,retime_e_field_rvalue[0],16'd0};
+assign retime_e_field_rdata  = {15'd0,retime_e_field_rvalue,16'd0};
 assign retime_e_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_e_field_rvalue = retime_e_field_read & retime_e_field_value;
 assign retime_e_field_wdata  = pwdata_reg[16];
@@ -406,11 +395,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_F_FIELD' declared on line 20 in test.rf
+// 1-bit RW field 'RETIME_F_FIELD' declared on line 20 in fields.rf
 //
 
 assign retime_f_field        = retime_f_field_value_sync;
-assign retime_f_field_rdata  = {14'd0,retime_f_field_rvalue[0],17'd0};
+assign retime_f_field_rdata  = {14'd0,retime_f_field_rvalue,17'd0};
 assign retime_f_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_f_field_rvalue = retime_f_field_read & retime_f_field_value;
 assign retime_f_field_wdata  = pwdata_reg[17];
@@ -436,11 +425,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_G_FIELD' declared on line 21 in test.rf
+// 1-bit RW field 'RETIME_G_FIELD' declared on line 21 in fields.rf
 //
 
 assign retime_g_field        = retime_g_field_value_sync;
-assign retime_g_field_rdata  = {13'd0,retime_g_field_rvalue[0],18'd0};
+assign retime_g_field_rdata  = {13'd0,retime_g_field_rvalue,18'd0};
 assign retime_g_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_g_field_rvalue = retime_g_field_read & retime_g_field_value;
 assign retime_g_field_wdata  = pwdata_reg[18];
@@ -466,11 +455,11 @@ end
 
 
 //
-// 1-bit RW field 'RETIME_H_FIELD' declared on line 22 in test.rf
+// 1-bit RW field 'RETIME_H_FIELD' declared on line 22 in fields.rf
 //
 
 assign retime_h_field        = retime_h_field_value_sync;
-assign retime_h_field_rdata  = {12'd0,retime_h_field_rvalue[0],19'd0};
+assign retime_h_field_rdata  = {12'd0,retime_h_field_rvalue,19'd0};
 assign retime_h_field_read   = ~pwrite_reg & paddr_reg_08h;
 assign retime_h_field_rvalue = retime_h_field_read & retime_h_field_value;
 assign retime_h_field_wdata  = pwdata_reg[19];
@@ -491,7 +480,7 @@ end
 
 
 //
-// 5-bit RW field 'DOUBLE_ACCESS_FIELD' declared on line 25 in test.rf
+// 5-bit RW field 'DOUBLE_ACCESS_FIELD' declared on line 25 in fields.rf
 //
 
 assign double_access_field        = double_access_field_value;
@@ -512,7 +501,7 @@ end
 
 
 //
-// 34-bit RW field 'TRIPPLE_ACCESS_FIELD' declared on line 28 in test.rf
+// 34-bit RW field 'TRIPPLE_ACCESS_FIELD' declared on line 28 in fields.rf
 //
 
 assign tripple_access_field        = tripple_access_field_value;
@@ -534,40 +523,34 @@ end
 
 
 //
-// 2-bit RO field 'RO_TEST_A_FIELD' declared on line 31 in test.rf
+// 2-bit RO field 'RO_TEST_A_FIELD' declared on line 31 in fields.rf
 //
 
-assign ro_test_a_field_rdata   = {14'd0,ro_test_a_field_rvalue[1:0],16'd0};
-assign ro_test_a_field_read    = {2{~pwrite_reg}} & {2{paddr_reg_18h}};
-assign ro_test_a_field_rvalue  = ro_test_a_field_read & ro_test_a_field_value;
-assign ro_test_a_field_select  = paddr_reg_18h;
-assign ro_test_a_field_value   = ro_test_a_field;
-assign ro_test_a_field_wselect = pwrite_reg & ro_test_a_field_select;
+assign ro_test_a_field_rdata  = {14'd0,ro_test_a_field_rvalue[1:0],16'd0};
+assign ro_test_a_field_read   = {2{~pwrite_reg}} & {2{paddr_reg_18h}};
+assign ro_test_a_field_rvalue = ro_test_a_field_read & ro_test_a_field_value;
+assign ro_test_a_field_value  = ro_test_a_field;
 
 
 //
-// 1-bit RO field 'RO_TEST_B_FIELD' declared on line 32 in test.rf
+// 1-bit RO field 'RO_TEST_B_FIELD' declared on line 32 in fields.rf
 //
 
-assign ro_test_b_field         = 1'h0;
-assign ro_test_b_field_rdata   = {13'd0,ro_test_b_field_rvalue[0],18'd0};
-assign ro_test_b_field_read    = ~pwrite_reg & paddr_reg_18h;
-assign ro_test_b_field_rvalue  = ro_test_b_field_read & ro_test_b_field_value;
-assign ro_test_b_field_select  = paddr_reg_18h;
-assign ro_test_b_field_value   = ro_test_b_field;
-assign ro_test_b_field_wselect = pwrite_reg & ro_test_b_field_select;
+assign ro_test_b_field        = 1'h0;
+assign ro_test_b_field_rdata  = {13'd0,ro_test_b_field_rvalue,18'd0};
+assign ro_test_b_field_read   = ~pwrite_reg & paddr_reg_18h;
+assign ro_test_b_field_rvalue = ro_test_b_field_read & ro_test_b_field_value;
+assign ro_test_b_field_value  = ro_test_b_field;
 
 
 //
-// 1-bit RO field 'RO_TEST_C_FIELD' declared on line 33 in test.rf
+// 1-bit RO field 'RO_TEST_C_FIELD' declared on line 33 in fields.rf
 //
 
-assign ro_test_c_field_rdata   = {12'd0,ro_test_c_field_rvalue[0],19'd0};
-assign ro_test_c_field_read    = ~pwrite_reg & paddr_reg_18h;
-assign ro_test_c_field_rvalue  = ro_test_c_field_read & ro_test_c_field_value;
-assign ro_test_c_field_select  = paddr_reg_18h;
-assign ro_test_c_field_value   = ro_test_c_field_sync;
-assign ro_test_c_field_wselect = pwrite_reg & ro_test_c_field_select;
+assign ro_test_c_field_rdata  = {12'd0,ro_test_c_field_rvalue,19'd0};
+assign ro_test_c_field_read   = ~pwrite_reg & paddr_reg_18h;
+assign ro_test_c_field_rvalue = ro_test_c_field_read & ro_test_c_field_value;
+assign ro_test_c_field_value  = ro_test_c_field_sync;
 
 always @(posedge pclk) begin
   ro_test_c_field_meta <= ro_test_c_field;
@@ -576,15 +559,13 @@ end
 
 
 //
-// 1-bit RO field 'RO_TEST_D_FIELD' declared on line 34 in test.rf
+// 1-bit RO field 'RO_TEST_D_FIELD' declared on line 34 in fields.rf
 //
 
-assign ro_test_d_field_rdata   = {11'd0,ro_test_d_field_rvalue[0],20'd0};
-assign ro_test_d_field_read    = ~pwrite_reg & paddr_reg_18h;
-assign ro_test_d_field_rvalue  = ro_test_d_field_read & ro_test_d_field_value;
-assign ro_test_d_field_select  = paddr_reg_18h;
-assign ro_test_d_field_value   = ro_test_d_field_sync;
-assign ro_test_d_field_wselect = pwrite_reg & ro_test_d_field_select;
+assign ro_test_d_field_rdata  = {11'd0,ro_test_d_field_rvalue,20'd0};
+assign ro_test_d_field_read   = ~pwrite_reg & paddr_reg_18h;
+assign ro_test_d_field_rvalue = ro_test_d_field_read & ro_test_d_field_value;
+assign ro_test_d_field_value  = ro_test_d_field_sync;
 
 always @(posedge pclk or negedge presetn) begin
   if (~presetn) begin
@@ -598,16 +579,14 @@ end
 
 
 //
-// 48-bit RO field 'RO_ERR_FIELD' declared on line 37 in test.rf
+// 48-bit RO field 'RO_ERR_FIELD' declared on line 37 in fields.rf
 //
 
-assign ro_err_field_rdata   = {8'd0,ro_err_field_rvalue[47:24]}
-                            | {ro_err_field_rvalue[23:0],8'd0};
-assign ro_err_field_read    = {48{~pwrite_reg}} & {{24{paddr_reg_20h}},{24{paddr_reg_1Ch}}};
-assign ro_err_field_rvalue  = ro_err_field_read & ro_err_field_value;
-assign ro_err_field_select  = {paddr_reg_20h,paddr_reg_1Ch};
-assign ro_err_field_value   = ro_err_field;
-assign ro_err_field_wselect = {2{pwrite_reg}} & ro_err_field_select;
+assign ro_err_field_rdata  = {8'd0,ro_err_field_rvalue[47:24]}
+                           | {ro_err_field_rvalue[23:0],8'd0};
+assign ro_err_field_read   = {48{~pwrite_reg}} & {{24{paddr_reg_20h}},{24{paddr_reg_1Ch}}};
+assign ro_err_field_rvalue = ro_err_field_read & ro_err_field_value;
+assign ro_err_field_value  = ro_err_field;
 
 
 //
@@ -616,34 +595,36 @@ assign ro_err_field_wselect = {2{pwrite_reg}} & ro_err_field_select;
 
 always @(posedge pclk or negedge presetn) begin
   if (~presetn) begin
-    prdata  <= 32'd0;
-    pready  <= 1'd0;
-    pslverr <= 1'd0;
+    prdata <= 32'd0;
+    pready <= 1'd0;
   end else begin
-    prdata  <= sub_atomic_field_rdata
-             | single_bit_field_rdata
-             | atomic_field_rdata
-             | retime_a_field_rdata
-             | retime_b_field_rdata
-             | retime_c_field_rdata
-             | retime_d_field_rdata
-             | retime_e_field_rdata
-             | retime_f_field_rdata
-             | retime_g_field_rdata
-             | retime_h_field_rdata
-             | double_access_field_rdata
-             | tripple_access_field_rdata
-             | ro_test_a_field_rdata
-             | ro_test_b_field_rdata
-             | ro_test_c_field_rdata
-             | ro_test_d_field_rdata
-             | ro_err_field_rdata;
-    pready  <= pactive_reg;
-    pslverr <= ro_test_a_field_wselect
-             | ro_test_b_field_wselect
-             | ro_test_c_field_wselect
-             | ro_test_d_field_wselect
-             | (|ro_err_field_wselect);
+    prdata <= sub_atomic_field_rdata
+            | single_bit_field_rdata
+            | atomic_field_rdata
+            | retime_a_field_rdata
+            | retime_b_field_rdata
+            | retime_c_field_rdata
+            | retime_d_field_rdata
+            | retime_e_field_rdata
+            | retime_f_field_rdata
+            | retime_g_field_rdata
+            | retime_h_field_rdata
+            | double_access_field_rdata
+            | tripple_access_field_rdata
+            | ro_test_a_field_rdata
+            | ro_test_b_field_rdata
+            | ro_test_c_field_rdata
+            | ro_test_d_field_rdata
+            | ro_err_field_rdata;
+    pready <= paddr_reg_00h
+            | paddr_reg_04h
+            | paddr_reg_08h
+            | paddr_reg_0Ch
+            | paddr_reg_10h
+            | paddr_reg_14h
+            | paddr_reg_18h
+            | paddr_reg_1Ch
+            | paddr_reg_20h;
   end
 end
 

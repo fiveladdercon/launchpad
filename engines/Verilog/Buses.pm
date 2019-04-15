@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Packages
+#-------------------------------------------------------------------------------
+use Verilog::Module;
+
 ################################################################################
 #
 #
@@ -9,20 +14,18 @@
 package Bus;
 #-------------------------------------------------------------------------------
 #
-# A Bus is a group of Signals with a Decoder Block that decodes addresses and
-# fans-out write data to Fields and a Return Block that fans-in read data
-# and errors.
+# A Bus has a Decoder Block that decodes addresses and fans-out write data & 
+# controls to Field & Region Blocks, and a Return Block that fans-in read 
+# data & controls from the Field & Region Blocks.
 #
-use EngineAPI;
-use Verilog::Module;
 use base ('Object');
 
 #---------------------
 # Virtual Bus Signals
 #---------------------
 #
-# In order to access Fields, a Bus derivative needs to provide an implementation
-# of the following Virutal Signals.
+# In order to access Fields or Regions, a Bus derivative needs to provide 
+# an implementation of the following Virutal Signals.
 #
 # Each Virtual Signal is requested on an as needed basis, which means it should
 # be added to the Module via the $Bus->Signal API and configured with the 
@@ -42,7 +45,16 @@ use base ('Object');
 # Signals on the Bus Clock clock domain.
 #
 sub Clock {
-	&sc_error("Bus->Clock not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_clock", sub {
+    #   my $Signal = shift;
+    #	$Signal->clock;
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Clock not implemented.", ref $Bus);
 }
 
 #
@@ -52,7 +64,16 @@ sub Clock {
 # Signals on the Bus Clock clock domain.
 #
 sub Reset {
-	&sc_error("Bus->Reset not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_reset", sub {
+    #   my $Signal = shift;
+    #	$Signal->reset;
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Reset not implemented.", ref $Bus);
 }
 
 #
@@ -66,7 +87,16 @@ sub Reset {
 # See the new constructor for more details on the bus parameters.
 #
 sub Address {
-	&sc_error("Bus->Address not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_address", sub {
+    #   my $Signal = shift;
+    #	$Signal->size($Bus->{ADDRPORT})->input->wire;
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Address not implemented.", ref $Bus);
 }
 
 #
@@ -82,7 +112,20 @@ sub Address {
 # See the new constructor for more details on the bus parameters.
 #
 sub Decode  {
-	&sc_error("Bus->Decode not implemented.");
+	my $Bus     = shift;
+	my $address = shift;
+	#
+    # return $Bus->Decoder->Decode($Bus->Address, $address, sub {
+    #   my $Signal = shift;
+    #	$Signal->wire;
+    #   
+    #   # The return value will ready after it's decoded
+    #   $Bus->Return($Bus->Ready, $Signal);
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Decode not implemented.", ref $Bus);
 }
 
 #
@@ -92,7 +135,16 @@ sub Decode  {
 # data.
 #
 sub Write {
-	&sc_error("Bus->Write not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_write", sub {
+    #   my $Signal = shift;
+    #	$Signal->input->wire;
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Write not implemented.", ref $Bus);
 }
 
 #
@@ -102,7 +154,16 @@ sub Write {
 # written on a write.
 #
 sub Wdata {
-	&sc_error("Bus->Wdata not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_wdata", sub {
+    #   my $Signal = shift;
+    #	$Signal->size($Bus->{DATABITS})->input->wire;
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Wdata not implemented.", ref $Bus);
 }
 
 #
@@ -112,7 +173,35 @@ sub Wdata {
 # the data read on a read.
 #
 sub Rdata {
-	&sc_error("Bus->Rdata not implemented.");
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_rdata", sub {
+    #   my $Signal = shift;
+    #	$Signal->size($Bus->{DATABITS})->output->reg($Bus->Clock, $Bus->Reset);
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Wdata not implemented.", ref $Bus);
+}
+
+#
+# $Ready = $Bus->Ready;
+#
+# A virtual method that creates a Signal that outputs when the Rdata is valid
+# or undef if not supported.
+#
+sub Ready {
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_ready", sub {
+    #   my $Signal = shift;
+    #	$Signal->output->reg($Bus->Clock, $Bus->Reset);
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
+	return undef;
 }
 
 #
@@ -122,7 +211,60 @@ sub Rdata {
 # if not supported.
 #
 sub Error {
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_error", sub {
+    #   my $Signal = shift;
+    #	$Signal->output->reg($Bus->Clock, $Bus->Reset);
+    # });
+    #
+    # See the APB Class below for a working example.
+    #
 	return undef;
+}
+
+#
+# $Interrupt = $Bus->Interrupt;
+#
+# A virtual method that creates a Signal that outputs an Interrupt or undef 
+# if not supported.
+#
+sub Interrupt {
+	my $Bus = shift;
+	#
+    # return $Bus->Signal("bus_intr", sub {
+    #   my $Signal = shift;
+    #	$Signal->output->reg($Bus->Clock, $Bus->Reset);
+    # });
+    #
+	return undef;
+}
+
+#------------------------
+# Virtual Regions
+#------------------------
+
+#
+# $Bus->Region($Node);
+#
+# A virtual method that implements bus sub-region fan-out and fan-in.
+#
+# The method should instantiate a Region($Bus, $Node) block and use 
+# it to implemented the required functionality using the Virtual Bus
+# signals.
+#
+sub Region {
+	my $Bus    = shift;
+	my $Node   = shift;
+	#
+	# my $Region = new Region($Bus, $Node);
+	#
+	# my $Address = $Region->Address()
+	# my $Address = $Region->Decode()
+	#
+    # See the APB Class below for a working example.
+    #
+	$Bus->error("%s->Region not implemented.", ref $Bus);
 }
 
 #------------------------
@@ -134,36 +276,6 @@ sub Error {
 #
 
 #
-# $address_decode = $Bus->decode($name,$address);
-#
-# A public method that nicely adds the $address to a base decode signal $name.
-#
-sub decode {
-	my $Bus     = shift;
-	my $base    = shift;
-	my $address = shift;
-	return sprintf("%s_".&u::sized($Bus->{ADDRPOWER})."h",$base,$address);
-}
-
-#
-# $Decoder = $Bus->Decoder;
-#
-# A public shortcut for dereferencing the Decoder Block.
-#
-sub Decoder {
-	return shift->{Decoder};
-}
-
-#
-# $Return = $Bus->Return;
-#
-# A public shortcut for dereferencing the Return Block.
-#
-sub Return {
-	return shift->{Return};
-}
-
-#
 # $Signal = $Bus->Signal($name,$callback);
 #
 # A public method that returns the $Signal with the given $name.
@@ -173,91 +285,76 @@ sub Return {
 # to the Decoder, Return path, or other Module Blocks.
 #
 sub Signal {
-	my $Bus  = shift;
-	my $name = shift;
-	my $add  = shift; $add = sub {} unless defined $add;
-	&$add($Bus->add_signal($name)) unless $Bus->has_signal($name);
-	return $Bus->get_signal($name);
-}
-
-#------------------
-# Module Interface
-#------------------
-
-#
-# A backstage method that implements the Decoder Block in the Module.
-# This is called *before* any fields or regions are implemented because 
-# those depend on the Decoder for address decoding.
-#
-sub add_Decoder {
-	my $Bus     = shift;
-	my $Module  = shift;
-	my $Decoder = $Bus->{Decoder} = $Module->add_block();
-
-	$Decoder->{comment} = "\n//\n// Address Decoding\n//\n";
-
-	# Cross reference our objects while we've got both in hand.
-
-	$Module->{Bus} = $Bus;      # Give the Module a reference to the Bus
-	$Bus->{Module} = $Module;   # Give the Bus a reference to the Module
+	return shift->Module->Signal(@_);
 }
 
 #
-# $Bus->add_Return;
+# $Decoder = $Bus->Decoder;
 #
-# A backstage method that implements the Return Block in the Module.
-# This is called *after* all fields or regions have been implemented
-# since the outputs must be collected before they they can be assembled
-# as Bus outputs.
+# A public shortcut for dereferencing the Decoder Block.
 #
-sub add_Return {
+# $Bus->Decoder($Module)
+#
+# A backstage method that adds the Decoder Block to the Module.
+# This is called *before* any fields or regions are implemented because
+# those depend on the Decoder Block for address decoding.
+#
+sub Decoder {
 	my $Bus    = shift;
 	my $Module = shift;
-	my $Return = $Bus->{Return} = $Module->add_block();
-
-	$Return->{comment} = "\n//\n// Return Path\n//\n";
-
-	# Return Data
-	my @Rdata = @{$Bus->{Values}};
-	$Return->assign($Bus->Rdata,join("\n| ",@Rdata)) if @Rdata;
-
-	# Bus Errors
-	my @Errors = @{$Bus->{Errors}};
-	$Return->assign($Bus->Error,join("\n| ",@Errors)) if @Errors and $Bus->Error;
-}
-
-#----------------
-# Module proxies
-#----------------
-
-#
-# $boolean = $Bus->has_signal($name);
-#
-# A backstage method that returns true if the given Signal $name exists
-# in the Module, false otherwise.
-#
-sub has_signal {
-	my $Bus = shift; return $Bus->{Module}->has_signal(shift);
+	if ($Module) {
+		$Bus->{Module}  = $Module;
+		$Bus->{Decoder} = new Decoder($Bus);
+ 	}
+	return $Bus->{Decoder};
 }
 
 #
-# $Signal = $Bus->get_signal($name);
+# $Bus->Return($Signal, $logic, ...);
 #
-# A backstage method the retrieves the Signal with the given $name.
+# A public method that adds the $logic for the $Signal to the Return Block
+# if the $Signal is defined.
 #
-sub get_signal {
-	my $Bus = shift; return $Bus->{Module}->get_signal(shift);
+# $Bus->Return;
+#
+# A backstage method for adding the Return Block to the Module.
+# This is called *after* all fields or regions have been implemented 
+# since the return logic must be collected before they they can be 
+# assembled as Bus outputs.
+#
+sub Return {
+	my $Bus    = shift;
+	my $Signal = shift;
+	my $logic  = shift;
+	if (not defined $logic) {
+		# Implement the return path
+		$Return = $Bus->Module->Block("\n//\n// Return Path\n//\n");
+		foreach $name (keys %{$Bus->{returns}}) {
+			$Signal = $Bus->Signal($name);
+			$logic  = join("\n| ", @{$Bus->{returns}->{$name}});
+			if ($Bus->{REGISTERED}) {
+				$Return->always($Signal, $logic);
+			} else {
+				$Return->assign($Signal, $logic);
+			}
+		}
+		$Bus->{Return} = $Return;
+	} elsif ($Signal) {
+		# Collect the logic for the $Signal since we need fan-in multiple sources
+		my $logic = sprintf($logic, @_);
+		my $name  = $Signal->{name};
+		$Bus->{returns}->{$name} = [] unless exists $Bus->{returns}->{$name};
+		push @{$Bus->{returns}->{$name}}, $logic;
+	}
 }
 
 #
-# $Signal = $Bus->add_signal($name);
-# $Signal = $Bus->add_signal($name,$size);
-# $Signal = $Bus->add_signal($name,$size,$lsb);
+# $Module = $Bus->Module;
 #
-# A backstage method that adds a new Signal to the Module.
+# A public shortcut for accessing the Module that contains the Bus.
 #
-sub add_signal {
-	my $Bus = shift; return $Bus->{Module}->add_signal(@_);
+sub Module {
+	return shift->{Module};
 }
 
 #-----------------
@@ -294,73 +391,52 @@ sub map {
 	my $bit  = 0;
 
 	while ($address < $last->{address}) {
-		$bit = $Bus->access($access,$address,$lsb,$mask,$bit);
+		$bit = $Bus->access($access,$address,$size,$lsb,$mask,$bit);
 		$lsb = 0;
 		$address++;
 	}
-	$Bus->access($access,$address,$lsb,$last->{bit},$bit);
+	$Bus->access($access,$address,$size,$lsb,$last->{bit},$bit);
 
 	$Field->{access} = $access;
 }
 
 #
-# $Bus->return($Value);
-#
-# A backstage method that collects $Values for the Return path.
-#
-sub return {
-	my $Bus   = shift;
-	my $Value = shift;
-	push @{$Bus->{Values}}, $Value;
-}
-
-#
-# $Bus->error($Signal);
-#
-# A backstage method that collects error $Signals for the Return path.
-#
-sub error {
-	my $Bus   = shift;
-	my $Error = shift;
-	push @{$Bus->{Errors}}, $Error;
-}
-
-#
-# $Bus->access($access,$address,$lsb,$msb,$index)
+# $Bus->access($access,$address,$size,$lsb,$msb,$index)
 #
 # A private method that "walks" through the field in DATABITS sized chunks
 # recording the formating information for decode fanout, write data slicing 
 # and read data packing.
 #
 sub access {
-	my $Bus       = shift;
-	my $access    = shift;
-	my $address   = shift; # DATABITS per address
-	my $wd_lsb    = shift;
-	my $wd_msb    = shift;
-	my $rv_lsb    = shift;
-	my $size      = $wd_msb-$wd_lsb+1;
-	my $rv_msb    = $rv_lsb+$size-1;
-	my $bus_msb   = $Bus->{DATABITS}-1;
-	my $single    = ($size == 1);
+	my $Bus        = shift;
+	my $access     = shift;
+	my $address    = shift; # DATABITS per address
+	my $size       = shift;
+	my $wdata_lsb  = shift;
+	my $wdata_msb  = shift;
+	my $rvalue_lsb = shift;
+	my $slice      = $wdata_msb-$wdata_lsb+1;
+	my $rvalue_msb = $rvalue_lsb+$slice-1;
+	my $Bus_msb    = $Bus->{DATABITS}-1;
+	my $single     = ($slice == 1);
 
 	#
 	# The format for faning out the decode
     #
-	my $decode = $single ? "%s" : sprintf("{%d{%%s}}",$size);
+	my $decode = $single ? "%s" : sprintf("{%d{%%s}}",$slice);
 
 	#
 	# The format for slicing the write data
 	#
-    my $write = $single ? "%s[$wd_lsb]" : "%s[$wd_msb:$wd_lsb]";
+    my $write = $single ? "%s[$wdata_lsb]" : "%s[$wdata_msb:$wdata_lsb]";
 	
 	#
 	# The format for returning the read data
 	#
 	my @read = ();
-	push @read, sprintf("%d'd0",$bus_msb-$wd_msb) if $wd_msb != $bus_msb;
-	push @read, $single ? "%s[$rv_lsb]" : "%s[$rv_msb:$rv_lsb]";
-	push @read, sprintf("%d'd0",$wd_lsb         ) if $wd_lsb != 0;
+	push @read, sprintf("%d'd0",$Bus_msb-$wdata_msb) if $wdata_msb != $Bus_msb;
+	push @read, ($size == 1) ? "%s" : $single ? "%s[$rvalue_lsb]" : "%s[$rvalue_msb:$rvalue_lsb]";
+	push @read, sprintf("%d'd0",$wdata_lsb         ) if $wdata_lsb != 0;
 	my $read = u::concat(@read);
 
 	push @{$access}, {
@@ -370,7 +446,7 @@ sub access {
 		read    => $read,
 	};
 
-	return $rv_lsb+$size;
+	return $rvalue_lsb+$slice;
 }
 
 #------------------
@@ -378,7 +454,7 @@ sub access {
 #------------------
 
 #
-# $Bus = new Bus(%parameters)
+# $Bus = new Bus($Space, @options)
 #
 # A public method that returns a new instance of a Bus.
 #
@@ -418,38 +494,258 @@ sub access {
 #     Byte space with a Word access system.
 #
 sub new {
-	my $invocant  = shift;
-	my $class     = ref($invocant) || $invocant;
-	my $UNITPOWER = 3;
-	my $DATAPOWER = 2;
-	my $ADDRPOWER = &u::clog2(&sc_get_space()->sc_get_size);
+	my $invocant   = shift;
+	my $class      = ref($invocant) || $invocant;
+	my $Space      = shift;
+	my $UNITPOWER  = 3;
+	my $DATAPOWER  = 2;
+	my $ADDRPOWER  = &u::clog2($Space->sc_get_size - 1);
 	my $ADDRPORT;
 
 	while (@_) {
 		my $op = shift;
-		if    ($op eq "--unitpower") { $UNITPOWER = shift; }
-		elsif ($op eq "--datapower") { $DATAPOWER = shift; }
-		elsif ($op eq "--addrpower") { $ADDRPORT  = shift; }
+		if    ($op eq "--unitpower" ) { $UNITPOWER  = shift; }
+		elsif ($op eq "--datapower" ) { $DATAPOWER  = shift; }
+		elsif ($op eq "--addrpower" ) { $ADDRPORT   = shift; }
 	}
 
 	$ADDRPOWER -= $UNITPOWER;
 
 	my $Bus = {
 		# Bus Parameters
-		UNITPOWER => $UNITPOWER,
-		DATAPOWER => $DATAPOWER,
-		DATABITS  => 1<<$DATAPOWER<<$UNITPOWER,
-		ADDRPOWER => $ADDRPOWER,
-		ADDRPORT  => $ADDRPORT || $ADDRPOWER,
-		# Blocks
-		Decoder  => undef, # Defined by $Bus->decoder
-		Return   => undef, # Defined by $Bus->return
-		# Return Path
-		Values   => [],
-		Errors   => [],
+		UNITPOWER  => $UNITPOWER,
+		DATAPOWER  => $DATAPOWER,
+		DATABITS   => 1<<$DATAPOWER<<$UNITPOWER,
+		ADDRPOWER  => $ADDRPOWER,
+		ADDRPORT   => $ADDRPORT || $ADDRPOWER,
+		# Storage
+		Module     => undef, # Set in $Bus->Decoder()
+		Decoder    => undef, # Set in $Bus->Decoder()
+		Return     => undef, # Set in $Bus->Return()
+		returns    => {}
 	};
 
 	return bless $Bus, $class;
+}
+
+
+
+
+
+#-------------------------------------------------------------------------------
+package Decoder;
+#-------------------------------------------------------------------------------
+#
+# A Decoder is a specialized Bus Block that has a single Decode method
+# for returning Decode Signals with names that include the decoded address.
+#
+use base ('Block');
+
+#------------------------
+# Bus Implementation API
+#------------------------
+
+#
+# $Decode = $Decoder->Decode($name, $address);
+# $Decode = $Decoder->Decode($name, $address, $callback);
+#
+# A public method that returns an address qualified Decode Signal.
+#
+sub Decode {
+	my $Decoder  = shift;
+	my $name     = shift;
+	my $address  = shift;
+	my $callback = shift;
+	my $APB      = $Decoder->{Bus};
+	my $decode   = sprintf("%s_".&u::sized($APB->{ADDRPOWER})."h", $name, $address);
+	return $APB->Module->Signal($decode, $callback);
+}
+
+#---------------
+# Bus Interface
+#---------------
+
+#
+# $Decoder = new Decoder($APB)
+#
+# A backstage method that returns a new Decoder Block.
+#
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $APB      = shift;
+	my $Decoder  = $APB->Module->Block("\n//\n// Address Decoding\n//\n");
+
+	$Decoder->{Bus} = $APB;
+
+	return bless $Decoder, $class;
+}
+
+
+
+
+
+#-------------------------------------------------------------------------------
+package Node;
+#-------------------------------------------------------------------------------
+#
+# A Node is a Block that wraps the spacecraft node to strip the verilog:
+# prefix from properties.
+#
+use base ('Block');
+
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $Module   = shift;
+	my $node     = shift;
+	my $Node     = new Block($Module);
+
+	$Node->{Node} = $node;
+	return bless $Node, $class;
+}
+
+#--------------
+# Property API
+#--------------
+
+#
+# $boolean = $Node->has_propery($key)
+#
+# A public method for determining if the Node has the property.
+# Note that the $key specified does not include the verilog: prefix.
+# Returns truthy if the Node has the property.
+#
+sub has_property {
+	my $Node = shift;
+	my $key  = shift;
+	return $Node->{Node}->sc_has_property("verilog:$key");
+}
+
+#
+# $value = $Node->get_propery($key)
+#
+# A public method for retrieving the given property from the Node.
+# Note that the $key specified does not include the verilog: prefix.
+# Returns the value of the property.
+#
+sub get_property {
+	my $Node = shift; 
+	my $key  = shift;
+	return $Node->{Node}->sc_get_property("verilog:$key");
+}
+
+
+
+
+
+#-------------------------------------------------------------------------------
+package Region;
+#-------------------------------------------------------------------------------
+use base ('Node');
+
+#-------------------------------
+# Bus Region Implementation API
+#-------------------------------
+
+#------------
+# Signal API
+#------------
+
+sub Signal {
+	my $Region = shift;
+	my $name   = shift;
+	my $signal = $Region->{glob}; $signal =~ s/[*]/$name/;
+	return $Region->Module->Signal($signal, @_);
+}
+
+sub Module {
+	return shift->{Module};
+}
+
+#--------------
+# Logic API
+#--------------
+
+sub aligned {
+	my $Region  = shift;
+	my $address = $Region->{Node}->sc_get_address;
+	my $size    = $Region->{Node}->sc_get_size;
+	return 0 unless $size == 1<<$Region->{ADDRPOWER};
+	return 0 if     $address & ($size-1);
+	return 1;
+}
+
+sub address {
+	my $Region  = shift;
+	my $Address = shift;
+	return $Address->{name};
+}
+
+sub decode {
+	my $Region  = shift;
+	my $Address = shift;
+	return $Address->{name};
+}
+
+#---------------
+# Bus Interface
+#---------------
+
+#
+# $Region = new Region($Bus, $Node)
+#
+# A backstage method that returns a new Region Block for the Bus.
+#
+sub new {
+	my $invocant = shift;
+	my $class    = ref($invocant) || $invocant;
+	my $Bus      = shift;
+	my $Node     = shift;
+	my $Module   = $Bus->Module;
+	my $Region   = new Node($Module, $Node);
+
+	bless $Region, $class;
+
+	# Add the Bus
+	$Region->{Bus} = $Bus;
+
+	# Import the Bus Parameters
+	$Region->{ADDRPOWER} = u::clog2($Node->sc_get_size - 1);
+	$Region->{ADDRPORT}  = ($Bus->{ADDRPORT} == $Bus->{ADDRPOWER}) ? $Bus->{ADDRPOWER} : $Region->{ADDRPOWER};
+	$Region->{DATABITS}  = $Bus->{DATABITS};
+
+	$Region->debug;
+
+	# Determing port naming
+	if ($Region->has_property("ports")) {
+		$glob = $Node->get_property("ports")."_*";
+	} else {
+		$glob = lc $Node->sc_import($Node->sc_get_glob);
+	}
+	if (($glob eq "*") && $Node->sc_is_named) {
+		$glob = lc $Node->sc_import($Node->sc_get_name."_*");
+	}
+	$Bus->error('The anonymous non-globbing region at line %d of %s requires a -verilog:ports option to name the ports.', 
+		$Node->sc_get_lineno, $Node->sc_get_filename) if $glob eq "*";
+	$Region->{glob} = $glob;
+
+	$Region->{comment} = sprintf("\n//\n// %s%s region%s declared on line %s in %s\n//\n",
+		$Node->sc_get_size('%U'),
+		$Node->sc_is_typed ? " " .$Node->sc_get_type     : '',
+		$Node->sc_is_named ? " '".$Node->sc_get_name."'" : '',
+		$Node->sc_get_filename,
+		$Node->sc_get_lineno);
+
+	# Determine address/size alignment for decoding
+	$size = $Node->sc_get_size;
+
+	printf("%-10s %d\n", $glob, $Region->aligned);
+
+	# Add the Region to the Module
+	$Module->Block($Region);
+
+	return $Region;
 }
 
 
@@ -471,141 +767,228 @@ use base('Bus');
 sub new {
 	my $invocant = shift;
 	my $class    = ref($invocant) || $invocant;
-	my $Bus      = new Bus(@_);
+	my $APB      = new Bus(@_);
 
 	while (@_) {
 		my $op = shift;
-		if ($op eq "--pslverr") { $Bus->{pslverr} = 1; }
+		if ($op eq "--pslverr") { $APB->{pslverr} = 1; }
 	}
 
-	return bless $Bus, $class;
+	return bless $APB, $class;
 }
 
-#-------------------------------
-# Virtual Signal Implementation
-#-------------------------------
+#-----------------------------------
+# ABP Virtual Signal Implementation
+#-----------------------------------
 
 sub Clock {
-	my $Bus = shift;
-	return $Bus->Signal("pclk", sub {
-		# Mark Pclk as a clock, a posedge triggered input wire
-		shift->clock;
-	});
+	return shift->Pclk;
 }
 
 sub Reset {
-	my $Bus = shift;
-	return $Bus->Signal("presetn", sub {
-		# Mark Presetn as a reset, a negedge triggered input wire
-		shift->reset;
-	});
+	return shift->Presetn;
 }
 
 sub Address {
-	my $Bus = shift;
-	return $Bus->Signal("paddr", sub {
-		# Add the Paddr[ADDRPORT:0] input wire
-		shift->size($Bus->{ADDRPORT})->input->wire;
-	});
+	return shift->Paddr;
 }
 
 sub Decode {
-	my $Bus     = shift;
+	my $APB     = shift;
 	my $address = shift;
-	return $Bus->Signal($Bus->decode("paddr_reg",$address),sub {
+	return $APB->Decoder->Decode($APB->Paddr_reg, $address, sub {
 		# Decode from a locally registered paddr.
 		# Note that paddr[DATAPOWER-1:0] is not compared.
-		# Also note how by referencing $Bus->Pactive_reg, it triggers
-		# a chain of callbacks that ultimately add the psel & penable
-		# inputs.
-		my $Decode = shift->wire;
-		$Bus->Decoder->assign($Decode,"%s && (%s == %d'h%X)",
-			$Bus->Pactive_reg,$Bus->Paddr_reg,$Bus->{ADDRPOWER}-$Bus->{DATAPOWER}+1,$address>>$Bus->{DATAPOWER});
+		my $Decode = shift; $Decode->wire;
+		$APB->Decoder->assign($Decode, "%s && (%s == %d'h%X)",
+			$APB->Pactive_reg, $APB->Paddr_reg, $APB->{ADDRPORT}-$APB->{DATAPOWER}, $address>>$APB->{DATAPOWER});
+		# Return the Decode as Pready
+		$APB->Return($APB->Pready, $Decode);
 	});
 }
 
 sub Write {
-	my $Bus = shift;
-	return $Bus->Signal("pwrite_reg", sub {
+	my $APB = shift;
+	return $APB->Signal("pwrite_reg", sub {
 		# Write from a locally registered pwrite
-		my $Pwrite_reg = shift->reg($Bus->Clock,$Bus->Reset);
-		my $Pwrite     = $Bus->Signal("pwrite")->input->wire;
-		$Bus->Decoder->always($Pwrite_reg," ".$Pwrite);
+		my $Pwrite_reg = shift; $Pwrite_reg->reg($APB->Pclk, $APB->Presetn);
+		$APB->Decoder->always($Pwrite_reg," ".$APB->Pwrite);
 	});
 }
 
 sub Wdata {
-	my $Bus = shift;
-	return $Bus->Signal("pwdata_reg", sub {
+	my $APB = shift;
+	return $APB->Signal("pwdata_reg", sub {
 		# Write data from a locally registered pwdata
-		my $Pwdata_reg = shift->size($Bus->{DATABITS})->reg($Bus->Clock,$Bus->Reset);
-		my $Pwdata     = $Bus->Signal("pwdata")->size($Bus->{DATABITS})->input->wire;
-		$Bus->Decoder->always($Pwdata_reg," ".$Pwdata);
+		my $Pwdata_reg = shift; $Pwdata_reg->size($APB->{DATABITS})->reg($APB->Pclk, $APB->Presetn);
+		$APB->Decoder->always($Pwdata_reg," ".$APB->Pwdata);
 	});
 }
 
 sub Rdata {
-	my $Bus = shift;
-	return $Bus->Signal("prdata",sub {
-		# Register the prdata
-		shift->size($Bus->{DATABITS})->output->reg($Bus->Clock,$Bus->Reset);
-		# Add and drive the pready signal
-		my $Pready = $Bus->Signal("pready")->output->reg($Bus->Clock,$Bus->Reset);
-		$Bus->Return->always($Pready,$Bus->Pactive_reg);
-	});
+	return shift->Prdata;
 }
 
 sub Error {
-	my $Bus = shift;
-	return undef unless $Bus->{pslverr};
-	return $Bus->Signal("pslverr", sub {
-		my $Pslverr = shift->output->reg($Bus->Clock,$Bus->Reset);
-	});
+	return shift->Pslverr;
 }
 
 #------------------------------------
-# APB Specific Signal Implementation
+# APB Virtual Region Implementation
 #------------------------------------
 
+sub Region {
+	my $APB  = shift;
+	my $Node = shift;
+
+	my $Region = new Region($APB, $Node);
+
+	# Define the region interface signals
+
+	my $Paddr   = $Region->Signal("paddr")->size($Region->{ADDRPORT})->output->wire;
+	my $Psel    = $Region->Signal("psel")->output->wire;
+	my $Penable = $Region->Signal("penable")->output->wire;
+	my $Pwrite  = $Region->Signal("pwrite")->output->wire;
+	my $Pwdata  = $Region->Signal("pwdata")->size($Region->{DATABITS})->output->wire;
+	my $Pready  = $Region->Signal("pready")->input->wire;
+	my $Prdata  = $Region->Signal("prdata")->size($Region->{DATABITS})->input->wire;
+	my $Pslverr = $Region->Signal("pslverr")->input->wire if $APB->Error;
+
+	# Define internal logic signals
+
+	my $Decode    = $Region->Signal("decode")->wire;
+	my $Pready_q  = $Region->Signal("pready_q")->wire;
+	my $Prdata_q  = $Region->Signal("prdata_q")->size($Region->{DATABITS})->wire;
+	my $Pslverr_q = $Region->Signal("pslverr_q")->wire if $APB->Error;
+
+	# Implement the fan-out
+
+	$Region->assign($Decode , $Region->decode($APB->Paddr));
+	$Region->assign($Paddr  , $Region->address($APB->Paddr));
+	$Region->assign($Psel   , "%s & $Decode", $APB->Psel);
+	$Region->assign($Penable, "%s & $Decode", $APB->Penable);
+	$Region->assign($Pwrite , $APB->Pwrite);
+	$Region->assign($Pwdata , $APB->Pwdata);
+
+	# Implement the fan-in
+
+	$Region->assign($Pready_q , "$Pready & $Decode");
+	$Region->assign($Prdata_q , "$Prdata & {%d{$Decode}}", $Region->{DATABITS});
+	$Region->assign($Pslverr_q, "$Pslverr & $Decode") if $APB->Error;
+	
+	$APB->Return($APB->Prdata , $Prdata_q);
+	$APB->Return($APB->Pready , $Pready_q);
+	$APB->Return($APB->Pslverr, $Pslverr_q);
+
+}
+
+#---------------
+# APB Interface
+#---------------
+
+sub Pclk {
+	my $APB = shift;
+	return $APB->Signal("pclk", sub {
+		my $Pclk = shift; $Pclk->clock;
+	});
+}
+
+sub Presetn {
+	my $APB = shift;
+	return $APB->Signal("presetn", sub {
+		my $Presetn = shift; $Presetn->reset;
+	});
+}
+
+sub Paddr {
+	my $APB = shift;
+	return $APB->Signal("paddr", sub {
+		my $Paddr = shift; $Paddr->size($APB->{ADDRPORT})->input->wire;
+	});
+}
+
 sub Psel {
-	my $Bus = shift;
-	return $Bus->Signal("psel", sub {
-		# Add the psel input wire
-		shift->input->wire; 
+	my $APB = shift;
+	return $APB->Signal("psel", sub {
+		my $Psel = shift; $Psel->input->wire; 
 	});
 }
 
 sub Penable {
-	my $Bus = shift;
-	return $Bus->Signal("penable", sub { 
-		# Add the penable input wire
-		shift->input->wire; 
+	my $APB = shift;
+	return $APB->Signal("penable", sub { 
+		my $Penable = shift; $Penable->input->wire; 
 	});
 }
 
+sub Pwrite {
+	my $APB = shift;
+	return $APB->Signal("pwrite", sub {
+		my $Pwrite = shift; $Pwrite->input->wire;
+	});
+}
+
+sub Pwdata {
+	my $APB = shift;
+	return $APB->Signal("pwdata", sub {
+		my $Pwdata = shift; $Pwdata->size($APB->{DATABITS})->input->wire;
+	});
+}
+
+sub Prdata {
+	my $APB = shift;
+	return $APB->Signal("prdata", sub {
+		my $Prdata = shift; $APB->Output($Prdata->size($APB->{DATABITS}));
+	});
+}
+
+sub Pready {
+	my $APB = shift;
+	return $APB->Signal("pready", sub {
+		my $Pready = shift; $APB->Output($Pready);
+	});
+}
+
+sub Pslverr {
+	my $APB = shift;
+	return undef unless $APB->{pslverr};
+	return $APB->Signal("pslverr", sub {
+		my $Pslverr = shift; $APB->Output($Pslverr);
+	});
+}
+
+sub Output {
+	my $APB    = shift;
+	my $Signal = shift;
+	$Signal->output->reg($APB->Pclk, $APB->Presetn);
+}
+
+#---------------------------------
+# APB Specific Signals for Fields
+#---------------------------------
+
 sub Pactive_reg {
-	my $Bus = shift;
-	return $Bus->Signal("pactive_reg", sub {
+	my $APB = shift;
+	return $APB->Signal("pactive_reg", sub {
 		# Locally register the transaction start
-		my $Pactive = shift; $Pactive->reg($Bus->Clock,$Bus->Reset);
-		$Bus->Decoder->always($Pactive," %s && !%s",$Bus->Psel,$Bus->Penable);
+		my $Pactive = shift; $Pactive->reg($APB->Clock,$APB->Reset);
+		$APB->Decoder->always($Pactive," %s && !%s", $APB->Psel, $APB->Penable);
 	});
 }
 
 sub Paddr_reg {
-	my $Bus = shift;
-	return $Bus->Signal("paddr_reg", sub {
+	my $APB = shift;
+	return $APB->Signal("paddr_reg", sub {
 		# Locally register and hold the address on the transaction start
 		# Note that paddr[DATAPOWER-1:0] is not captured since it is unused
 		# in the Decode.
 		my $Paddr_reg = shift; 
-		$Paddr_reg->size($Bus->{ADDRPOWER}-$Bus->{DATAPOWER},$Bus->{DATAPOWER});
-		$Paddr_reg->reg($Bus->Clock,$Bus->Reset);
-		$Bus->Decoder->always($Paddr_reg,"(%s && !%s) ? %s[%d:%d] : %s",
-			$Bus->Psel,$Bus->Penable,$Bus->Address,$Bus->{ADDRPOWER},$Bus->{DATAPOWER},$Paddr_reg);
+		$Paddr_reg->size($APB->{ADDRPORT}-$APB->{DATAPOWER}, $APB->{DATAPOWER});
+		$Paddr_reg->reg($APB->Clock,$APB->Reset);
+		$APB->Decoder->always($Paddr_reg,"(%s && !%s) ? %s[%d:%d] : %s",
+			$APB->Psel, $APB->Penable, $APB->Address, $APB->{ADDRPORT}-1, $APB->{DATAPOWER}, $Paddr_reg);
 	});
 }
-
 
 
 

@@ -50,6 +50,8 @@
 #   private   : intended for use by the object itself.
 #
 ################################################################################
+use EngineAPI;
+
 #-------------------------------------------------------------------------------
 package u;
 #-------------------------------------------------------------------------------
@@ -147,7 +149,7 @@ sub indented {
 sub clog2 {
 	my $number = shift;
 	my $power  = 0;
-	while ((1<<$power)<$number) {$power++;}
+	while ((1<<$power)<=$number) {$power++;}
 	return $power;
 }
 
@@ -172,7 +174,6 @@ package Object;
 #
 # A base class to help with debugging
 #
-use EngineAPI;
 
 sub error {
 	shift; &sc_error(@_);
@@ -335,8 +336,10 @@ sub new {
 		name    => $name,
 		size    => $size,
 		lsb     => $lsb,
-		type    => undef,
-		port    => undef,
+		type    => undef,  # reg | wire
+		port    => undef,  # input | output | undef
+		class   => undef,  # clock | reset | undef
+		edge    => undef,  # posedge | negedge | undef
 		verilog => undef
 	};
 	$this->{msb} = $lsb+$size-1 if ($size > 1);
@@ -430,6 +433,25 @@ use base ('Object');
 #------------
 
 #
+# $Module = $Block->Module;
+#
+# A public shortcut to get the Module that contains the Block
+#
+sub Module {
+	return shift->{Module};
+}
+
+#
+# $Signal = $Block->Signal($name);
+# $Signal = $Block->Signal($name, $callback);
+#
+# A public shortcut for getting/setting Signals in the Module
+#
+sub Signal {
+	return shift->Module->Signal(@_);
+}
+
+#
 # $Block = $Block->assign($Wire,$logic,...);
 #
 # A public chainable method that adds an assign statement to the Block 
@@ -514,40 +536,6 @@ sub new {
 	return bless $this, $class;
 }
 
-#----------------
-# Module proxies
-#----------------
-
-#
-# $boolean = $Block->has_signal($name);
-#
-# A backstage method that returns true if the given Signal $name exists
-# in the Module, false otherwise.
-#
-sub has_signal {
-	my $this = shift; return $this->{Module}->has_signal(shift);
-}
-
-#
-# $Signal = $Block->get_signal($name);
-#
-# A backstage method the retrieves the Signal with the given $name.
-#
-sub get_signal {
-	my $this = shift; return $this->{Module}->get_signal(shift);
-}
-
-#
-# $Signal = $Block->add_signal($name);
-# $Signal = $Block->add_signal($name,$size);
-# $Signal = $Block->add_signal($name,$size,$lsb);
-#
-# A backstage method that adds a new Signal to the Module.
-#
-sub add_signal {
-	my $this = shift; return $this->{Module}->add_signal(@_);
-}
-
 #------------------
 # Module Interface
 #------------------
@@ -620,7 +608,6 @@ package Module;
 #
 # A Module is a named collection of Signals and Blocks
 #
-use EngineAPI;
 use base ('Object');
 
 #---------------------
@@ -628,51 +615,45 @@ use base ('Object');
 #---------------------
 
 #
-# $boolean = $Module->has_signal($name);
+# $Signal = $Module->Signal($name)
+# $Signal = $Module->Signal($name, $callback)
 #
-# A backstage method that returns true if the given Signal $name exists, 
-# false otherwise.
+# A backstage method for getting & setting Signals in the Module.
+# Always returns the Signal with the given name.  If the Signal
+# does not exist, it is created and passed to the callback for
+# configuration before it is returned.
 #
-sub has_signal {
-	my $this = shift;
-	my $name = shift;
-	return exists $this->{Signals}->{$name};
+# The callback mechanism builds the Signal list in and on-demand 
+# fashion and is typically a chain of callbacks, where one callback
+# depends on another Signal, which depends on another, and so on.
+#
+sub Signal {
+	my $Module   = shift;
+	my $name     = shift;
+	my $callback = shift;
+	if (not exists $Module->{Signals}->{$name}) {
+		$Signal = new Signal($name);
+		$Module->{Signals}->{$name} = $Signal;
+		&$callback($Signal) if $callback;
+	}
+	return $Module->{Signals}->{$name};
 }
 
 #
-# $Signal = $Module->get_signal($name);
+# $Block = $Module->Block;
+# $Block = $Module->Block("comment");
+# $Block = $Module->Block($Block);
 #
-# A backstage method the retrieves the Signal with the given $name.
+# A backstage method for adding Blocks to the Module.  
+# Always returns a Block.  Creates a new Block without
+# any arguments or a new Block with the given comment,
+# or just adds the Block if one is given.
 #
-sub get_signal {
-	my $this = shift;
-	my $name = shift;
-	return $this->{Signals}->{$name};
-}
-
-#
-# $Signal = $Module->add_signal($name);
-# $Signal = $Module->add_signal($name,$size);
-# $Signal = $Module->add_signal($name,$size,$lsb);
-#
-# A backstage method that adds a new Signal to the Module.
-#
-sub add_signal {
-	my $this   = shift;
-	my $Signal = new Signal(@_);
-	$this->{Signals}->{$Signal->{name}} = $Signal;
-	return $Signal;
-}
-
-#
-# $Block = $Module->add_block;
-#
-# A backstage method that returns a new Block to the $Module user.
-#
-sub add_block {
-	my $this  = shift;
-	my $Block = shift || new Block($this);
-	push @{$this->{Blocks}}, $Block;
+sub Block {
+	my $Module = shift;
+	my $arg    = shift;
+	my $Block  = ref($arg) ? $arg : new Block($Module, $arg);
+	push @{$Module->{Blocks}}, $Block;
 	return $Block;
 }
 
@@ -713,12 +694,12 @@ sub declaration {
 	return $this->{verilog} if $this->{verilog};
     
     foreach my $name (sort keys %{$this->{Signals}}) {
-    	my $Signal = $this->get_signal($name);
+    	my $Signal = $this->Signal($name);
     	if    ($Signal->{port} eq 'input' ) { push @{$this->{Inputs}},  $Signal;  }
     	elsif ($Signal->{port} eq 'output') { push @{$this->{Outputs}}, $Signal;  }
     	elsif ($Signal->{type} eq 'wire'  ) { push @{$this->{Wires}},   $Signal;  }
     	elsif ($Signal->{type} eq 'reg'   ) { push @{$this->{Regs}},    $Signal;  }
-    	else  {$Signal->debug(); &sc_fatal("Unknown Signal type $Signal");        }
+    	else  {$Signal->debug(); &sc_fatal("Signal $Signal has not been configured as a reg or wire."); }
     }
 
     $this->{verilog} = "module $name (\n";

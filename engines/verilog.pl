@@ -7,16 +7,14 @@ use lib (".");
 use EngineAPI;
 use EngineUtils;
 use Verilog::Buses;
+use Verilog::Fields;
 
 #-------------------------------------------------------------------------------
 package Slave;
 #-------------------------------------------------------------------------------
 #
-#  A Slave is a Module that uses a Bus to access Fields
+#  A Slave is a Module that uses a Bus to access Fields and Regions
 #
-use EngineAPI;
-use Verilog::Module;
-use Verilog::Fields;
 use base ('Module');
 
 #------------------
@@ -24,41 +22,43 @@ use base ('Module');
 #------------------
 
 #
-# $Slave = new Slave($Bus);
+# $Slave = new Slave($Bus, $Space);
 #
 # A backstage method that returns a new instance of a Slave.
 #
 sub new {
 	my $invocant = shift;
 	my $class    = ref($invocant) || $invocant;
+	my $Space    = shift;
 	my $Bus      = shift;
-	my $Space    = &sc_get_space();
-	my $Slave    = Module::new($class,$Space->sc_get_type || "space");
+	my $Slave    = Module::new($class, $Space->sc_get_type || "space");
 
-	$Bus->add_Decoder($Slave);
+	# Add the Bus to the Module
+	$Slave->{Bus} = $Bus;
 
-	my @Nodes = &bounded($Space);
+	# Add the Decoder to the Bus
+	$Bus->Decoder($Slave);
 
-	foreach my $Node (@Nodes) {
+	# Add the Fields & Regions
+	my @Fields = ();
+	foreach my $Node (&bounded($Space)) {
 		if ($Node->sc_is_field) {
-			my $name = $Node->sc_get_identifier;
-			my $Type = $Node->sc_get_type;
-			my $file = $Node->sc_get_filename;
-			my $line = $Node->sc_get_lineno;
-			eval { $Slave->{Fields}->{$name} = $Type->new($Slave,$Node); } or 
-				&sc_fatal("Field ${name} declared on line ${line} in ${file} has unknown type: ${Type}.");
-		}
-	}
-
-	foreach my $Node (@Nodes) {
-		if ($Node->sc_is_field) {
-			$Slave->{Fields}->{$Node->sc_get_identifier}->implementation;
+			# Only declare Fields on this pass so Fields can reference
+			# each other in their implementations.
+			push @Fields, $Slave->Field($Node);
 		} else {
-			$Slave->region($Node);
+			# Regions are implemented as we go
+			$Bus->Region($Node);
 		}
 	}
 
-	$Bus->add_Return($Slave);
+	# Now implement the Fields
+	foreach my $Field (@Fields) {
+		$Field->implementation;
+	}
+
+	# Add the Return block to the Bus
+	$Bus->Return;
 
 	return $Slave;
 }
@@ -70,8 +70,8 @@ sub new {
 # implemented inside the Module.  These are:
 #
 #  o Fields
-#  o Typed Regions that are not imported
-#  o Untyped Regions that are exported
+#  o Typed Regions that are imported
+#  o Untyped Regions that are not exported
 #  o Named Childless Regions (i.e. RAMs and ROMS)
 #
 # Note that this is not a method of the Slave class, but just a regular
@@ -96,11 +96,34 @@ sub bounded {
 	return @nodes;
 }
 
-sub region {
-	my $this   = shift;
-	my $region = shift;
+#
+# $Field = $Slave->Field($Node)
+#
+# A backstage method that returns an instance of the Type of Field
+# specified by the supplied Node.  Throws a fatal if the node type
+# has no implementation.
+#
+# The method also adds the Field's Port and Value Signals to the
+# Slave so that Fields can connect with each other.
+#
+sub Field {
+	my $Slave = shift;
+	my $Node  = shift;
+	my $name  = $Node->sc_get_identifier;
+	my $Type  = $Node->sc_get_type;
+	my $file  = $Node->sc_get_filename;
+	my $line  = $Node->sc_get_lineno;
+	my $Field;
 
-	printf("REGION %s %s\n",$region->sc_get_identifier);
+	# Attempt to instantiate the specified Type.
+	eval { $Field = $Type->new($Slave,$Node); } or 
+		&sc_fatal("Field ${name} declared on line ${line} in ${file} has unknown type: ${Type}.");
+	
+	# Add the Port and Value to the list of Signals
+	$Field->Port;
+	$Field->Value;
+
+	return $Field;
 }
 
 #-------------------------------------------------------------------------------
@@ -112,13 +135,16 @@ my $BUS;
 my $TYPES;
 my $OUTPUT;
 my @ARGS = ();
+my $DEBUG = 0;
 
 while (@ARGV) {
 	my $op = shift;
 	if    ($op =~ /^-?-h(elp)?$/) { &uhelp;          }
-	elsif ($op =~ /[.]v$/       ) { $OUTPUT = $op;   }
 	elsif ($op eq "-bus"        ) { $BUS    = shift; }
 	elsif ($op eq "-types"      ) { $TYPES  = shift; }
+	elsif ($op eq "-d") { $DEBUG = 1; }
+	elsif ($op eq "-o"          ) { $OUTPUT = shift; }
+	elsif ($op =~ /[.]v$/       ) { $OUTPUT = $op;   }
 	else                          { push @ARGS, $op; }
 }
 
@@ -138,9 +164,10 @@ if ($BUS) {
 # Main
 #-------------------------------------------------------------------------------
 
-my $Bus   = new $BUS(@ARGS);
-my $Slave = new Slave($Bus);
+my $Space = &sc_get_space();
+my $Bus   = new $BUS($Space, @ARGS);
+my $Slave = new Slave($Space, $Bus);
 
 &uopen($OUTPUT);
-print $Slave->declaration;
+print $Slave->declaration unless $DEBUG;
 &uclose($OUTPUT);

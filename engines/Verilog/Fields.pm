@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Packages
+#-------------------------------------------------------------------------------
+use Verilog::Module;
+
 ################################################################################
 #
 #
@@ -9,11 +14,10 @@
 package Field;
 #-------------------------------------------------------------------------------
 #
-# A Field is a Block in a Slave Module that implements the function of the field
-# type.
+# A Field is a Node Block in a Slave Module that implements the function of the 
+# field type.
 #
-use EngineAPI;
-use base ('Block');
+use base ('Node');
 
 #------------------------------
 # Virtual Field Implementation
@@ -37,6 +41,9 @@ sub implementation {
 # The following methods are the public interface for implementing the
 # virtual implementation method in derived classes.
 #
+# In addition to te following APIs, Fields inherit the following 
+# Property API from the Node Class
+#
 
 #--------------
 # Property API
@@ -49,42 +56,35 @@ sub implementation {
 # Note that the $key specified does not include the verilog: prefix.
 # Returns truthy if the Field Node has the property.
 #
-sub has_property {
-	my $Field = shift;
-	my $key   = shift;
-	return $Field->{Node}->sc_has_property("verilog:$key");
-}
 
 #
-# $boolean = $Field->get_propery($key)
+# $value = $Field->get_propery($key)
 #
 # A public method for retrieving the given property from the Field Node.
 # Note that the $key specified does not include the verilog: prefix.
 # Returns the value of the property.
 #
-sub get_property {
-	my $Field = shift; 
-	my $key   = shift;
-	return $Field->{Node}->sc_get_property("verilog:$key");
-}
 
 #------------
 # Signal API
 #------------
 
 #
+# $Signal = $Field->Signal($suffix);
 # $Signal = $Field->Signal($suffix,$callback);
 #
 # A public method that returns a Signal based on a $suffixed Field name.
 # If the $Signal does not exist, then it is created with the Field size and 
-# passed to the $callback so that it can be configured and used when added.
+# passed to the $callback so that it can be configured when added.
 #
 sub Signal {
-	my $Field = shift;
-	my $name = join("_",$Field->name,shift);
-	my $add  = shift; $add = sub {} unless defined $add;
-	&$add($Field->add_signal($name,$Field->size)) unless $Field->has_signal($name);
-	return $Field->get_signal($name);
+	my $Field    = shift;
+	my $name     = join("_",$Field->name,shift);
+	my $callback = shift;
+	return $Field->Module->Signal($name, sub {
+		$Signal = shift->size($Field->size);
+		&$callback($Signal) if $callback;
+	});
 }
 
 #---------
@@ -103,7 +103,8 @@ sub Bus {
 #
 # $Select = $Field->Select;
 #
-# A public method that returns the $Select Signal.  
+# A public method that returns the $Select Signal.
+#  
 # The $Select Signal is a concatination of address decodes used to access the
 # Field and may be more than one bit if the Field spans multiple Bus addresses.
 #
@@ -111,9 +112,10 @@ sub Select {
 	my $Field = shift;
 	my $Bus   = $Field->Bus;
 	return $Field->Signal("select",sub {
+		my $Select  = shift;
 		my @access  = $Field->access;
-		my $Select  = shift->size(scalar @access)->wire;
 		my @decodes = ();
+		$Select->size(scalar @access)->wire;
 		foreach my $access (@access) {
 			unshift @decodes, $Bus->Decode($access->{address});
 		}
@@ -125,15 +127,16 @@ sub Select {
 # $WSelect = $Field->WSelect;
 #
 # A public method that returns the $WSelect Signal. 
+#  
 # The $WSelect is the $Select Signal qualified by the Bus Write Signal.
 #
 sub Wselect {
 	my $Field = shift;
 	my $Bus   = $Field->Bus;
 	return $Field->Signal("wselect", sub {
+		my $WSelect = shift;
 		my $Select  = $Field->Select;
-		my $WSelect = shift->size($Select->size)->wire;
-		my $Write   = $Bus->Write;
+		$WSelect->size($Select->size)->wire;
 		$Field->assign($WSelect,"%s & %s",u::fanout($Bus->Write,$Select->size),$Select);
 	});
 }
@@ -142,16 +145,17 @@ sub Wselect {
 # $RSelect = $Field->RSelect;
 #
 # A public method that returns the $RSelect Signal.
+#  
 # The $RSelect is the $Select Signal qualified by the Bus Read Signal.
 #
 sub Rselect {
 	my $Field = shift;
 	my $Bus   = $Field->Bus;
 	return $Field->Signal("rselect", sub {
+		my $RSelect = shift;
 		my $Select  = $Field->Select;
-		my $RSelect = shift->size($Select->size)->wire;
-		my $Write   = $Bus->Write;
-		$Field->assign($WSelect,"%s & %s",u::fanout("~".$Bus->Write,$Select->size),$Select);
+		$RSelect->size($Select->size)->wire;
+		$Field->assign($RSelect,"%s & %s",u::fanout("~".$Bus->Write,$Select->size),$Select);
 	});
 }
 
@@ -159,6 +163,7 @@ sub Rselect {
 # $Write = $Field->Write;
 #
 # A public method that returns the $Write Signal.
+#  
 # The $Write is a Field sized Signal that is a fanout of the the Bus Write 
 # qualified by fanout(s) of the Bus Decode Signal(s).  The intent is to use the
 # $Write for bitwise muxing ofthe Write Data with the Field Value:
@@ -182,6 +187,7 @@ sub Write {
 # $Wdata = $Field->Wdata;
 #
 # A public method that returns the $Wdata Signal.
+#  
 # The $Wdata is a Field sized Signal that is a fanout of the Bus Wdata, sliced
 # and/or concatinated to line up with the Field Value.
 #
@@ -202,6 +208,7 @@ sub Wdata {
 # $Read = $Field->Read;
 #
 # A public method that returns the $Read Signal.
+#  
 # The $Read Signal is an inverted $Write Signal.  It is intended for qualifying
 # the Field Value before packing into the return path.
 #
@@ -219,30 +226,44 @@ sub Read {
 }
 
 #
-# $Field->return($Value);
+# $Field->rdata($Value);
 # 
 # A public method to add the $Value to the return path.
+#  
 # The $Value is qualified and shifted to align with the Bus address(es) then
 # passed to the Bus.
 #
-sub return {
+sub rdata {
 	my $Field = shift;
 	my $Value = shift;
 	my $Bus   = $Field->Bus;
-	$Field->Signal("rdata", sub {
+	$Field->Signal("rvalue", sub {
 		# Qualify the Value with the Read Enable
-		my $Rdata = shift; $Rdata->wire;
-		my $Read  = $Field->Read;
-		$Field->assign($Rdata,"$Read & $Value");
+		my $Rvalue = shift; $Rvalue->wire;
+		my $Read   = $Field->Read;
+		$Field->assign($Rvalue,"$Read & $Value");
 		# Organize the Qualified Value into data chunks
-		my $Return = $Bus->Signal($Field->{name}."_return")->size($Bus->{DATABITS})->wire;
+		my $Rdata  = $Field->Signal("rdata")->size($Bus->{DATABITS})->wire;
 		my @shifts = ();
 		foreach my $access ($Field->access) {
-			unshift @shifts, sprintf($access->{read},$Rdata);
+			unshift @shifts, sprintf($access->{read},$Rvalue);
 		}
-		$Field->assign($Return,join("\n| ", @shifts));
-		$Bus->return($Return);
+		$Field->assign($Rdata, join("\n| ", @shifts));
+		$Bus->Return($Bus->Rdata, $Rdata);
 	});
+}
+
+#
+# $Field->ready($Ready);
+#
+# A public method to add the $Ready to the return path.
+# The $Ready is reduce ORed if it is more than one bit.
+#
+sub ready {
+	my $Field = shift;
+	my $Ready = shift;
+	my $Bus   = $Field->Bus;
+	$Bus->Return($Bus->Ready, u::reduce("|",$Ready,$Ready->size));
 }
 
 #
@@ -254,8 +275,23 @@ sub return {
 sub error {
 	my $Field = shift;
 	my $Error = shift;
-	$Field->Bus->error(u::reduce("|",$Error,$Error->size));
+	my $Bus   = $Field->Bus;
+	$Bus->Return($Bus->Error, u::reduce("|",$Error,$Error->size));
 }
+
+#
+# $Field->interrupt($Interrupt);
+#
+# A public method to add the $Interrupt to the return path.
+# The $Interrupt is reduce ORed if it is more than one bit.
+#
+sub ready {
+	my $Field     = shift;
+	my $Interrupt = shift;
+	my $Bus       = $Field->Bus;
+	$Bus->Return($Bus->Interrupt, u::reduce("|",$Interrupt,$Interrupt->size));
+}
+
 
 #-----------
 # Field API
@@ -284,11 +320,30 @@ sub size {
 #
 # A public method to get the Field default value.
 #
-my $WARNED = 0;
 sub default {
 	my $Field = shift;
-	&sc_warn("Field->default does not return valid verilog.") unless $WARNED++;
-	return $Field->{Node}->sc_get_value;
+	if (not defined $Field->{value}) {
+		my $value = $Field->{Node}->sc_get_value;
+		my $fpart = 0;
+		my $shift = 0;
+		my $hex   = 0;
+		my $ipart = 0;
+
+		$fpart = $1 if $value =~ s/[.](\d+)$//;
+		$shift = 0  if $value =~ s/b$//;
+		$shift = 3  if $value =~ s/B$//;
+		$shift = 4  if $value =~ s/H$//;
+		$shift = 5  if $value =~ s/W$//;
+		$shift = 6  if $value =~ s/D$//;
+		$shift = 13 if $value =~ s/K$//;
+		$shift = 23 if $value =~ s/M$//;
+		$shift = 33 if $value =~ s/G$//;
+		$shift = 43 if $value =~ s/T$//;
+		$hex   = 1  if $value =~ s/h$//;
+		$ipart = $hex ? hex($value) : $value;
+		$Field->{value} = sprintf("%d'h%x",$Field->{size},($ipart<<$shift)+$fpart);
+	}
+	return $Field->{value};
 }
 
 #
@@ -304,7 +359,9 @@ sub default {
 sub Clock {
 	my $Field = shift;
 	my $name  = $Field->get_property("clock") || $Field->name."_clk";
-	return $Field->get_signal($name) || $Field->add_signal($name)->clock;
+	return $Field->Module->Signal($name, sub { 
+		shift->clock; 
+	});
 }
 
 #
@@ -320,7 +377,9 @@ sub Clock {
 sub Reset {
 	my $Field = shift;
 	my $name = $Field->get_property("reset") || $Field->name."_rstn";
-	return $Field->get_signal($name) || $Field->add_signal($name)->reset;
+	return $Field->Module->Signal($name, sub { 
+		shift->reset; 
+	});
 }
 
 #
@@ -335,7 +394,9 @@ sub Reset {
 #
 sub Port {
 	my $Field = shift;
-	return $Field->get_signal($Field->name) || $Field->add_signal($Field->name,$Field->size);
+	return $Field->Module->Signal($Field->name, sub { 
+		shift->size($Field->size); 
+	});
 }
 
 #
@@ -371,7 +432,10 @@ sub Reg {
 	my $Clock   = shift;
 	my $Reset   = shift;
 	my $default = shift; $default = $Field->default unless $default;
-	return $Field->get_signal($name) || $Field->add_signal($name,$Field->size)->reg($Clock,$Reset,$default);
+	return $Field->Module->Signal($name, sub {
+		shift->reg($Clock, $Reset, $default);
+	});
+	#return $Field->get_signal($name) || $Field->add_signal($name,$Field->size)->reg($Clock,$Reset,$default);
 }
 
 #
@@ -453,7 +517,7 @@ sub negedge_detect {
 #------------------
 
 #
-# $Field = new Field($Module,$field);
+# $Field = new Field($Module,$Node);
 #
 # A backstage method that returns a new instance of a Field.
 #
@@ -463,7 +527,7 @@ sub new {
 	my $Module   = shift;
 	my $Node     = shift;
 	my $Bus      = $Module->{Bus};
-	my $Field    = Block::new($class,$Module);
+	my $Field    = new Node($Module, $Node);
 
 	my $name     = $Node->sc_get_identifier;
 	my $address  = $Node->sc_get_address;
@@ -472,20 +536,18 @@ sub new {
 	my $filename = $Node->sc_get_filename;  $filename =~ s/.*\///;
 	my $lineno   = $Node->sc_get_lineno;
 
+	$Field->{comment} = "\n//\n// ${size}-bit ${type} field '${name}' declared on line ${lineno} in ${filename}\n//\n";
 	$Field->{name}    = lc $name;
 	$Field->{address} = $address;
 	$Field->{size}    = $size;
 	$Field->{type}    = $type;
 
 	$Field->{Bus}     = $Bus;
-	$Field->{Node}    = $Node;
 
-	$Field->{comment} = "\n//\n// ${size}-bit ${type} field '${name}' declared on line ${lineno} in ${filename}\n//\n";
-
-	$Module->add_block($Field);
+	$Module->Block($Field);
 	$Bus->map($Field);
 
-	return $Field;
+	return bless $Field, $class;
 }
 
 #-----------------
@@ -519,7 +581,13 @@ package RW;
 use base ('Field');
 
 #
-# RW [-verilog:clock [CLOCK] [-verilog:reset [RESET]]]
+# RW
+# RW -verilog:retime
+# RW -verilog:clock
+# RW -verilog:clock CLOCK
+# RW -verilog:clock       -verilog:reset
+# RW -verilog:clock CLOCK -verilog:reset
+# RW -verilog:clock CLOCK -verilog:reset RESET
 #
 
 sub implementation {
@@ -539,7 +607,7 @@ sub implementation {
 	$Value->reg($Bus->Clock,$Bus->Reset,$default);
 
 	# Add the field Value to the Return path so it can be read.
-	$Field->return($Value);
+	$Field->rdata($Value);
 
 	# Define how the field Value is updates on Bus writes.
 	$Field->always($Value,u::mux($Write,$Wdata,$Value));
@@ -564,7 +632,14 @@ package RO;
 use base ('Field');
 
 #
-# RO [-verilog:retime [-verilog:reset]] | [-verilog:constant]
+# RO
+# RO -verilog:constant
+# RO -verilog:retime
+# RO -verilog:clock
+# RO -verilog:clock CLOCK
+# RO -verilog:clock       -verilog:reset
+# RO -verilog:clock CLOCK -verilog:reset
+# RO -verilog:clock CLOCK -verilog:reset RESET
 #
 
 sub implementation {
@@ -591,7 +666,7 @@ sub implementation {
 		$Field->assign($Value, $Port);
 
 		# Add the Value to the Return path for reading
-		$Field->return($Value);
+		$Field->rdata($Value);
 
 	} else {
 
@@ -611,11 +686,11 @@ sub implementation {
 		$Field->assign($Value, $Port);
 
 		# Add the Value to the Return path for reading
-		$Field->return($Value);
+		$Field->rdata($Value);
 
 	}
 
-	# Set an Error on a write, if supported/enabled
+	# Set an Error on a write, if supported by the Bus
 	$Field->error($Field->Wselect) if $Bus->Error;
 }
 

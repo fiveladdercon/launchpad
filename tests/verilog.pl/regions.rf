@@ -1,0 +1,22 @@
+0KB 4KB RAM_A {};
+
+5KB 4KB RAM_B {};
+
+12KB 2KB RAM_C {};
+
+/-
+16KB 1KB {
+
+	0W  16W N_U_T_REGION test;
+
+    16W 16W A_G_T_REGION_* test;
+
+    32W 16W IMPORTED_* test -verilog:import;
+
+    48W 16W IMPORTED_* NAMED test;
+
+};
+-/
+
+23KB 3KB ROM {};
+

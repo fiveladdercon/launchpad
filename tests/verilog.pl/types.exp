@@ -3,6 +3,7 @@ module types (
   output wire           test
 );
 
+wire           test_value;
 
 
 
@@ -15,7 +16,8 @@ module types (
 // 1-bit TEST field 'TEST' declared on line 1 in types.rf
 //
 
-assign test = 0;
+assign test       = test_value;
+assign test_value = 1'h0;
 
 
 //

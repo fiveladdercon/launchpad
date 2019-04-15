@@ -12,15 +12,15 @@ describe("verilog.pl", sub {
 
 	it("generates a verilog module from the model", sub {
 		rm("*.v");
-		spacecraft("test.rf verilog.pl test.v");
-		diff("test.v","test.exp");
+		spacecraft("fields.rf verilog.pl test.v");
+		diff("test.v","fields.exp");
 		rm("*.v");
 	});
 
 	it("optionally generates an bus with errors via a bus option", sub {
 		rm("*.v");
-		spacecraft("test.rf verilog.pl --pslverr test.v");
-		diff("test.v","pslverr.exp");
+		spacecraft("fields.rf verilog.pl --pslverr test.v");
+		diff("test.v","fields.pslverr.exp");
 		rm("*.v");
 	});
 
