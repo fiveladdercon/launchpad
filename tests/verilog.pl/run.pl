@@ -10,10 +10,17 @@ describe("verilog.pl", sub {
 		rm("help.*");
 	});
 
-	it("generates a verilog module from the model", sub {
+	it("generates a verilog module with fields", sub {
 		rm("*.v");
 		spacecraft("fields.rf verilog.pl test.v");
 		diff("test.v","fields.exp");
+		rm("*.v");
+	});
+
+	it("generates a verilog module with regions", sub {
+		rm("*.v");
+		spacecraft("regions.rf verilog.pl test.v");
+		diff("test.v","regions.exp");
 		rm("*.v");
 	});
 

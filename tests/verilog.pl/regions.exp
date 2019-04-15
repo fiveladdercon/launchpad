@@ -1,0 +1,217 @@
+module regions (
+  input  wire [16:0]    paddr,
+  input  wire           pclk,
+  input  wire           penable,
+  input  wire           presetn,
+  input  wire           psel,
+  input  wire [31:0]    pwdata,
+  input  wire           pwrite,
+  input  wire [31:0]    ram_a_prdata,
+  input  wire           ram_a_pready,
+  input  wire [31:0]    ram_b_prdata,
+  input  wire           ram_b_pready,
+  input  wire [31:0]    ram_c_prdata,
+  input  wire           ram_c_pready,
+  input  wire [31:0]    rom_prdata,
+  input  wire           rom_pready,
+
+  output reg  [31:0]    prdata,
+  output reg            pready,
+  output wire [14:0]    ram_a_paddr,
+  output wire           ram_a_penable,
+  output wire           ram_a_psel,
+  output wire [31:0]    ram_a_pwdata,
+  output wire           ram_a_pwrite,
+  output wire [14:0]    ram_b_paddr,
+  output wire           ram_b_penable,
+  output wire           ram_b_psel,
+  output wire [31:0]    ram_b_pwdata,
+  output wire           ram_b_pwrite,
+  output wire [13:0]    ram_c_paddr,
+  output wire           ram_c_penable,
+  output wire           ram_c_psel,
+  output wire [31:0]    ram_c_pwdata,
+  output wire           ram_c_pwrite,
+  output wire [14:0]    rom_paddr,
+  output wire           rom_penable,
+  output wire           rom_psel,
+  output wire [31:0]    rom_pwdata,
+  output wire           rom_pwrite
+);
+
+wire           ram_a_decode;
+wire [31:0]    ram_a_prdata_q;
+wire           ram_a_pready_q;
+wire           ram_b_decode;
+wire [16:0]    ram_b_offset;
+wire [31:0]    ram_b_prdata_q;
+wire           ram_b_pready_q;
+wire           ram_c_decode;
+wire [16:0]    ram_c_offset;
+wire [31:0]    ram_c_prdata_q;
+wire           ram_c_pready_q;
+wire           rom_decode;
+wire [16:0]    rom_offset;
+wire [31:0]    rom_prdata_q;
+wire           rom_pready_q;
+
+
+
+//
+// Address Decoding
+//
+
+
+//
+// 4KB region 'RAM_A' declared on line regions.rf in 1
+//
+
+assign ram_a_decode   = (paddr >= 15'h0) && (paddr <= 15'h7fff);
+assign ram_a_paddr    = paddr[14:0];
+assign ram_a_penable  = penable & ram_a_decode;
+assign ram_a_prdata_q = ram_a_prdata & {32{ram_a_decode}};
+assign ram_a_pready_q = ram_a_pready & ram_a_decode;
+assign ram_a_psel     = psel & ram_a_decode;
+assign ram_a_pwdata   = pwdata;
+assign ram_a_pwrite   = pwrite;
+
+
+//
+// Return Path
+//
+
+always @(posedge pclk or negedge presetn) begin
+  if (~presetn) begin
+    prdata <= 32'd0;
+    pready <= 1'd0;
+  end else begin
+    prdata <= ram_a_prdata_q;
+    pready <= ram_a_pready_q;
+  end
+end
+
+
+//
+// 4KB region 'RAM_B' declared on line regions.rf in 3
+//
+
+assign ram_b_decode   = (paddr >= 15'h1400) && (paddr <= 15'h93ff);
+assign ram_b_offset   = paddr - 17'h1400;
+assign ram_b_paddr    = ram_b_offset[14:0];
+assign ram_b_penable  = penable & ram_b_decode;
+assign ram_b_prdata_q = ram_b_prdata & {32{ram_b_decode}};
+assign ram_b_pready_q = ram_b_pready & ram_b_decode;
+assign ram_b_psel     = psel & ram_b_decode;
+assign ram_b_pwdata   = pwdata;
+assign ram_b_pwrite   = pwrite;
+
+
+//
+// Return Path
+//
+
+always @(posedge pclk or negedge presetn) begin
+  if (~presetn) begin
+    prdata <= 32'd0;
+    pready <= 1'd0;
+  end else begin
+    prdata <= ram_a_prdata_q
+            | ram_b_prdata_q;
+    pready <= ram_a_pready_q
+            | ram_b_pready_q;
+  end
+end
+
+
+//
+// 2KB region 'RAM_C' declared on line regions.rf in 5
+//
+
+assign ram_c_decode   = (paddr >= 14'h3000) && (paddr <= 14'h6fff);
+assign ram_c_offset   = paddr - 17'h3000;
+assign ram_c_paddr    = ram_c_offset[13:0];
+assign ram_c_penable  = penable & ram_c_decode;
+assign ram_c_prdata_q = ram_c_prdata & {32{ram_c_decode}};
+assign ram_c_pready_q = ram_c_pready & ram_c_decode;
+assign ram_c_psel     = psel & ram_c_decode;
+assign ram_c_pwdata   = pwdata;
+assign ram_c_pwrite   = pwrite;
+
+
+//
+// Return Path
+//
+
+always @(posedge pclk or negedge presetn) begin
+  if (~presetn) begin
+    prdata <= 32'd0;
+    pready <= 1'd0;
+  end else begin
+    prdata <= ram_a_prdata_q
+            | ram_b_prdata_q
+            | ram_c_prdata_q;
+    pready <= ram_a_pready_q
+            | ram_b_pready_q
+            | ram_c_pready_q;
+  end
+end
+
+
+//
+// 3KB region 'ROM' declared on line regions.rf in 21
+//
+
+assign rom_decode   = (paddr >= 15'h1f400) && (paddr <= 15'h253ff);
+assign rom_offset   = paddr - 17'h1f400;
+assign rom_paddr    = rom_offset[14:0];
+assign rom_penable  = penable & rom_decode;
+assign rom_prdata_q = rom_prdata & {32{rom_decode}};
+assign rom_pready_q = rom_pready & rom_decode;
+assign rom_psel     = psel & rom_decode;
+assign rom_pwdata   = pwdata;
+assign rom_pwrite   = pwrite;
+
+
+//
+// Return Path
+//
+
+always @(posedge pclk or negedge presetn) begin
+  if (~presetn) begin
+    prdata <= 32'd0;
+    pready <= 1'd0;
+  end else begin
+    prdata <= ram_a_prdata_q
+            | ram_b_prdata_q
+            | ram_c_prdata_q
+            | rom_prdata_q;
+    pready <= ram_a_pready_q
+            | ram_b_pready_q
+            | ram_c_pready_q
+            | rom_pready_q;
+  end
+end
+
+
+//
+// Return Path
+//
+
+always @(posedge pclk or negedge presetn) begin
+  if (~presetn) begin
+    prdata <= 32'd0;
+    pready <= 1'd0;
+  end else begin
+    prdata <= ram_a_prdata_q
+            | ram_b_prdata_q
+            | ram_c_prdata_q
+            | rom_prdata_q;
+    pready <= ram_a_pready_q
+            | ram_b_pready_q
+            | ram_c_pready_q
+            | rom_pready_q;
+  end
+end
+
+
+endmodule

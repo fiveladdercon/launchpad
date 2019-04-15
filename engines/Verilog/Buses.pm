@@ -667,25 +667,31 @@ sub Module {
 # Logic API
 #--------------
 
-sub aligned {
-	my $Region  = shift;
-	my $address = $Region->{Node}->sc_get_address;
-	my $size    = $Region->{Node}->sc_get_size;
-	return 0 unless $size == 1<<$Region->{ADDRPOWER};
-	return 0 if     $address & ($size-1);
-	return 1;
-}
-
 sub address {
 	my $Region  = shift;
 	my $Address = shift;
-	return $Address->{name};
+	my $Bus     = $Region->{Bus};
+	my $address = $Region->{address};
+	my $size    = $Region->{size};
+	my $power   = $Region->{ADDRPORT};
+	my $mask    = (1<<$power) - 1;
+	if ($address & $mask) {
+		my $Offset = $Region->Signal("offset")->size($Address->{size})->wire;
+		$Region->assign($Offset, "%s - %d'h%x", $Address, $Address->{size}, $address);
+		$Address = $Offset;
+	}
+	return sprintf("%s[%d:0]", $Address, $power - 1);
 }
 
 sub decode {
 	my $Region  = shift;
 	my $Address = shift;
-	return $Address->{name};
+	my $first   = $Region->{address};
+	my $last    = $first+$Region->{size}-1;
+	my $size    = $Region->{ADDRPORT};
+	return sprintf("(%s >= %d'h%x) && (%s <= %d'h%x)",
+		$Address, $size, $first,
+		$Address, $size, $last);
 }
 
 #---------------
@@ -705,17 +711,16 @@ sub new {
 	my $Module   = $Bus->Module;
 	my $Region   = new Node($Module, $Node);
 
-	bless $Region, $class;
-
 	# Add the Bus
 	$Region->{Bus} = $Bus;
 
-	# Import the Bus Parameters
-	$Region->{ADDRPOWER} = u::clog2($Node->sc_get_size - 1);
-	$Region->{ADDRPORT}  = ($Bus->{ADDRPORT} == $Bus->{ADDRPOWER}) ? $Bus->{ADDRPOWER} : $Region->{ADDRPOWER};
-	$Region->{DATABITS}  = $Bus->{DATABITS};
+	$Region->{address} = $Node->sc_get_address >> $Bus->{UNITPOWER};
+	$Region->{size}    = $Node->sc_get_size;
 
-	$Region->debug;
+	# Set the Width Parameters
+	$Region->{ADDRPOWER} = u::clog2($Region->{size} - 1);
+	$Region->{ADDRPORT}  = ($Bus->{ADDRPORT} != $Bus->{ADDRPOWER}) ? $Bus->{ADDRPORT} : $Region->{ADDRPOWER};
+	$Region->{DATABITS}  = $Bus->{DATABITS};
 
 	# Determing port naming
 	if ($Region->has_property("ports")) {
@@ -737,15 +742,10 @@ sub new {
 		$Node->sc_get_filename,
 		$Node->sc_get_lineno);
 
-	# Determine address/size alignment for decoding
-	$size = $Node->sc_get_size;
-
-	printf("%-10s %d\n", $glob, $Region->aligned);
-
 	# Add the Region to the Module
 	$Module->Block($Region);
 
-	return $Region;
+	return bless $Region, $class;
 }
 
 
